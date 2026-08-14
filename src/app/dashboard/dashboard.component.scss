@@ -186,16 +186,6 @@
   gap: var(--board-track-gap);
 }
 
-.visually-hidden {
-  position: absolute;
-  width: var(--visually-hidden-size);
-  height: var(--visually-hidden-size);
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
 @media (max-width: 720px) {
   .global-header {
     padding-inline: var(--header-padding-x-compact);

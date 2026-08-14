@@ -46,6 +46,10 @@
   --color-purple-300: #aa86e4;
   --color-purple-700: #5b27af;
   --color-purple-900: #3a1971;
+  --color-red-100: #fce1e6;
+  --color-red-200: #f8c6cf;
+  --color-red-600: #db3e5d;
+  --color-red-700: #d00132;
   --color-green-100: #f4fdee;
   --color-green-300: #c7e6a8;
   --color-green-800: #448214;
@@ -125,6 +129,7 @@
   --avatar-text: var(--text-neutral-inverse);
   --layer-header: 10;
   --layer-tooltip: 20;
+  --layer-popover: 30;
 
   --priorities-min-height: 844px;
   --priorities-padding: var(--space-xl);
@@ -172,6 +177,37 @@
   --board-card-padding-bottom: var(--space-lg);
   --board-track-gap: var(--space-lg);
   --scrollbar-width: var(--space-xs);
+  --board-search-height: var(--space-4xl);
+  --board-search-padding-x: var(--space-md);
+  --board-search-border-default: var(--border-neutral-default);
+  --board-search-border-focused: var(--focus-ring-color);
+  --board-filter-indicator-size: var(--space-sm);
+  --board-filter-indicator-offset: var(--space-xs);
+  --board-filter-indicator-bg: var(--color-red-600);
+  --board-filter-menu-width: 191px;
+  --board-filter-menu-top: 47px;
+  --board-filter-menu-right: var(--space-lg);
+  --board-filter-menu-padding: var(--space-xl);
+  --board-filter-menu-gap: var(--space-xl);
+  --board-filter-menu-shadow: 0 2px 6px -1px rgb(0 0 0 / 6%), 0 4px 16px -2px rgb(0 0 0 / 10%);
+  --board-filter-group-gap: var(--space-2xs);
+  --board-filter-option-height: var(--space-3xl);
+  --board-filter-radio-size: 14px;
+  --board-filter-radio-target-size: var(--space-3xl);
+  --board-filter-radio-border: var(--color-grey-600);
+  --board-filter-action-gap: var(--space-md);
+  --board-filter-button-height: var(--space-4xl);
+  --board-filter-button-padding-x: var(--space-lg);
+  --board-filter-button-padding-y: var(--space-sm);
+  --board-filter-button-primary-bg: var(--color-purple-900);
+  --board-filter-button-primary-bg-hover: var(--color-purple-700);
+  --board-filter-button-primary-text: var(--text-neutral-inverse);
+  --board-filter-button-subtle-bg: var(--color-grey-100);
+  --board-filter-button-subtle-bg-hover: var(--color-grey-200);
+  --board-filter-button-subtle-bg-pressed: var(--color-grey-300);
+  --board-filter-button-subtle-text: var(--text-neutral-primary);
+  --board-empty-icon-size: 36px;
+  --board-empty-gap: var(--space-xs);
 
   --lead-card-gap: var(--space-md);
   --lead-card-padding: var(--space-lg);
@@ -222,6 +258,9 @@
   --tag-info-bg: var(--color-cyan-100);
   --tag-info-border: var(--color-cyan-300);
   --tag-info-text: var(--color-cyan-800);
+  --tag-danger-bg: var(--color-red-100);
+  --tag-danger-border: var(--color-red-200);
+  --tag-danger-text: var(--color-red-700);
   --tag-neutral-bg: var(--color-grey-200);
   --tag-neutral-border: var(--color-grey-300);
   --tag-neutral-text: var(--text-neutral-primary);
@@ -247,6 +286,16 @@
 *::before,
 *::after {
   box-sizing: border-box;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: var(--visually-hidden-size);
+  height: var(--visually-hidden-size);
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 html,

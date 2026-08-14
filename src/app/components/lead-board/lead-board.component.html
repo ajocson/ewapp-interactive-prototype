@@ -1,38 +1,122 @@
 <section class="lead-board" [attr.aria-labelledby]="board.id + '-title'">
   <header class="lead-board__header">
-    <span class="lead-board__heading">
+    <span *ngIf="!isSearchOpen" class="lead-board__heading">
       <h2 [id]="board.id + '-title'">{{ board.title }}</h2>
       <span class="lead-board__count" [attr.aria-label]="board.leads.length + ' leads'">
         {{ board.leads.length }}
       </span>
     </span>
 
+    <h2 *ngIf="isSearchOpen" [id]="board.id + '-title'" class="visually-hidden">{{ board.title }}</h2>
+
+    <label *ngIf="isSearchOpen" class="lead-board__search-field">
+      <span class="visually-hidden">Search {{ board.title }} leads</span>
+      <input
+        #searchInput
+        type="search"
+        placeholder="Search"
+        [value]="searchTerm"
+        (input)="updateSearch($any($event.target).value)"
+      >
+    </label>
+
     <span class="lead-board__actions">
       <lam-icon-button
+        *ngIf="!isSearchOpen"
         icon="search"
         [label]="'Search ' + board.title"
         tooltip="Search"
         tooltipPosition="bottom"
         [disabled]="board.leads.length === 0"
-        (activated)="searchRequested.emit(board.id)"
+        (activated)="openSearch()"
       />
       <lam-icon-button
-        icon="sort"
-        [label]="'Filter & Sort ' + board.title"
-        tooltip="Filter & Sort"
+        *ngIf="isSearchOpen"
+        icon="cancel"
+        [label]="'Close search for ' + board.title"
+        tooltip="Close search"
         tooltipPosition="bottom"
-        tooltipAlign="end"
-        [disabled]="board.leads.length === 0"
-        (activated)="sortRequested.emit(board.id)"
+        (activated)="closeSearch()"
       />
+      <span class="lead-board__filter-control" [class.lead-board__filter-control--active]="hasAppliedFilters">
+        <lam-icon-button
+          icon="sort"
+          [label]="'Filter & Sort ' + board.title"
+          tooltip="Filter & Sort"
+          tooltipPosition="bottom"
+          tooltipAlign="end"
+          [disabled]="board.leads.length === 0"
+          (activated)="toggleFilterMenu()"
+        />
+      </span>
     </span>
   </header>
 
-  <div class="lead-board__cards">
+  <div class="lead-board__cards" [class.lead-board__cards--empty]="visibleLeads.length === 0">
     <lam-lead-card
-      *ngFor="let lead of board.leads; trackBy: trackLead"
+      *ngFor="let lead of visibleLeads; trackBy: trackLead"
       [lead]="lead"
       (selected)="leadSelected.emit($event)"
     />
+
+    <div *ngIf="visibleLeads.length === 0" class="lead-board__empty-state" role="status">
+      <img src="assets/empty-search.png" alt="">
+      <p>No matches were found</p>
+    </div>
   </div>
+
+  <form
+    *ngIf="isFilterOpen"
+    class="lead-board__filter-menu"
+    aria-label="Filter and sort leads"
+    (submit)="$event.preventDefault(); applyFilters()"
+  >
+    <fieldset>
+      <legend>Filter by Status</legend>
+      <label *ngFor="let status of statusOptions" class="lead-board__radio">
+        <input
+          type="checkbox"
+          [name]="board.id + '-status-filter'"
+          [checked]="draftFilters.status === status"
+          (change)="toggleStatus(status)"
+        >
+        <span>{{ status }}</span>
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Filter by Lead Type</legend>
+      <label *ngFor="let leadType of leadTypeOptions" class="lead-board__radio">
+        <input
+          type="checkbox"
+          [name]="board.id + '-lead-type-filter'"
+          [checked]="draftFilters.leadType === leadType"
+          (change)="toggleLeadType(leadType)"
+        >
+        <span>{{ leadType }}</span>
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Sort by</legend>
+      <label *ngFor="let option of sortOptions" class="lead-board__radio">
+        <input
+          type="checkbox"
+          [name]="board.id + '-sort-filter'"
+          [checked]="draftFilters.sort === option.value"
+          (change)="toggleSort(option.value)"
+        >
+        <span>{{ option.label }}</span>
+      </label>
+    </fieldset>
+
+    <div class="lead-board__filter-actions">
+      <button type="button" class="lead-board__button lead-board__button--subtle" [disabled]="!hasDraftFilters" (click)="clearDraftFilters()">
+        Clear all
+      </button>
+      <button type="submit" class="lead-board__button lead-board__button--primary" [disabled]="!canApplyFilters">
+        Apply
+      </button>
+    </div>
+  </form>
 </section>

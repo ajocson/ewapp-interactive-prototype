@@ -13,6 +13,7 @@ describe('LeadCardComponent', () => {
       id: '1',
       name: 'John Mark Doe',
       createdAt: 'Created Feb/01/2026 · 3:00 PM',
+      createdAtTimestamp: new Date(2026, 1, 1, 15).getTime(),
       leadType: 'Inactive',
       aging: '1d',
       source: 'Referral',
@@ -26,5 +27,17 @@ describe('LeadCardComponent', () => {
     fixture.componentInstance.selected.subscribe(emitted);
     (fixture.nativeElement.querySelector('button') as HTMLButtonElement).click();
     expect(emitted).toHaveBeenCalledWith(fixture.componentInstance.lead);
+  });
+
+  it('uses the danger tag treatment for a dropped lead', () => {
+    fixture.componentRef.setInput('lead', {
+      ...fixture.componentInstance.lead,
+      tags: [{ label: 'Drop Lead', tone: 'danger' }]
+    });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.status-tag--danger').textContent).toContain(
+      'Drop Lead'
+    );
   });
 });

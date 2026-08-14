@@ -35,3 +35,9 @@
   background: var(--tag-info-bg);
   color: var(--tag-info-text);
 }
+
+.status-tag--danger {
+  border-color: var(--tag-danger-border);
+  background: var(--tag-danger-bg);
+  color: var(--tag-danger-text);
+}

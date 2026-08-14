@@ -1,4 +1,4 @@
-export type TagTone = 'primary' | 'success' | 'info' | 'neutral';
+export type TagTone = 'primary' | 'success' | 'info' | 'danger' | 'neutral';
 
 export interface LeadTag {
   label: string;
@@ -9,6 +9,7 @@ export interface LeadCardData {
   id: string;
   name: string;
   createdAt: string;
+  createdAtTimestamp: number;
   leadType: 'Active' | 'Inactive';
   aging: string;
   source: string;
