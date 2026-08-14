@@ -1,0 +1,41 @@
+<nav id="primary-navigation" class="side-navigation" aria-label="Primary navigation">
+  <div class="side-navigation__content">
+    <div class="side-navigation__group">
+      <button
+        *ngFor="let item of primaryItems; trackBy: trackItem"
+        type="button"
+        class="side-navigation__item"
+        [class.side-navigation__item--active]="item.active"
+        [attr.aria-current]="item.active ? 'page' : null"
+      >
+        <span class="material-symbols-rounded" aria-hidden="true">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </button>
+    </div>
+
+    <div class="side-navigation__separator" aria-hidden="true"></div>
+
+    <div class="side-navigation__group">
+      <button
+        *ngFor="let item of secondaryItems; trackBy: trackItem"
+        type="button"
+        class="side-navigation__item"
+      >
+        <img *ngIf="item.asset" class="side-navigation__asset-icon" [src]="item.asset" alt="">
+        <span *ngIf="!item.asset" class="material-symbols-rounded" aria-hidden="true">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </button>
+    </div>
+
+    <div class="side-navigation__actions">
+      <button type="button" class="side-navigation__action side-navigation__action--primary">
+        <span class="material-symbols-rounded" aria-hidden="true">person_add</span>
+        <span>New Lead</span>
+      </button>
+      <button type="button" class="side-navigation__action side-navigation__action--subtle">
+        <span class="material-symbols-rounded" aria-hidden="true">content_paste</span>
+        <span>Draft SI</span>
+      </button>
+    </div>
+  </div>
+</nav>

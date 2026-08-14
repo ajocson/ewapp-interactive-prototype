@@ -1,6 +1,16 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  HostListener,
+  Inject,
+  OnDestroy
+} from '@angular/core';
 
 import { LeadBoardData, LeadCardData, LeadTag } from '../lead-board.model';
+
+const DESKTOP_SIDEBAR_QUERY = '(min-width: 1024px)';
 
 @Component({
   selector: 'lam-dashboard',
@@ -9,13 +19,48 @@ import { LeadBoardData, LeadCardData, LeadTag } from '../lead-board.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: false
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnDestroy {
   searchTerm = '';
   selectedSource = 'All Sources';
   selectedLead: LeadCardData | null = null;
+  isSidebarOpen = false;
+  isDesktopViewport = false;
 
   readonly sourceOptions = ['All Sources', 'Referral', 'Digital', 'Branch', 'Event'];
   readonly boards: readonly LeadBoardData[] = this.createBoards();
+
+  private readonly desktopMediaQuery: MediaQueryList | null;
+
+  constructor(
+    @Inject(DOCUMENT) document: Document,
+    private readonly changeDetectorRef: ChangeDetectorRef
+  ) {
+    this.desktopMediaQuery = document.defaultView?.matchMedia?.(DESKTOP_SIDEBAR_QUERY) ?? null;
+    this.isDesktopViewport = this.desktopMediaQuery?.matches ?? false;
+    this.isSidebarOpen = this.isDesktopViewport;
+    this.desktopMediaQuery?.addEventListener('change', this.handleDesktopBreakpointChange);
+  }
+
+  ngOnDestroy(): void {
+    this.desktopMediaQuery?.removeEventListener('change', this.handleDesktopBreakpointChange);
+  }
+
+  toggleSidebar(): void {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
+  closeSidebarFromOverlay(): void {
+    if (!this.isDesktopViewport) {
+      this.isSidebarOpen = false;
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  closeSidebarWithEscape(): void {
+    if (!this.isDesktopViewport && this.isSidebarOpen) {
+      this.isSidebarOpen = false;
+    }
+  }
 
   get filteredBoards(): readonly LeadBoardData[] {
     const query = this.searchTerm.trim().toLocaleLowerCase();
@@ -134,4 +179,10 @@ export class DashboardComponent {
 
     return `Created ${months[value.getMonth()]}/${day}/${value.getFullYear()} · ${hour}:${minutes} ${period}`;
   }
+
+  private readonly handleDesktopBreakpointChange = (event: MediaQueryListEvent): void => {
+    this.isDesktopViewport = event.matches;
+    this.isSidebarOpen = event.matches;
+    this.changeDetectorRef.markForCheck();
+  };
 }

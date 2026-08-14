@@ -17,6 +17,8 @@ export class IconButtonComponent {
   @Input() disabled = false;
   @Input() filled = true;
   @Input() size: 'small' | 'medium' | 'icon' = 'small';
+  @Input() ariaControls = '';
+  @Input() expanded: boolean | null = null;
   @Output() activated = new EventEmitter<void>();
 
   get tooltipText(): string {

@@ -1,0 +1,155 @@
+:host {
+  display: block;
+  width: var(--sidebar-width);
+  height: 100%;
+  flex: 0 0 var(--sidebar-width);
+}
+
+.side-navigation {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-inline-end: var(--sidebar-border-width) solid var(--sidebar-border);
+  background: var(--sidebar-bg);
+}
+
+.side-navigation__content {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: var(--sidebar-item-stack-gap);
+  padding: var(--sidebar-padding);
+}
+
+.side-navigation__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sidebar-item-stack-gap);
+}
+
+.side-navigation__item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: var(--sidebar-item-gap);
+  padding: var(--sidebar-item-padding);
+  border: var(--border-width-none) solid transparent;
+  border-radius: var(--sidebar-item-radius);
+  background: transparent;
+  color: var(--sidebar-item-text);
+  cursor: pointer;
+  font-size: var(--paragraph-sm-text-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--paragraph-sm-line-height);
+  text-align: start;
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-easing-standard),
+    color var(--motion-duration-fast) var(--motion-easing-standard);
+}
+
+.side-navigation__item:hover {
+  background: var(--sidebar-item-bg-hover);
+  font-weight: var(--font-weight-bold);
+}
+
+.side-navigation__item:active {
+  background: var(--sidebar-item-bg-active);
+}
+
+.side-navigation__item:focus-visible,
+.side-navigation__action:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.side-navigation__item--active,
+.side-navigation__item--active:hover,
+.side-navigation__item--active:active {
+  background: var(--sidebar-item-bg-active);
+  color: var(--sidebar-item-active-text);
+  font-weight: var(--font-weight-bold);
+}
+
+.side-navigation__item .material-symbols-rounded,
+.side-navigation__asset-icon {
+  width: var(--sidebar-item-icon-size);
+  height: var(--sidebar-item-icon-size);
+  flex: none;
+}
+
+.side-navigation__item .material-symbols-rounded {
+  font-size: var(--sidebar-item-icon-size);
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.side-navigation__asset-icon {
+  display: block;
+  object-fit: contain;
+}
+
+.side-navigation__separator {
+  display: flex;
+  height: var(--sidebar-separator-height);
+  flex: none;
+  align-items: center;
+}
+
+.side-navigation__separator::before {
+  width: 100%;
+  border-top: var(--sidebar-border-width) solid var(--sidebar-border);
+  content: '';
+}
+
+.side-navigation__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sidebar-action-gap);
+  padding-top: var(--sidebar-action-padding-top);
+}
+
+.side-navigation__action {
+  display: flex;
+  width: 100%;
+  min-height: var(--sidebar-action-height);
+  align-items: center;
+  justify-content: center;
+  gap: var(--sidebar-action-icon-gap);
+  padding: var(--sidebar-action-padding-y) var(--sidebar-action-padding-x);
+  border: var(--border-width-none) solid transparent;
+  border-radius: var(--radius-round);
+  cursor: pointer;
+  font-size: var(--paragraph-sm-text-size);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--paragraph-sm-line-height);
+  transition: background-color var(--motion-duration-fast) var(--motion-easing-standard);
+}
+
+.side-navigation__action .material-symbols-rounded {
+  font-size: var(--sidebar-action-icon-size);
+}
+
+.side-navigation__action--primary {
+  background: var(--sidebar-action-primary-bg);
+  color: var(--sidebar-action-primary-text);
+}
+
+.side-navigation__action--primary:hover {
+  background: var(--sidebar-action-primary-bg-hover);
+}
+
+.side-navigation__action--primary:active {
+  background: var(--sidebar-action-primary-bg-pressed);
+}
+
+.side-navigation__action--subtle {
+  background: var(--sidebar-action-subtle-bg);
+  color: var(--sidebar-action-subtle-text);
+}
+
+.side-navigation__action--subtle:hover {
+  background: var(--sidebar-action-subtle-bg-hover);
+}
+
+.side-navigation__action--subtle:active {
+  background: var(--sidebar-action-subtle-bg-pressed);
+}

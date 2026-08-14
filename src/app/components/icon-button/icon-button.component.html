@@ -9,6 +9,8 @@
   [class.icon-button--tooltip-end]="tooltipAlign === 'end'"
   [disabled]="disabled"
   [attr.aria-label]="label"
+  [attr.aria-controls]="ariaControls || null"
+  [attr.aria-expanded]="expanded"
   [attr.data-tooltip]="tooltipText"
   (click)="activated.emit()"
 >

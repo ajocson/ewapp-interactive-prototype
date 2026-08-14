@@ -46,6 +46,7 @@
   --color-purple-300: #aa86e4;
   --color-purple-700: #5b27af;
   --color-purple-900: #3a1971;
+  --color-magenta-700: #a82675;
   --color-red-100: #fce1e6;
   --color-red-200: #f8c6cf;
   --color-red-600: #db3e5d;
@@ -57,6 +58,7 @@
   --color-cyan-300: #cfeff5;
   --color-cyan-800: #1f8796;
   --color-black: #000000;
+  --color-overlay: rgb(15 23 42 / 30%);
 
   --typography-font-family-heading: 'Montserrat', sans-serif;
   --typography-font-family-paragraph: 'Lato', sans-serif;
@@ -112,6 +114,7 @@
   --scrollbar-thumb: rgb(102 102 102 / 40%);
   --tooltip-bg: var(--color-black);
   --tooltip-text: var(--color-grey-50);
+  --overlay-bg: var(--color-overlay);
 
   /* Component tokens. */
   --app-min-width: 320px;
@@ -130,6 +133,8 @@
   --layer-header: 10;
   --layer-tooltip: 20;
   --layer-popover: 30;
+  --layer-sidebar-backdrop: 40;
+  --layer-sidebar: 50;
 
   --priorities-min-height: 844px;
   --priorities-padding: var(--space-xl);
@@ -208,6 +213,38 @@
   --board-filter-button-subtle-text: var(--text-neutral-primary);
   --board-empty-icon-size: 36px;
   --board-empty-gap: var(--space-xs);
+
+  --sidebar-width: 225px;
+  --sidebar-bg: var(--surface-default);
+  --sidebar-border: var(--border-neutral-subtle);
+  --sidebar-border-width: var(--border-width-xs-1);
+  --sidebar-padding: var(--space-xl);
+  --sidebar-shadow: var(--shadow-lg);
+  --sidebar-item-stack-gap: var(--space-xs);
+  --sidebar-item-gap: var(--space-md);
+  --sidebar-item-padding: var(--space-lg);
+  --sidebar-item-radius: var(--radius-lg);
+  --sidebar-item-icon-size: var(--space-3xl);
+  --sidebar-item-text: var(--text-neutral-primary);
+  --sidebar-item-active-text: var(--color-magenta-700);
+  --sidebar-item-bg-hover: var(--color-grey-50);
+  --sidebar-item-bg-active: var(--color-grey-100);
+  --sidebar-separator-height: var(--space-3xl);
+  --sidebar-action-gap: var(--space-lg);
+  --sidebar-action-padding-top: var(--space-2xl);
+  --sidebar-action-height: var(--space-4xl);
+  --sidebar-action-padding-x: var(--space-lg);
+  --sidebar-action-padding-y: var(--space-sm);
+  --sidebar-action-icon-size: var(--space-xl);
+  --sidebar-action-icon-gap: var(--space-xs);
+  --sidebar-action-primary-bg: var(--color-purple-900);
+  --sidebar-action-primary-bg-hover: var(--color-purple-700);
+  --sidebar-action-primary-bg-pressed: var(--color-purple-900);
+  --sidebar-action-primary-text: var(--text-neutral-inverse);
+  --sidebar-action-subtle-bg: var(--color-grey-100);
+  --sidebar-action-subtle-bg-hover: var(--color-grey-200);
+  --sidebar-action-subtle-bg-pressed: var(--color-grey-300);
+  --sidebar-action-subtle-text: var(--text-neutral-primary);
 
   --lead-card-gap: var(--space-md);
   --lead-card-padding: var(--space-lg);
