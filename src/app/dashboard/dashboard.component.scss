@@ -221,6 +221,10 @@
 }
 
 @media (max-width: 1023px) {
+  .priorities {
+    padding-inline-end: var(--priorities-padding-responsive-end);
+  }
+
   .dashboard__body > lam-side-navigation {
     position: fixed;
     z-index: var(--layer-sidebar);
@@ -243,6 +247,7 @@
 
   .priorities {
     padding: var(--priorities-padding-compact);
+    padding-inline-end: var(--priorities-padding-responsive-end);
   }
 
   .search-field {
