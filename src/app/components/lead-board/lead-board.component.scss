@@ -136,7 +136,7 @@
   padding: var(--board-card-padding-top) var(--board-card-padding-x) var(--board-card-padding-bottom);
   scrollbar-color: var(--scrollbar-thumb) transparent;
   scrollbar-width: thin;
-  touch-action: pan-y;
+  touch-action: pan-x pan-y;
   -webkit-overflow-scrolling: touch;
 }
 

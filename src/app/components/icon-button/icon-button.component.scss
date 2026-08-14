@@ -54,6 +54,13 @@
   background: var(--icon-button-bg-pressed);
 }
 
+.icon-button--no-interaction-background,
+.icon-button--no-interaction-background:hover:not(:disabled),
+.icon-button--no-interaction-background:focus-visible:not(:disabled),
+.icon-button--no-interaction-background:active:not(:disabled) {
+  background: transparent;
+}
+
 .icon-button:focus-visible {
   outline: var(--focus-ring-width) solid var(--focus-ring-color);
   outline-offset: var(--focus-ring-offset);

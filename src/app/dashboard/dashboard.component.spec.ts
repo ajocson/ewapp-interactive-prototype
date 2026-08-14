@@ -63,6 +63,7 @@ describe('DashboardComponent sidebar', () => {
     ) as HTMLButtonElement;
 
     expect(navigationButton.hasAttribute('data-tooltip')).toBe(false);
+    expect(navigationButton.classList.contains('icon-button--no-interaction-background')).toBe(true);
     expect(globalSearchButton.getAttribute('data-tooltip')).toBe('ASM Search');
   });
 

@@ -15,6 +15,7 @@ export class IconButtonComponent {
   @Input() tooltipPosition: 'top' | 'bottom' = 'top';
   @Input() tooltipAlign: 'center' | 'end' = 'center';
   @Input() emphasis: 'default' | 'transparent' = 'transparent';
+  @Input() interactionBackground: 'default' | 'none' = 'default';
   @Input() disabled = false;
   @Input() filled = true;
   @Input() size: 'small' | 'medium' | 'icon' = 'small';

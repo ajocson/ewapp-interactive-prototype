@@ -51,4 +51,12 @@ describe('IconButtonComponent', () => {
     expect(button.classList.contains('icon-button--default')).toBe(true);
     expect(button.classList.contains('icon-button--icon')).toBe(true);
   });
+
+  it('supports an interaction treatment without hover or pressed backgrounds', () => {
+    fixture.componentRef.setInput('interactionBackground', 'none');
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    expect(button.classList.contains('icon-button--no-interaction-background')).toBe(true);
+  });
 });
