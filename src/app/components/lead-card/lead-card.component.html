@@ -1,0 +1,19 @@
+<button type="button" class="lead-card" (click)="selected.emit(lead)">
+  <span class="lead-card__identity">
+    <strong>{{ lead.name }}</strong>
+    <small>{{ lead.createdAt }}</small>
+  </span>
+
+  <span class="lead-card__tags" *ngIf="lead.tags.length">
+    <lam-status-tag
+      *ngFor="let tag of lead.tags; trackBy: trackTag"
+      [label]="tag.label"
+      [tone]="tag.tone"
+    />
+  </span>
+
+  <span class="lead-card__metadata">
+    <span><span class="material-symbols-rounded" aria-hidden="true">person</span>{{ lead.leadType }}</span>
+    <span><span class="material-symbols-rounded" aria-hidden="true">schedule</span>{{ lead.aging }}</span>
+  </span>
+</button>

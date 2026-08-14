@@ -1,0 +1,90 @@
+:host {
+  display: flex;
+  min-width: var(--board-min-width);
+  max-width: var(--board-max-width);
+  flex: var(--board-flex);
+}
+
+.lead-board {
+  display: flex;
+  width: 100%;
+  min-height: var(--board-min-height);
+  flex-direction: column;
+  overflow: hidden;
+  border: var(--board-border-width) solid var(--board-border);
+  border-radius: var(--board-radius);
+  background: var(--board-bg);
+}
+
+.lead-board__header {
+  display: flex;
+  min-height: var(--board-header-height);
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--board-header-padding);
+}
+
+.lead-board__heading,
+.lead-board__actions {
+  display: flex;
+  align-items: center;
+}
+
+.lead-board__heading {
+  min-width: var(--space-none);
+  gap: var(--board-heading-gap);
+}
+
+.lead-board__heading h2 {
+  overflow: hidden;
+  margin: var(--space-none);
+  color: var(--board-title-text);
+  font-family: var(--typography-font-family-paragraph);
+  font-size: var(--paragraph-sm-text-size);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--paragraph-sm-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lead-board__count {
+  display: inline-flex;
+  min-width: var(--board-count-size);
+  height: var(--board-count-size);
+  align-items: center;
+  justify-content: center;
+  padding-inline: var(--board-count-padding-x);
+  border-radius: var(--radius-round);
+  background: var(--board-count-bg);
+  color: var(--board-count-text);
+  font-size: var(--caption-sm-text-size);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--caption-sm-line-height);
+}
+
+.lead-board__actions {
+  flex: none;
+}
+
+.lead-board__cards {
+  display: flex;
+  min-height: var(--space-none);
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--board-card-gap);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: var(--board-card-padding-top) var(--board-card-padding-x) var(--board-card-padding-bottom);
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+  scrollbar-width: thin;
+}
+
+.lead-board__cards::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+}
+
+.lead-board__cards::-webkit-scrollbar-thumb {
+  border-radius: var(--radius-round);
+  background: var(--scrollbar-thumb);
+}

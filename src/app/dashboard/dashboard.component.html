@@ -1,0 +1,76 @@
+<main class="dashboard">
+  <header class="global-header">
+    <div class="global-header__brand">
+      <lam-icon-button
+        icon="dock_to_right"
+        label="Toggle navigation"
+        size="icon"
+        tooltipPosition="bottom"
+        [filled]="false"
+      />
+      <img class="global-header__logo" src="assets/ewapp-logo.svg" alt="EWApp">
+    </div>
+
+    <div class="global-header__actions">
+      <div class="global-header__search">
+        <lam-icon-button
+          icon="search"
+          label="Global search"
+          emphasis="default"
+          tooltipPosition="bottom"
+        />
+      </div>
+
+      <div class="global-header__profile">
+        <lam-icon-button
+          icon="notifications"
+          label="Notifications"
+          size="icon"
+          tooltipPosition="bottom"
+          tooltipAlign="end"
+          [filled]="true"
+        />
+        <button type="button" class="avatar" aria-label="Open EA profile">EA</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="priorities" aria-labelledby="priorities-title">
+    <h1 id="priorities-title">Today’s Priorities</h1>
+
+    <div class="filters" role="search">
+      <label class="search-field">
+        <span class="material-symbols-rounded" aria-hidden="true">search</span>
+        <span class="visually-hidden">Search by lead name</span>
+        <input
+          type="search"
+          name="lead-search"
+          placeholder="Search by lead name"
+          [(ngModel)]="searchTerm"
+        >
+      </label>
+
+      <label class="source-filter">
+        <span class="visually-hidden">Source of lead</span>
+        <select name="lead-source" [(ngModel)]="selectedSource">
+          <option *ngFor="let source of sourceOptions" [value]="source">{{ source }}</option>
+        </select>
+        <span class="material-symbols-rounded" aria-hidden="true">keyboard_arrow_down</span>
+      </label>
+    </div>
+
+    <div class="board-viewport" tabindex="0" aria-label="Lead pipeline boards">
+      <div class="board-track">
+        <lam-lead-board
+          *ngFor="let board of filteredBoards; trackBy: trackBoard"
+          [board]="board"
+          (leadSelected)="selectLead($event)"
+        />
+      </div>
+    </div>
+  </section>
+
+  <p class="selection-announcement visually-hidden" aria-live="polite">
+    {{ selectedLead ? selectedLead.name + ' selected' : '' }}
+  </p>
+</main>

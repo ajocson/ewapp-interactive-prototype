@@ -1,0 +1,37 @@
+:host {
+  display: inline-flex;
+}
+
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tag-height);
+  padding: var(--tag-padding-y) var(--tag-padding-x);
+  border: var(--tag-border-width) solid var(--tag-neutral-border);
+  border-radius: var(--tag-radius);
+  background: var(--tag-neutral-bg);
+  color: var(--tag-neutral-text);
+  font-size: var(--tag-font-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--tag-line-height);
+  white-space: nowrap;
+}
+
+.status-tag--primary {
+  border-color: var(--tag-primary-border);
+  background: var(--tag-primary-bg);
+  color: var(--tag-primary-text);
+}
+
+.status-tag--success {
+  border-color: var(--tag-success-border);
+  background: var(--tag-success-bg);
+  color: var(--tag-success-text);
+}
+
+.status-tag--info {
+  border-color: var(--tag-info-border);
+  background: var(--tag-info-bg);
+  color: var(--tag-info-text);
+}

@@ -1,0 +1,16 @@
+<button
+  type="button"
+  class="icon-button"
+  [class.icon-button--outlined]="!filled"
+  [class.icon-button--default]="emphasis === 'default'"
+  [class.icon-button--medium]="size === 'medium'"
+  [class.icon-button--icon]="size === 'icon'"
+  [class.icon-button--tooltip-bottom]="tooltipPosition === 'bottom'"
+  [class.icon-button--tooltip-end]="tooltipAlign === 'end'"
+  [disabled]="disabled"
+  [attr.aria-label]="label"
+  [attr.data-tooltip]="tooltipText"
+  (click)="activated.emit()"
+>
+  <span class="material-symbols-rounded" aria-hidden="true">{{ icon }}</span>
+</button>

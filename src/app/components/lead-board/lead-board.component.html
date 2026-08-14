@@ -1,0 +1,38 @@
+<section class="lead-board" [attr.aria-labelledby]="board.id + '-title'">
+  <header class="lead-board__header">
+    <span class="lead-board__heading">
+      <h2 [id]="board.id + '-title'">{{ board.title }}</h2>
+      <span class="lead-board__count" [attr.aria-label]="board.leads.length + ' leads'">
+        {{ board.leads.length }}
+      </span>
+    </span>
+
+    <span class="lead-board__actions">
+      <lam-icon-button
+        icon="search"
+        [label]="'Search ' + board.title"
+        tooltip="Search"
+        tooltipPosition="bottom"
+        [disabled]="board.leads.length === 0"
+        (activated)="searchRequested.emit(board.id)"
+      />
+      <lam-icon-button
+        icon="sort"
+        [label]="'Filter & Sort ' + board.title"
+        tooltip="Filter & Sort"
+        tooltipPosition="bottom"
+        tooltipAlign="end"
+        [disabled]="board.leads.length === 0"
+        (activated)="sortRequested.emit(board.id)"
+      />
+    </span>
+  </header>
+
+  <div class="lead-board__cards">
+    <lam-lead-card
+      *ngFor="let lead of board.leads; trackBy: trackLead"
+      [lead]="lead"
+      (selected)="leadSelected.emit($event)"
+    />
+  </div>
+</section>

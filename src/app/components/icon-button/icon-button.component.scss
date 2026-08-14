@@ -1,0 +1,120 @@
+:host {
+  display: inline-flex;
+}
+
+.icon-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-button-size-sm);
+  height: var(--icon-button-size-sm);
+  padding: var(--space-none);
+  border: var(--border-width-none) solid transparent;
+  border-radius: var(--radius-round);
+  background: transparent;
+  color: var(--icon-button-icon);
+  cursor: pointer;
+  transition: background-color var(--motion-duration-fast) var(--motion-easing-standard);
+}
+
+.icon-button--medium {
+  width: var(--icon-button-size-md);
+  height: var(--icon-button-size-md);
+}
+
+.icon-button--icon {
+  width: var(--icon-button-size-icon);
+  height: var(--icon-button-size-icon);
+}
+
+.icon-button .material-symbols-rounded {
+  font-size: var(--icon-button-glyph-size);
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.icon-button--outlined .material-symbols-rounded {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.icon-button--icon .material-symbols-rounded {
+  font-size: var(--icon-button-glyph-size-icon);
+}
+
+.icon-button--default {
+  background: var(--icon-button-bg-default);
+}
+
+.icon-button:hover:not(:disabled),
+.icon-button:focus-visible:not(:disabled) {
+  background: var(--icon-button-bg-hover);
+}
+
+.icon-button:active:not(:disabled) {
+  background: var(--icon-button-bg-pressed);
+}
+
+.icon-button:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.icon-button:disabled {
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+}
+
+.icon-button::after {
+  position: absolute;
+  z-index: var(--layer-tooltip);
+  bottom: calc(100% + var(--space-xs));
+  left: 50%;
+  padding: var(--tooltip-padding-y) var(--tooltip-padding-x);
+  border-radius: var(--tooltip-radius);
+  background: var(--tooltip-bg);
+  color: var(--tooltip-text);
+  content: attr(data-tooltip);
+  font-size: var(--caption-text-size);
+  line-height: var(--caption-line-height);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(var(--space-xs));
+  transition:
+    opacity var(--motion-duration-fast) var(--motion-easing-standard),
+    transform var(--motion-duration-fast) var(--motion-easing-standard);
+  white-space: nowrap;
+}
+
+.icon-button:hover::after,
+.icon-button:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(var(--space-none));
+}
+
+.icon-button--tooltip-bottom::after {
+  top: calc(100% + var(--space-xs));
+  bottom: auto;
+  transform: translateX(-50%) translateY(calc(var(--space-xs) * -1));
+}
+
+.icon-button--tooltip-bottom:hover::after,
+.icon-button--tooltip-bottom:focus-visible::after {
+  transform: translateX(-50%) translateY(var(--space-none));
+}
+
+.icon-button--tooltip-end::after {
+  right: var(--space-none);
+  left: auto;
+  transform: translateY(var(--space-xs));
+}
+
+.icon-button--tooltip-bottom.icon-button--tooltip-end::after {
+  transform: translateY(calc(var(--space-xs) * -1));
+}
+
+.icon-button--tooltip-end:hover::after,
+.icon-button--tooltip-end:focus-visible::after,
+.icon-button--tooltip-bottom.icon-button--tooltip-end:hover::after,
+.icon-button--tooltip-bottom.icon-button--tooltip-end:focus-visible::after {
+  transform: translateY(var(--space-none));
+}
