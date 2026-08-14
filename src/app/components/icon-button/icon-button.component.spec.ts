@@ -32,6 +32,16 @@ describe('IconButtonComponent', () => {
     expect(button.classList.contains('icon-button--tooltip-end')).toBe(true);
   });
 
+  it('can hide its visual tooltip without removing its accessible name', () => {
+    fixture.componentRef.setInput('showTooltip', false);
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    expect(button.hasAttribute('data-tooltip')).toBe(false);
+    expect(button.getAttribute('aria-label')).toBe('Search');
+    expect(button.classList.contains('icon-button--has-tooltip')).toBe(false);
+  });
+
   it('supports Figma-aligned subtle and bare icon treatments', () => {
     fixture.componentRef.setInput('emphasis', 'default');
     fixture.componentRef.setInput('size', 'icon');

@@ -5,7 +5,7 @@
         icon="dock_to_right"
         [label]="isSidebarOpen ? 'Close navigation' : 'Open navigation'"
         size="icon"
-        tooltipPosition="bottom"
+        [showTooltip]="false"
         [filled]="false"
         ariaControls="primary-navigation"
         [expanded]="isSidebarOpen"
@@ -19,6 +19,7 @@
         <lam-icon-button
           icon="search"
           label="Global search"
+          tooltip="ASM Search"
           emphasis="default"
           tooltipPosition="bottom"
         />

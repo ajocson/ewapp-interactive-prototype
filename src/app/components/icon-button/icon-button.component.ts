@@ -11,6 +11,7 @@ export class IconButtonComponent {
   @Input({ required: true }) icon = '';
   @Input({ required: true }) label = '';
   @Input() tooltip = '';
+  @Input() showTooltip = true;
   @Input() tooltipPosition: 'top' | 'bottom' = 'top';
   @Input() tooltipAlign: 'center' | 'end' = 'center';
   @Input() emphasis: 'default' | 'transparent' = 'transparent';

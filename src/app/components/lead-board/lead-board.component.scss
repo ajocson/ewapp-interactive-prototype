@@ -1,5 +1,7 @@
 :host {
   display: flex;
+  height: 100%;
+  min-height: var(--space-none);
   min-width: var(--board-min-width);
   max-width: var(--board-max-width);
   flex: var(--board-flex);
@@ -9,7 +11,8 @@
   position: relative;
   display: flex;
   width: 100%;
-  min-height: var(--board-min-height);
+  height: 100%;
+  min-height: var(--space-none);
   flex-direction: column;
   overflow: hidden;
   border: var(--board-border-width) solid var(--board-border);
@@ -129,9 +132,12 @@
   gap: var(--board-card-gap);
   overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
   padding: var(--board-card-padding-top) var(--board-card-padding-x) var(--board-card-padding-bottom);
   scrollbar-color: var(--scrollbar-thumb) transparent;
   scrollbar-width: thin;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 .lead-board__cards::-webkit-scrollbar {

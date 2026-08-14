@@ -64,7 +64,7 @@
   opacity: var(--disabled-opacity);
 }
 
-.icon-button::after {
+.icon-button--has-tooltip::after {
   position: absolute;
   z-index: var(--layer-tooltip);
   bottom: calc(100% + var(--space-xs));
@@ -85,36 +85,36 @@
   white-space: nowrap;
 }
 
-.icon-button:hover::after,
-.icon-button:focus-visible::after {
+.icon-button--has-tooltip:hover::after,
+.icon-button--has-tooltip:focus-visible::after {
   opacity: 1;
   transform: translateX(-50%) translateY(var(--space-none));
 }
 
-.icon-button--tooltip-bottom::after {
+.icon-button--has-tooltip.icon-button--tooltip-bottom::after {
   top: calc(100% + var(--space-xs));
   bottom: auto;
   transform: translateX(-50%) translateY(calc(var(--space-xs) * -1));
 }
 
-.icon-button--tooltip-bottom:hover::after,
-.icon-button--tooltip-bottom:focus-visible::after {
+.icon-button--has-tooltip.icon-button--tooltip-bottom:hover::after,
+.icon-button--has-tooltip.icon-button--tooltip-bottom:focus-visible::after {
   transform: translateX(-50%) translateY(var(--space-none));
 }
 
-.icon-button--tooltip-end::after {
+.icon-button--has-tooltip.icon-button--tooltip-end::after {
   right: var(--space-none);
   left: auto;
   transform: translateY(var(--space-xs));
 }
 
-.icon-button--tooltip-bottom.icon-button--tooltip-end::after {
+.icon-button--has-tooltip.icon-button--tooltip-bottom.icon-button--tooltip-end::after {
   transform: translateY(calc(var(--space-xs) * -1));
 }
 
-.icon-button--tooltip-end:hover::after,
-.icon-button--tooltip-end:focus-visible::after,
-.icon-button--tooltip-bottom.icon-button--tooltip-end:hover::after,
-.icon-button--tooltip-bottom.icon-button--tooltip-end:focus-visible::after {
+.icon-button--has-tooltip.icon-button--tooltip-end:hover::after,
+.icon-button--has-tooltip.icon-button--tooltip-end:focus-visible::after,
+.icon-button--has-tooltip.icon-button--tooltip-bottom.icon-button--tooltip-end:hover::after,
+.icon-button--has-tooltip.icon-button--tooltip-bottom.icon-button--tooltip-end:focus-visible::after {
   transform: translateY(var(--space-none));
 }

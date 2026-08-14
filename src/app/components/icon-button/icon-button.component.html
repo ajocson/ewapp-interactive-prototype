@@ -7,11 +7,12 @@
   [class.icon-button--icon]="size === 'icon'"
   [class.icon-button--tooltip-bottom]="tooltipPosition === 'bottom'"
   [class.icon-button--tooltip-end]="tooltipAlign === 'end'"
+  [class.icon-button--has-tooltip]="showTooltip"
   [disabled]="disabled"
   [attr.aria-label]="label"
   [attr.aria-controls]="ariaControls || null"
   [attr.aria-expanded]="expanded"
-  [attr.data-tooltip]="tooltipText"
+  [attr.data-tooltip]="showTooltip ? tooltipText : null"
   (click)="activated.emit()"
 >
   <span class="material-symbols-rounded" aria-hidden="true">{{ icon }}</span>

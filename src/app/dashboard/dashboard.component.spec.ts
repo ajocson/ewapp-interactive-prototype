@@ -54,6 +54,18 @@ describe('DashboardComponent sidebar', () => {
     expect(fixture.nativeElement.querySelector('lam-side-navigation')).toBeTruthy();
   });
 
+  it('uses the requested header tooltip behavior', () => {
+    const navigationButton = fixture.nativeElement.querySelector(
+      '[aria-controls="primary-navigation"]'
+    ) as HTMLButtonElement;
+    const globalSearchButton = fixture.nativeElement.querySelector(
+      '[aria-label="Global search"]'
+    ) as HTMLButtonElement;
+
+    expect(navigationButton.hasAttribute('data-tooltip')).toBe(false);
+    expect(globalSearchButton.getAttribute('data-tooltip')).toBe('ASM Search');
+  });
+
   it('hides at tablet size and opens as a dismissible overlay when requested', () => {
     desktopMediaQuery.setMatches(false);
     fixture.detectChanges();
