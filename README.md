@@ -1,6 +1,6 @@
-# LAM Reusable Components
+# EWApp Interactive Prototype
 
-A self-contained Angular implementation of the LAM “Today’s Priorities” lead board. It does not import or modify the parent prototype's `src/app/shared/components` directory.
+A living Angular prototype of EWApp used by the UI/UX Team to validate designs, interactions, and enhancements before development handoff.
 
 ## Structure
 

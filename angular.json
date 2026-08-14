@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "lam-reusable-components": {
+    "ewapp-interactive-prototype": {
       "projectType": "application",
       "root": "",
       "sourceRoot": "src",
@@ -37,8 +37,8 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "configurations": {
-            "production": { "buildTarget": "lam-reusable-components:build:production" },
-            "development": { "buildTarget": "lam-reusable-components:build:development" }
+            "production": { "buildTarget": "ewapp-interactive-prototype:build:production" },
+            "development": { "buildTarget": "ewapp-interactive-prototype:build:development" }
           },
           "defaultConfiguration": "development"
         },
