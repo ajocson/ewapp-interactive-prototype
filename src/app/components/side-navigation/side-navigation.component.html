@@ -5,8 +5,9 @@
         *ngFor="let item of primaryItems; trackBy: trackItem"
         type="button"
         class="side-navigation__item"
-        [class.side-navigation__item--active]="item.active"
-        [attr.aria-current]="item.active ? 'page' : null"
+        [class.side-navigation__item--active]="isActive(item)"
+        [attr.aria-current]="isActive(item) ? 'page' : null"
+        (click)="selectItem(item)"
       >
         <span class="material-symbols-rounded" aria-hidden="true">{{ item.icon }}</span>
         <span>{{ item.label }}</span>

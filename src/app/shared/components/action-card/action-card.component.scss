@@ -1,0 +1,13 @@
+:host { display: block; }
+.action-card { display: flex; width: 100%; min-height: var(--action-card-height); align-items: center; gap: var(--space-lg); padding: var(--space-lg); border: var(--border-width-xs-1) solid var(--action-card-border-default); border-radius: var(--radius-lg); background: var(--action-card-bg-default); color: var(--text-neutral-primary); box-shadow: var(--action-card-shadow-default); text-align: left; cursor: pointer; transition: border-color var(--motion-duration-fast) var(--motion-easing-standard), background var(--motion-duration-fast) var(--motion-easing-standard), box-shadow var(--motion-duration-fast) var(--motion-easing-standard); }
+.action-card:hover { border-color: var(--action-card-border-hover); box-shadow: var(--action-card-shadow-hover); }
+.action-card:active { border-color: var(--action-card-border-pressed); background: var(--action-card-bg-pressed); box-shadow: var(--action-card-shadow-pressed); }
+.action-card:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring-color); outline-offset: var(--focus-ring-offset); }
+.action-card__icon { display: grid; width: var(--action-card-icon-box); height: var(--action-card-icon-box); flex: none; place-items: center; border-radius: var(--radius-md); background: var(--action-card-brand-icon-bg); color: var(--action-card-brand-icon); font-size: var(--button-medium-icon-size); }
+.action-card--success .action-card__icon { background: var(--action-card-success-icon-bg); color: var(--action-card-success-icon); }
+.action-card--danger .action-card__icon { background: var(--action-card-danger-icon-bg); color: var(--action-card-danger-icon); }
+.action-card__copy { display: flex; min-width: var(--space-none); flex: 1; flex-direction: column; }
+.action-card__copy strong { font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
+.action-card__copy small { overflow: hidden; color: var(--text-neutral-secondary); font-size: var(--caption-sm-text-size); line-height: var(--caption-sm-line-height); text-overflow: ellipsis; white-space: nowrap; }
+.action-card__arrow { flex: none; font-size: var(--action-card-arrow-size); }
+

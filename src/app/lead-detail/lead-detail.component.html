@@ -1,0 +1,68 @@
+<main class="lead-detail">
+  <header class="lead-detail__header">
+    <img class="lead-detail__logo" src="assets/ewapp-logo.svg" alt="EWApp">
+    <div class="lead-detail__header-actions">
+      <lam-icon-button icon="notifications" label="Notifications" size="icon" [filled]="true" />
+      <button type="button" class="avatar" aria-label="Open EA profile">EA</button>
+    </div>
+  </header>
+
+  <section class="lead-detail__content" aria-labelledby="lead-title">
+    <button type="button" class="back-link" (click)="backRequested.emit()">
+      <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+      Back to today’s priorities
+    </button>
+
+    <div class="lead-detail__hero">
+      <div class="lead-detail__identity">
+        <div class="lead-detail__initials" aria-hidden="true">{{ lead.name.slice(0, 1) }}</div>
+        <div>
+          <div class="lead-detail__eyebrow">Lead profile</div>
+          <h1 id="lead-title">{{ lead.name }}</h1>
+          <div class="lead-detail__meta">
+            <lam-status-tag *ngFor="let tag of lead.tags" [label]="tag.label" [tone]="tag.tone" />
+            <span><span class="material-symbols-rounded" aria-hidden="true">person</span>{{ lead.leadType }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="lead-detail__actions">
+        <button type="button" class="button button--secondary">
+          <span class="material-symbols-rounded" aria-hidden="true">edit</span>Edit lead
+        </button>
+        <button type="button" class="button button--primary">
+          <span class="material-symbols-rounded" aria-hidden="true">calendar_add_on</span>Schedule appointment
+        </button>
+      </div>
+    </div>
+
+    <nav class="lead-tabs" aria-label="Lead details">
+      <button *ngFor="let tab of tabs" type="button" [class.lead-tabs__tab--active]="activeTab === tab" class="lead-tabs__tab" (click)="selectTab(tab)">{{ tab }}</button>
+    </nav>
+
+    <div class="lead-detail__grid" *ngIf="activeTab === 'Overview'">
+      <section class="detail-card detail-card--wide" aria-labelledby="contact-heading">
+        <div class="detail-card__heading"><div><p>Lead information</p><h2 id="contact-heading">Contact details</h2></div><span class="detail-card__icon material-symbols-rounded" aria-hidden="true">contact_page</span></div>
+        <dl class="details-list">
+          <div><dt>Lead source</dt><dd>{{ lead.source }}</dd></div>
+          <div><dt>Created</dt><dd>{{ lead.createdAt.replace('Created ', '') }}</dd></div>
+          <div><dt>Phone number</dt><dd>+63 917 123 4567</dd></div>
+          <div><dt>Email address</dt><dd>johnmark.doe@email.com</dd></div>
+          <div><dt>Preferred contact</dt><dd>Phone call</dd></div>
+          <div><dt>Assigned advisor</dt><dd>Erica Alvarez</dd></div>
+        </dl>
+      </section>
+
+      <aside class="detail-card" aria-labelledby="next-step-heading">
+        <div class="detail-card__heading"><div><p>Next step</p><h2 id="next-step-heading">Follow up</h2></div><span class="detail-card__icon material-symbols-rounded" aria-hidden="true">schedule</span></div>
+        <div class="follow-up"><strong>Reach out within {{ lead.aging }}</strong><span>Confirm preferred time for an introductory call.</span><button type="button" class="text-button">Log activity <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span></button></div>
+      </aside>
+
+      <section class="detail-card detail-card--wide" aria-labelledby="activity-heading">
+        <div class="detail-card__heading"><div><p>Recent activity</p><h2 id="activity-heading">Timeline</h2></div><button type="button" class="text-button">View all</button></div>
+        <ol class="timeline"><li><span class="timeline__dot"></span><div><strong>Lead was created</strong><p>{{ lead.createdAt }}</p></div></li><li><span class="timeline__dot timeline__dot--muted"></span><div><strong>Awaiting first contact</strong><p>Set a follow-up to keep the lead moving.</p></div></li></ol>
+      </section>
+    </div>
+
+    <section class="detail-card detail-card--empty" *ngIf="activeTab !== 'Overview'"><span class="material-symbols-rounded" aria-hidden="true">{{ activeTab === 'Activities' ? 'history' : 'note_alt' }}</span><h2>No {{ activeTab.toLocaleLowerCase() }} yet</h2><p>This lead has no recorded {{ activeTab.toLocaleLowerCase() }}.</p></section>
+  </section>
+</main>

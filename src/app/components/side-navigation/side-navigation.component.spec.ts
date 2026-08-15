@@ -20,6 +20,18 @@ describe('SideNavigationComponent', () => {
     expect(activeItem.textContent).toContain('LCAM Board');
   });
 
+  it('uses the default state away from the LCAM board and navigates back when clicked', () => {
+    fixture.componentInstance.navigation.showLeadFlow();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[aria-current="page"]')).toBeNull();
+
+    const lcamButton = Array.from(fixture.nativeElement.querySelectorAll('.side-navigation__item') as NodeListOf<HTMLButtonElement>)
+      .find(button => button.textContent?.includes('LCAM Board')) as HTMLButtonElement;
+    lcamButton.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[aria-current="page"]')).toBe(lcamButton);
+  });
+
   it('renders all Figma navigation destinations and actions', () => {
     expect(fixture.nativeElement.textContent).toContain('Dashboard');
     expect(fixture.nativeElement.textContent).toContain('Applications');

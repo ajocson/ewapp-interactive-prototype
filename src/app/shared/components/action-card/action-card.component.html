@@ -1,0 +1,6 @@
+<button type="button" class="action-card" [class]="'action-card action-card--' + tone" (click)="activated.emit()">
+  <span class="action-card__icon material-symbols-rounded" aria-hidden="true">{{ icon }}</span>
+  <span class="action-card__copy"><strong>{{ title }}</strong><small>{{ description }}</small></span>
+  <span class="action-card__arrow material-symbols-rounded" aria-hidden="true">arrow_forward_ios</span>
+</button>
+

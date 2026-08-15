@@ -1,0 +1,16 @@
+<label class="tdx-search-field" [class.tdx-search-field--disabled]="disabled">
+  <span class="material-symbols-rounded tdx-search-field__leading-icon" aria-hidden="true">search</span>
+  <span class="visually-hidden">{{ ariaLabel }}</span>
+  <input
+    type="search"
+    [name]="name"
+    [value]="value"
+    [placeholder]="placeholder"
+    [disabled]="disabled"
+    [attr.aria-label]="ariaLabel"
+    (input)="updateValue($any($event.target).value)"
+  >
+  <button *ngIf="value && !disabled" type="button" class="tdx-search-field__clear" [attr.aria-label]="'Clear ' + ariaLabel.toLocaleLowerCase()" (click)="clear()">
+    <span class="material-symbols-rounded" aria-hidden="true">cancel</span>
+  </button>
+</label>

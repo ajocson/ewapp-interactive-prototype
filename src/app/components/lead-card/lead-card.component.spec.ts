@@ -36,7 +36,7 @@ describe('LeadCardComponent', () => {
     });
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.status-tag--danger').textContent).toContain(
+    expect(fixture.nativeElement.querySelector('.tdx-tag--danger').textContent).toContain(
       'Drop Lead'
     );
   });

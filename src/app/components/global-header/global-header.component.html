@@ -1,0 +1,40 @@
+<header class="global-header">
+  <div class="global-header__brand">
+    <lam-icon-button
+      icon="dock_to_right"
+      [label]="navigation.isSidebarOpen() ? 'Close navigation' : 'Open navigation'"
+      size="icon"
+      [showTooltip]="false"
+      interactionBackground="none"
+      [filled]="false"
+      ariaControls="primary-navigation"
+      [expanded]="navigation.isSidebarOpen()"
+      (activated)="navigation.toggleSidebar()"
+    />
+    <img class="global-header__logo" src="assets/ewapp-logo.svg" alt="EWApp">
+  </div>
+
+  <div class="global-header__actions">
+    <div class="global-header__search">
+      <lam-icon-button
+        icon="search"
+        label="Global search"
+        tooltip="ASM Search"
+        emphasis="default"
+        tooltipPosition="bottom"
+      />
+    </div>
+
+    <div class="global-header__profile">
+      <lam-icon-button
+        icon="notifications"
+        label="Notifications"
+        size="icon"
+        tooltipPosition="bottom"
+        tooltipAlign="end"
+        [filled]="true"
+      />
+      <button type="button" class="avatar" aria-label="Open EA profile">EA</button>
+    </div>
+  </div>
+</header>

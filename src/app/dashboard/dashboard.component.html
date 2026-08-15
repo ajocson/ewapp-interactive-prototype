@@ -1,50 +1,11 @@
 <main class="dashboard">
-  <header class="global-header">
-    <div class="global-header__brand">
-      <lam-icon-button
-        icon="dock_to_right"
-        [label]="isSidebarOpen ? 'Close navigation' : 'Open navigation'"
-        size="icon"
-        [showTooltip]="false"
-        interactionBackground="none"
-        [filled]="false"
-        ariaControls="primary-navigation"
-        [expanded]="isSidebarOpen"
-        (activated)="toggleSidebar()"
-      />
-      <img class="global-header__logo" src="assets/ewapp-logo.svg" alt="EWApp">
-    </div>
-
-    <div class="global-header__actions">
-      <div class="global-header__search">
-        <lam-icon-button
-          icon="search"
-          label="Global search"
-          tooltip="ASM Search"
-          emphasis="default"
-          tooltipPosition="bottom"
-        />
-      </div>
-
-      <div class="global-header__profile">
-        <lam-icon-button
-          icon="notifications"
-          label="Notifications"
-          size="icon"
-          tooltipPosition="bottom"
-          tooltipAlign="end"
-          [filled]="true"
-        />
-        <button type="button" class="avatar" aria-label="Open EA profile">EA</button>
-      </div>
-    </div>
-  </header>
+  <lam-global-header />
 
   <div class="dashboard__body">
-    <lam-side-navigation *ngIf="isSidebarOpen" />
+    <lam-side-navigation *ngIf="navigation.isSidebarOpen()" />
 
     <button
-      *ngIf="isSidebarOpen && !isDesktopViewport"
+      *ngIf="navigation.isSidebarOpen() && !isDesktopViewport"
       type="button"
       class="sidebar-backdrop"
       aria-label="Close navigation"
@@ -55,16 +16,7 @@
       <h1 id="priorities-title">Today’s Priorities</h1>
 
       <div class="filters" role="search">
-        <label class="search-field">
-          <span class="material-symbols-rounded" aria-hidden="true">search</span>
-          <span class="visually-hidden">Search by lead name</span>
-          <input
-            type="search"
-            name="lead-search"
-            placeholder="Search by lead name"
-            [(ngModel)]="searchTerm"
-          >
-        </label>
+        <app-search-field class="filters__search" name="lead-search" placeholder="Search by lead name" ariaLabel="Search by lead name" [(value)]="searchTerm" />
 
         <label class="source-filter">
           <span class="visually-hidden">Source of lead</span>

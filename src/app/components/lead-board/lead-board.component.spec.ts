@@ -61,7 +61,7 @@ describe('LeadBoardComponent', () => {
     expect(cards[0].textContent).toContain('John Mark Doe');
   });
 
-  it('shows the Figma empty state when a board search has no matches', () => {
+  it('leaves the board blank when a search has no matches', () => {
     (fixture.nativeElement.querySelector('button[aria-label="Search Follow-Up"]') as HTMLButtonElement).click();
     fixture.detectChanges();
 
@@ -70,9 +70,8 @@ describe('LeadBoardComponent', () => {
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.lead-board__empty-state').textContent).toContain(
-      'No matches were found'
-    );
+    expect(fixture.nativeElement.querySelectorAll('lam-lead-card')).toHaveLength(0);
+    expect(fixture.nativeElement.querySelector('.lead-board__empty-state')).toBeNull();
   });
 
   it('lets users deselect the active option in every filter group', () => {

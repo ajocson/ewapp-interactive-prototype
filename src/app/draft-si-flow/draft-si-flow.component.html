@@ -1,0 +1,180 @@
+<div class="si-overlay" role="presentation" *ngIf="step !== 'results'">
+  <section
+    class="si-dialog"
+    [class.si-dialog--product]="step === 1"
+    [class.si-dialog--basic]="step === 2"
+    [class.si-dialog--coverage]="step === 3"
+    [class.si-dialog--lead]="step === 4"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="step === 1 ? 'choose-product-title' : 'si-step-title'"
+  >
+    <ng-container *ngIf="step === 1">
+      <header class="si-heading si-heading--product">
+        <h1 id="choose-product-title">Choose Product</h1>
+        <p>Select the insurance plan that best suits your needs. Limit your selection to one plan only.</p>
+      </header>
+
+      <div class="product-tabs" role="tablist" aria-label="Product categories">
+        <button
+          *ngFor="let category of categories"
+          type="button"
+          role="tab"
+          class="product-tabs__tab"
+          [class.product-tabs__tab--active]="activeCategory === category"
+          [attr.aria-selected]="activeCategory === category"
+          (click)="selectCategory(category)"
+        >{{ category }}</button>
+      </div>
+
+      <div class="product-grid" role="list" aria-label="Insurance products">
+        <button
+          *ngFor="let product of visibleProducts; trackBy: trackProduct"
+          type="button"
+          class="product-card"
+          [class.product-card--selected]="selectedProduct?.id === product.id"
+          [attr.aria-pressed]="selectedProduct?.id === product.id"
+          [disabled]="product.id !== 'dream-builder'"
+          (click)="selectProduct(product)"
+        >
+          <span class="product-card__icon"><img src="assets/product-icon.svg" alt=""></span>
+          <span>{{ product.name }}</span>
+          <span *ngIf="selectedProduct?.id === product.id" class="material-symbols-rounded product-card__check" aria-hidden="true">check_circle</span>
+        </button>
+      </div>
+
+      <footer class="si-footer si-footer--product">
+        <nav class="pagination" aria-label="Product pages">
+          <button type="button" disabled aria-label="Previous page">&lt;</button>
+          <button type="button" aria-current="page">1</button>
+          <button type="button" aria-label="Next page">&gt;</button>
+        </nav>
+        <div class="si-footer__actions">
+          <button type="button" class="flow-button flow-button--outline" (click)="closed.emit()">Cancel</button>
+          <button type="button" class="flow-button flow-button--primary" [disabled]="!selectedProduct" (click)="goToStep(2)">Continue</button>
+        </div>
+      </footer>
+    </ng-container>
+
+    <ng-container *ngIf="step === 2 || step === 3">
+      <header class="si-heading">
+        <span class="si-progress">{{ step }} OUT OF 5</span>
+        <h1 id="si-step-title">{{ step === 2 ? 'Insured Basic Information' : 'Coverage Info' }}</h1>
+        <p>Complete the details below to customize your insurance plan for personalized coverage.</p>
+      </header>
+
+      <div class="si-form-layout">
+        <form class="si-form" *ngIf="step === 2">
+          <h2>Insured Basic Information</h2>
+          <fieldset class="gender-fieldset">
+            <legend>Select Gender</legend>
+            <button type="button" [class.is-selected]="gender === 'Male'" (click)="gender = 'Male'">Male</button>
+            <button type="button" [class.is-selected]="gender === 'Female'" (click)="gender = 'Female'">Female</button>
+          </fieldset>
+          <label class="field-label" for="insured-birthdate">When is the date of birth?</label>
+          <div class="input-with-icon">
+            <input id="insured-birthdate" type="text" name="dateOfBirth" placeholder="Select date of birth" [(ngModel)]="dateOfBirth">
+            <span class="material-symbols-rounded" aria-hidden="true">calendar_today</span>
+          </div>
+        </form>
+
+        <form class="si-form" *ngIf="step === 3">
+          <h2 class="si-form__accent-title">Benefit Details</h2>
+          <label class="field-label" for="payment-period">Payment Period</label>
+          <select id="payment-period" name="paymentPeriod" [(ngModel)]="paymentPeriod">
+            <option value="" disabled>Select Payment Period</option>
+            <option value="5 Pay">5 Pay</option>
+            <option value="10 Pay">10 Pay</option>
+          </select>
+          <label class="field-label" for="payment-frequency">Payment Frequency</label>
+          <select id="payment-frequency" name="paymentFrequency" [(ngModel)]="paymentFrequency">
+            <option value="" disabled>Select Frequency</option>
+            <option value="Annual">Annual</option>
+            <option value="Semi-annual">Semi-annual</option>
+            <option value="Quarterly">Quarterly</option>
+            <option value="Monthly">Monthly</option>
+          </select>
+          <small>Monthly premium should have a minimum base plan of atleast ₱3,000</small>
+          <label class="field-label" for="benefit-amount">Benefit Amount</label>
+          <div class="currency-field"><span>₱</span><input id="benefit-amount" type="text" inputmode="numeric" name="benefitAmount" [(ngModel)]="benefitAmount"></div>
+          <label class="field-label" for="annual-premium">Annual Premium</label>
+          <div class="currency-field currency-field--disabled"><span>₱</span><input id="annual-premium" type="text" [value]="annualPremium" disabled></div>
+        </form>
+
+        <aside class="product-summary" aria-label="Selected product details">
+          <span>PRODUCT SELECTED</span>
+          <h2>{{ productName }}</h2>
+          <p>Dream Builder is a peso-denominated participating life insurance product that provides life insurance coverage for twenty (20) years, along with guaranteed cash payouts to help you build your dreams today.</p>
+          <ul>
+            <li>Get life protection that increases with Protection Booster.</li>
+            <li>Receive Guaranteed Cash Payouts at the end of policy year 3 or 6 until maturity at the end of policy year 20.</li>
+            <li>Enjoy Maturity Benefit paid as lump sum at end of policy year 20.</li>
+            <li>Receive additional potential earnings through non-guaranteed dividends.</li>
+            <li>Choose to have extra protection by adding riders on top of your plan.</li>
+          </ul>
+          <em *ngIf="step === 2">The generated quick quote results will not be part of the contract.</em>
+        </aside>
+      </div>
+
+      <footer class="si-footer">
+        <button type="button" class="flow-button flow-button--outline" (click)="closed.emit()">Cancel</button>
+        <div class="si-footer__actions">
+          <button type="button" class="flow-button flow-button--outline flow-button--purple" (click)="goToStep(step === 2 ? 1 : 2)">Back to {{ step === 2 ? 'Product Selection' : 'Insured Info' }}</button>
+          <button
+            type="button"
+            class="flow-button flow-button--primary"
+            [disabled]="step === 2 ? (!gender || !dateOfBirth) : (!paymentPeriod || !paymentFrequency || !benefitAmount)"
+            (click)="goToStep(step === 2 ? 3 : 4)"
+          >Continue</button>
+        </div>
+      </footer>
+    </ng-container>
+
+    <ng-container *ngIf="step === 4">
+      <header class="si-heading si-heading--lead">
+        <span class="si-progress">4 OUT OF 5</span>
+        <h1 id="si-step-title">Lead Info</h1>
+        <p>Review your client’s information below before generating the Draft Sales Illustration. To make changes, <button type="button" class="inline-link">edit the lead information</button>.</p>
+      </header>
+
+      <div class="lead-info-layout">
+        <form class="lead-form">
+          <label class="field-label" for="existing-lead">Search Existing Lead</label>
+          <div class="search-lead"><span class="material-symbols-rounded" aria-hidden="true">person_search</span><input id="existing-lead" [value]="lead.name" readonly><button type="button" aria-label="Reset lead"><span class="material-symbols-rounded" aria-hidden="true">replay</span></button></div>
+          <div class="lead-form__row"><label>Title<input value="Mr." disabled></label><label>Suffix (Optional)<input placeholder="Select suffix" disabled></label></div>
+          <label>First Name<input [value]="lead.name.split(' ').slice(0, -1).join(' ')" disabled></label>
+          <label>Middle Name<input placeholder="Enter your middle name" disabled></label>
+          <label class="checkbox-line"><input type="checkbox" disabled> I do not have middle name <span class="material-symbols-rounded" aria-hidden="true">help_outline</span></label>
+          <label>Last Name<input [value]="lead.name.split(' ').slice(-1)[0]" disabled></label>
+          <label>Mobile Number<div class="phone-field"><span>🇵🇭 +63</span><input value="171234567" disabled></div><small>It can be used for essential communication related to their insurance coverage only.</small></label>
+          <label>Date of Birth<div class="input-with-icon"><input value="January 01, 1990" disabled><span class="material-symbols-rounded" aria-hidden="true">calendar_today</span></div></label>
+          <label>Email Address<input value="test@email.com" disabled><small>It can be used to set up the customer portal account.</small></label>
+        </form>
+
+        <aside class="lead-summary">
+          <span>LEAD INFO</span><h2>Andrew Sy Lim</h2>
+          <p><span class="material-symbols-rounded" aria-hidden="true">call</span>+63 976 295 1361</p>
+          <p><span class="material-symbols-rounded" aria-hidden="true">mail</span>qabangtestewa@gmail.com</p>
+          <span>INSURED INFO</span><h3>Male, 36 years old</h3>
+          <span>PRODUCT</span><h3>{{ productName }}</h3>
+          <p>Dream Builder is a peso-denominated participating life insurance product that provides life insurance coverage for twenty (20) years, along with guaranteed cash payouts to help you build your dreams today.</p>
+          <ul><li>Get life protection that increases with Protection Booster.</li><li>Receive Guaranteed Cash Payouts at the end of policy year 3 or 6 until maturity at the end of policy year 20.</li><li>Enjoy Maturity Benefit paid as lump sum at end of policy year 20.</li><li>Receive additional potential earnings through non-guaranteed dividends.</li><li>Choose to have extra protection by adding riders on top of your plan.</li></ul>
+        </aside>
+      </div>
+
+      <footer class="si-footer si-footer--lead">
+        <button type="button" class="flow-button flow-button--outline" (click)="closed.emit()">Cancel</button>
+        <div class="si-footer__actions"><button type="button" class="flow-button flow-button--outline">Skip</button><button type="button" class="flow-button flow-button--outline flow-button--purple" (click)="goToStep(3)">Back to Coverage Info</button><button type="button" class="flow-button flow-button--primary" (click)="goToStep('results')">Generate Draft Sales Illustration</button></div>
+      </footer>
+    </ng-container>
+  </section>
+</div>
+
+<section class="si-results" *ngIf="step === 'results' && !proposalOpen" role="dialog" aria-modal="true" aria-labelledby="results-title">
+  <header class="si-results__brandbar"><img src="assets/si-brand-logo.png" alt="EastWest Ageas"><button type="button" aria-label="Close results" (click)="closed.emit()"><span class="material-symbols-rounded" aria-hidden="true">close</span></button></header>
+  <div class="si-results__titlebar"><h1 id="results-title">Draft Sales Illustration Results</h1></div>
+  <div class="si-results__actions"><button type="button" class="flow-button flow-button--outline flow-button--purple" (click)="startNewDraft()">Generate new draft SI</button><span></span><button type="button" class="flow-button flow-button--primary" (click)="openProposal()">Convert to Proposal</button><button type="button" class="flow-button flow-button--discovery" (click)="downloadResults()">Download Results</button></div>
+  <div class="pdf-viewer" aria-label="Draft sales illustration document preview"><img src="assets/si-page-1.png" alt="Draft sales illustration page 1"></div>
+</section>
+
+<lam-proposal-flow *ngIf="proposalOpen" [lead]="lead" (closed)="proposalOpen = false" />

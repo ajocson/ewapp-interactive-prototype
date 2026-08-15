@@ -1,5 +1,6 @@
 :host {
   display: flex;
+  width: var(--board-width);
   height: 100%;
   min-height: var(--space-none);
   min-width: var(--board-min-width);
@@ -22,6 +23,7 @@
 
 .lead-board__header {
   display: flex;
+  min-width: var(--space-none);
   min-height: var(--board-header-height);
   flex: none;
   align-items: center;
@@ -74,12 +76,17 @@
 
 .lead-board__search-field {
   display: flex;
+  width: var(--space-none);
   min-width: var(--space-none);
-  flex: 1 1 auto;
+  flex: 1 1 var(--space-none);
+  overflow: hidden;
 }
 
 .lead-board__search-field input {
+  box-sizing: border-box;
   width: 100%;
+  min-width: var(--space-none);
+  max-width: 100%;
   height: var(--board-search-height);
   padding: var(--space-none) var(--board-search-padding-x);
   border: var(--board-border-width) solid var(--board-search-border-default);

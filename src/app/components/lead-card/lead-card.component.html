@@ -5,10 +5,11 @@
   </span>
 
   <span class="lead-card__tags" *ngIf="lead.tags.length">
-    <lam-status-tag
+    <app-tag
       *ngFor="let tag of lead.tags; trackBy: trackTag"
       [label]="tag.label"
-      [tone]="tag.tone"
+      [variant]="tagVariant(tag.tone)"
+      [emphasis]="TdxTagEmphasis.Subtle"
     />
   </span>
 

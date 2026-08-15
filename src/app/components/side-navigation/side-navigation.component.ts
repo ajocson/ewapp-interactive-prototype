@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 import { SideNavigationItem } from './side-navigation.model';
+import { AppNavigationStateService } from '../../shared/services/app-navigation-state.service';
 
 @Component({
   selector: 'lam-side-navigation',
@@ -10,9 +11,11 @@ import { SideNavigationItem } from './side-navigation.model';
   standalone: false
 })
 export class SideNavigationComponent {
+  constructor(readonly navigation: AppNavigationStateService) {}
+
   readonly primaryItems: readonly SideNavigationItem[] = [
     { label: 'Dashboard', icon: 'space_dashboard' },
-    { label: 'LCAM Board', icon: 'view_week', active: true },
+    { label: 'LCAM Board', icon: 'view_week' },
     { label: 'Applications', icon: 'contract_edit' },
     { label: 'Customers', icon: 'group' }
   ];
@@ -26,5 +29,13 @@ export class SideNavigationComponent {
 
   trackItem(index: number, item: SideNavigationItem): string {
     return item.label;
+  }
+
+  isActive(item: SideNavigationItem): boolean {
+    return item.label === 'LCAM Board' && this.navigation.activeDestination() === 'lcam-board';
+  }
+
+  selectItem(item: SideNavigationItem): void {
+    if (item.label === 'LCAM Board') this.navigation.goToLcamBoard();
   }
 }

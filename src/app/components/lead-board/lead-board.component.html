@@ -52,17 +52,12 @@
     </span>
   </header>
 
-  <div class="lead-board__cards" [class.lead-board__cards--empty]="visibleLeads.length === 0">
+  <div class="lead-board__cards">
     <lam-lead-card
       *ngFor="let lead of visibleLeads; trackBy: trackLead"
       [lead]="lead"
       (selected)="leadSelected.emit($event)"
     />
-
-    <div *ngIf="visibleLeads.length === 0" class="lead-board__empty-state" role="status">
-      <img src="assets/empty-search.png" alt="">
-      <p>No matches were found</p>
-    </div>
   </div>
 
   <form

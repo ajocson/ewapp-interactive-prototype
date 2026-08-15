@@ -1,0 +1,81 @@
+<section class="proposal-shell" role="dialog" aria-modal="true" aria-labelledby="proposal-lead-title">
+  <lam-global-header />
+  <div class="proposal-body">
+    <lam-side-navigation *ngIf="navigation.isSidebarOpen()" class="proposal-sidebar" />
+    <main class="proposal-main">
+      <header class="lead-page-header">
+        <div class="lead-page-header__row">
+          <nav class="proposal-breadcrumbs" aria-label="Breadcrumb"><span>Dashboard</span><span class="material-symbols-rounded" aria-hidden="true">chevron_right</span><strong>Mr. {{ lead.name }}</strong></nav>
+          <div class="lead-page-header__actions"><app-button label="Record Activity" [variant]="TdxButtonVariant.Primary" [emphasis]="TdxButtonEmphasis.Outline" [size]="TdxButtonSize.Small" ariaControls="lead-activity-drawer" [ariaExpanded]="drawerOpen" (clicked)="openDrawer()" /><app-button label="" [variant]="TdxButtonVariant.Subtle" [size]="TdxButtonSize.Small" leftIcon="more_horiz" ariaLabel="More lead actions" /></div>
+        </div>
+        <h1 id="proposal-lead-title">Mr. {{ lead.name }}</h1><small>Date Created: Jul 23, 2026 2:29 PM</small>
+      </header>
+
+      <nav class="profile-tabs" aria-label="Lead record sections">
+        <button type="button" [class.is-active]="stage === 'individual-form' || stage === 'individual-summary'" (click)="goTo('individual-summary')">Info</button>
+        <button type="button" [class.is-active]="stage !== 'individual-form' && stage !== 'individual-summary'" [disabled]="stage === 'individual-form' || stage === 'individual-summary'" (click)="goTo('csa-information')">Profile</button>
+        <button type="button" disabled>Proposals</button><button type="button" disabled>Applications</button><button type="button">Policies</button>
+      </nav>
+
+      <div class="proposal-content">
+        <article class="proposal-card individual-card" *ngIf="stage === 'individual-form'">
+          <h2>Individual Information</h2>
+          <form class="individual-form">
+            <p class="form-message"><span class="material-symbols-rounded" aria-hidden="true">info</span>Complete all details to proceed with the CSA/Sales process.</p>
+            <fieldset class="form-section"><legend>Basic Information</legend><div class="form-grid">
+              <label>First Name<input name="firstName" [(ngModel)]="firstName"></label><label class="compact-field">Title<select name="title" [(ngModel)]="title"><option>Mr.</option><option>Ms.</option></select></label>
+              <label>Middle Name<input value="No Middle Name" disabled></label><label>Gender<input name="gender" [(ngModel)]="gender" disabled></label>
+              <label class="checkbox-field"><input type="checkbox" name="noMiddleName" [(ngModel)]="noMiddleName">No Middle Name</label><span></span>
+              <label>Last Name<input name="lastName" [(ngModel)]="lastName"></label><label>Birth Date<span class="date-field"><input name="birthDate" [(ngModel)]="birthDate"><span class="material-symbols-rounded" aria-hidden="true">calendar_today</span></span></label>
+              <label>Suffix<select name="suffix" [(ngModel)]="suffix"><option>No suffix</option></select></label>
+            </div></fieldset>
+            <fieldset class="form-section"><legend>Contact Info</legend><div class="form-grid">
+              <label>Mobile Number<div class="phone-input"><span>+639</span><input name="mobileNumber" [(ngModel)]="mobileNumber"></div></label><label>Email Address<input name="email" [(ngModel)]="emailAddress"></label><label>Source of Lead<input name="source" [(ngModel)]="sourceOfLead"></label>
+            </div></fieldset>
+          </form>
+          <footer class="card-footer"><button type="button" class="proposal-button proposal-button--outline" (click)="closed.emit()">Cancel</button><button type="button" class="proposal-button proposal-button--primary" (click)="goTo('individual-summary')">Save Changes</button></footer>
+        </article>
+
+        <article class="proposal-card proposal-card--summary" *ngIf="stage === 'individual-summary'">
+          <h2>Individual Information <button type="button" class="summary-more" aria-label="More information actions"><span class="material-symbols-rounded" aria-hidden="true">more_vert</span></button></h2>
+          <section><h3>Basic Information</h3><dl><div><dt>Full Name</dt><dd>Mr. John Mark Doe</dd></div><div><dt>Birthdate</dt><dd>January 1, 1989</dd></div><div><dt>Gender</dt><dd>Male</dd></div><div><dt>Age</dt><dd>37</dd></div></dl></section>
+          <section><h3>Contact Information</h3><dl><div><dt>Mobile Number</dt><dd>+639 171234567</dd></div><div><dt>Email Address</dt><dd>test@email.com</dd></div></dl></section>
+          <section class="source-summary"><dl><div><dt>Source of Lead</dt><dd>Referral (Center of Influence)</dd></div></dl></section>
+          <footer class="summary-actions"><div><button type="button" class="proposal-button proposal-button--primary" (click)="requestAddProfile()">Continue and Add Profile (CSA)</button><button type="button" class="proposal-button proposal-button--outline">Generate Draft Sales Illustration <small>New</small></button></div><button type="button" class="quick-quotes-link">or view all generated Quick Quotes</button></footer>
+        </article>
+
+        <article class="proposal-card csa-card" *ngIf="stage !== 'individual-form' && stage !== 'individual-summary'">
+          <h2><span>Client Suitability Assessment<small *ngIf="stage === 'risk-profile'">August 6, 2026</small></span><button *ngIf="stage === 'risk-profile'" type="button" class="summary-more" aria-label="More CSA actions"><span class="material-symbols-rounded" aria-hidden="true">more_vert</span></button></h2>
+          <nav class="csa-tabs" aria-label="Client suitability assessment steps"><button type="button" [class.is-active]="stage === 'csa-information'" (click)="goTo('csa-information')">Information</button><button type="button" [class.is-active]="stage === 'life-needs'" (click)="goTo('life-needs')">Life Needs &amp; Priorities</button><button type="button" [class.is-active]="stage === 'calculation'" (click)="goTo('calculation')">Calculation of Needs</button><button type="button" [class.is-active]="stage === 'assessment' || stage === 'risk-profile'" (click)="goTo('assessment')">General Assessment</button></nav>
+
+          <form class="csa-form" *ngIf="stage === 'csa-information'">
+            <fieldset><legend>General Information</legend><label>Civil Status<input name="civilStatus" [(ngModel)]="civilStatus"></label></fieldset>
+            <fieldset><legend>Occupation</legend><p>Does your client have a nature of business as “Designated Non-Financial Businesses and Professions (DNFBPs)”</p><div class="radio-row"><label><input type="radio" name="business" value="Yes" [(ngModel)]="designatedBusiness">Yes</label><label><input type="radio" name="business" value="No" [(ngModel)]="designatedBusiness">No</label></div><label>Occupation<div class="input-icon"><input value="Business Professional"><span class="material-symbols-rounded" aria-hidden="true">search</span></div></label></fieldset>
+            <fieldset><legend>Existing Life Insurance</legend><label class="checkbox-field"><input type="checkbox" name="noInsurance" [(ngModel)]="noExistingInsurance">No Existing Life Insurance</label><div class="form-grid"><label>Company Name<input value="Not applicable" disabled></label><label>Aggregated Annual Premium<input value="₱ 0" disabled><small>If amount is in foreign currency, convert to peso</small></label><label>Aggregated Sum Assured<input value="₱ 0" disabled></label></div></fieldset>
+          </form>
+
+          <section class="life-needs" *ngIf="stage === 'life-needs'"><h3>Life Needs and Priorities</h3><p>Rank financial needs by dragging up or down, the top most being the priority</p><ol><li *ngFor="let need of needs"><span>{{ need }}</span><span class="material-symbols-rounded" aria-hidden="true">drag_indicator</span></li></ol></section>
+
+          <form class="calculation-form" *ngIf="stage === 'calculation'">
+            <fieldset><legend>Health and Wellness</legend><label>Approximate amount needed to cover critical illness<input value="₱ 500,000"></label><label>Provision made for critical illness<input value="₱ 100,000"></label><label>Critical illness and hospitalization shortfall<input value="₱ 400,000" disabled></label></fieldset>
+            <fieldset><legend>Children’s Education</legend><label>University choice<input value="Ateneo de Manila University"></label><label>Provision made for education<input value="₱ 500,000"></label><label>Child’s age<input value="8"></label><label>Education shortfall<input value="₱ 1,000,000" disabled></label><label>Projected fees and related costs<input value="₱ 1,500,000"></label></fieldset>
+            <fieldset><legend>Financial Capacity</legend><label>Total monthly earnings<input value="₱ 150,000"></label><label>Annual premium capacity<input value="₱ 117,750"></label><label>Total assets<input value="₱ 3,000,000"></label><label>Approximate net worth<input value="₱ 2,500,000"></label></fieldset>
+          </form>
+
+          <section class="assessment" *ngIf="stage === 'assessment'"><h3>Risk Profile Assessment</h3><fieldset><legend>How long will you keep your money invested?</legend><button type="button" class="answer is-selected">A. &lt; 1 yr <span>✓</span></button><button type="button" class="answer">D. 7 to 9 years</button><button type="button" class="answer">B. 1 to 3 years</button><button type="button" class="answer">E. At least 10 years</button><button type="button" class="answer">C. 4 to 6 years</button></fieldset><fieldset><legend>What is your goal in investing?</legend><button type="button" class="answer answer--wide is-selected">A. Preservation of capital in exchange for very low returns that may not keep pace with inflation <span>✓</span></button><button type="button" class="answer answer--wide">B. Modest fluctuations in the value of capital in exchange for modest income and growth</button></fieldset><div class="assessment-actions"><button type="button" class="proposal-button proposal-button--outline">Back</button><button type="button" class="proposal-button proposal-button--primary" (click)="requestRiskProfile()">Calculate Risk Profile</button></div></section>
+
+          <section class="risk-profile" *ngIf="stage === 'risk-profile'"><h3>Risk Profile</h3><div class="risk-profile__result"><strong>Your current risk profile:</strong><mark>Conservative</mark><ul><li>Preserve Capital</li><li>Product Option: Traditional Life Insurance</li></ul></div><footer><button type="button" class="create-proposal-button">Create Proposal <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button></footer></section>
+        </article>
+      </div>
+    </main>
+  </div>
+
+  <div class="confirmation-overlay" *ngIf="confirmation" role="presentation"><section class="confirmation-dialog" role="alertdialog" aria-modal="true" [attr.aria-labelledby]="confirmation === 'add-profile' ? 'add-profile-title' : 'save-csa-title'"><h2 *ngIf="confirmation === 'add-profile'" id="add-profile-title">Add Profile (CSA)</h2><h2 *ngIf="confirmation === 'save-csa'" id="save-csa-title">Save Client Suitability Assessment</h2><p *ngIf="confirmation === 'add-profile'">Lead information cannot be edited once you add profile. Kindly ensure that all the provided details are accurate and correct before proceeding.</p><p *ngIf="confirmation === 'save-csa'">Kindly ensure that all the provided information is accurate and correct before saving CSA.</p><footer><button type="button" class="proposal-button proposal-button--neutral-outline" (click)="confirmation = null">Cancel</button><button type="button" class="proposal-button proposal-button--primary" (click)="proceedConfirmation()">Proceed</button></footer></section></div>
+
+  <div class="drawer-overlay" *ngIf="drawerOpen" (click)="drawerOpen = false" aria-hidden="true"></div>
+  <aside id="lead-activity-drawer" class="lead-drawer" *ngIf="drawerOpen" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+    <header><div class="drawer-title-row"><h2 id="drawer-title">Mr. John Mark Doe</h2><div class="drawer-header-actions"><app-button label="" [variant]="TdxButtonVariant.Subtle" [size]="TdxButtonSize.Small" leftIcon="more_vert" ariaLabel="More lead actions" /><lam-icon-button icon="close" label="Close drawer" size="icon" interactionBackground="none" [showTooltip]="false" (activated)="drawerOpen = false" /></div></div><div class="drawer-status"><app-tag label="SI Generated" [variant]="TdxTagVariant.Success" [emphasis]="TdxTagEmphasis.Subtle" /><small><span class="material-symbols-rounded" aria-hidden="true">person</span> Active</small><small><span class="material-symbols-rounded" aria-hidden="true">schedule</span> 1 day</small></div></header>
+    <app-tab-group [tabs]="drawerTabs" [activeId]="drawerTab" ariaLabel="Lead activity sections" (activeIdChange)="drawerTab = $event" />
+    <div class="drawer-scroll"><section class="drawer-lead-info"><dl class="drawer-details"><div><dt>Birthdate</dt><dd>January 05, 1989</dd></div><div><dt>Gender</dt><dd>Male</dd></div><div><dt>Email</dt><dd>client@email.com</dd></div><div><dt>Mobile Number</dt><dd>+63 9226789012</dd></div><div><dt>Referrer Name</dt><dd>Maxwell Anderson</dd></div><div><dt>Referrer ID</dt><dd>100234</dd></div><div><dt>Source of Lead</dt><dd>Leads from store</dd></div><div><dt>EWB Client Financial Segmentation</dt><dd>Mid</dd></div><div><dt>Store/Branch Assignment</dt><dd>595 THE FORT - BGC CORPORATE CENTER</dd></div><div><dt>Store/Branch ID</dt><dd>RBG0380</dd></div></dl><div class="drawer-lead-actions"><app-button class="drawer-full-button" label="Generate Full Proposal" [variant]="TdxButtonVariant.Primary" [emphasis]="TdxButtonEmphasis.Outline" [size]="TdxButtonSize.Small" (clicked)="drawerOpen = false; requestAddProfile()" /><app-button class="drawer-edit" label="Edit Lead Information" [variant]="TdxButtonVariant.Primary" [emphasis]="TdxButtonEmphasis.Transparent" [size]="TdxButtonSize.Small" /></div></section><section class="drawer-next"><h3>Before you continue</h3><p>Complete the remaining steps before starting the application.</p><app-stepper class="drawer-stepper" [steps]="activitySteps" [currentIndex]="1" orientation="horizontal" /><app-section-message description="Schedule an appointment or indicate if you’re unable to set one." appearance="info" /><h4>Appointments</h4><lam-action-card title="Schedule Appointment" description="Set a date and time for your client appointment." icon="calendar_month" tone="success" (activated)="chooseDrawerAction('scheduled')" /><lam-action-card title="Unable to Set Appointment" description="An appointment could not be scheduled with the client." icon="event_busy" tone="danger" (activated)="chooseDrawerAction('unable')" /></section></div>
+  </aside>
+</section>

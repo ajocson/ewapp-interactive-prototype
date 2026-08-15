@@ -1,0 +1,11 @@
+:host { display: block; width: var(--search-field-width); max-width: 100%; }
+.tdx-search-field { box-sizing: border-box; display: flex; width: 100%; height: var(--search-field-height); align-items: center; gap: var(--search-field-content-gap); padding: var(--search-field-padding); border: var(--search-field-border-width) solid var(--search-field-border-default); border-radius: var(--search-field-radius); background: var(--search-field-bg); transition: border-color var(--motion-duration-fast) var(--motion-easing-standard); }
+.tdx-search-field:focus-within { border-width: var(--search-field-border-focus-width); border-color: var(--search-field-border-focus); }
+.tdx-search-field__leading-icon { flex: none; color: var(--search-field-icon); font-size: var(--search-field-icon-size); font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+.tdx-search-field input { min-width: var(--space-none); height: 100%; flex: 1 1 auto; padding: var(--space-none); border: var(--border-width-none); outline: var(--space-none); appearance: none; background: transparent; color: var(--search-field-text); font-size: var(--search-field-text-size); line-height: var(--search-field-line-height); }
+.tdx-search-field input::-webkit-search-cancel-button { display: none; }
+.tdx-search-field input::placeholder { color: var(--search-field-placeholder); }
+.tdx-search-field__clear { display: inline-flex; width: var(--search-field-clear-target-size); height: var(--search-field-clear-target-size); flex: none; align-items: center; justify-content: center; padding: var(--space-none); border: var(--border-width-none); background: transparent; color: var(--search-field-clear-icon); cursor: pointer; }
+.tdx-search-field__clear:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring-color); outline-offset: var(--focus-ring-offset); }
+.tdx-search-field__clear .material-symbols-rounded { font-size: var(--search-field-clear-icon-size); font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+.tdx-search-field--disabled { opacity: var(--search-field-disabled-opacity); }

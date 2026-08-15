@@ -3,12 +3,15 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  EventEmitter,
   HostListener,
   Inject,
-  OnDestroy
+  OnDestroy,
+  Output
 } from '@angular/core';
 
 import { LeadBoardData, LeadCardData, LeadTag } from '../lead-board.model';
+import { AppNavigationStateService } from '../shared/services/app-navigation-state.service';
 
 const DESKTOP_SIDEBAR_QUERY = '(min-width: 1024px)';
 
@@ -20,10 +23,10 @@ const DESKTOP_SIDEBAR_QUERY = '(min-width: 1024px)';
   standalone: false
 })
 export class DashboardComponent implements OnDestroy {
+  @Output() leadOpened = new EventEmitter<LeadCardData>();
   searchTerm = '';
   selectedSource = 'All Sources';
   selectedLead: LeadCardData | null = null;
-  isSidebarOpen = false;
   isDesktopViewport = false;
 
   readonly sourceOptions = ['All Sources', 'Referral', 'Digital', 'Branch', 'Event'];
@@ -33,11 +36,12 @@ export class DashboardComponent implements OnDestroy {
 
   constructor(
     @Inject(DOCUMENT) document: Document,
-    private readonly changeDetectorRef: ChangeDetectorRef
+    private readonly changeDetectorRef: ChangeDetectorRef,
+    readonly navigation: AppNavigationStateService
   ) {
     this.desktopMediaQuery = document.defaultView?.matchMedia?.(DESKTOP_SIDEBAR_QUERY) ?? null;
     this.isDesktopViewport = this.desktopMediaQuery?.matches ?? false;
-    this.isSidebarOpen = this.isDesktopViewport;
+    this.navigation.setSidebarOpen(this.isDesktopViewport);
     this.desktopMediaQuery?.addEventListener('change', this.handleDesktopBreakpointChange);
   }
 
@@ -45,20 +49,16 @@ export class DashboardComponent implements OnDestroy {
     this.desktopMediaQuery?.removeEventListener('change', this.handleDesktopBreakpointChange);
   }
 
-  toggleSidebar(): void {
-    this.isSidebarOpen = !this.isSidebarOpen;
-  }
-
   closeSidebarFromOverlay(): void {
     if (!this.isDesktopViewport) {
-      this.isSidebarOpen = false;
+      this.navigation.setSidebarOpen(false);
     }
   }
 
   @HostListener('document:keydown.escape')
   closeSidebarWithEscape(): void {
-    if (!this.isDesktopViewport && this.isSidebarOpen) {
-      this.isSidebarOpen = false;
+    if (!this.isDesktopViewport && this.navigation.isSidebarOpen()) {
+      this.navigation.setSidebarOpen(false);
     }
   }
 
@@ -81,6 +81,7 @@ export class DashboardComponent implements OnDestroy {
 
   selectLead(lead: LeadCardData): void {
     this.selectedLead = lead;
+    this.leadOpened.emit(lead);
   }
 
   private createBoards(): readonly LeadBoardData[] {
@@ -182,7 +183,7 @@ export class DashboardComponent implements OnDestroy {
 
   private readonly handleDesktopBreakpointChange = (event: MediaQueryListEvent): void => {
     this.isDesktopViewport = event.matches;
-    this.isSidebarOpen = event.matches;
+    this.navigation.setSidebarOpen(event.matches);
     this.changeDetectorRef.markForCheck();
   };
 }

@@ -1,0 +1,15 @@
+<div class="tdx-tab-group" [ngClass]="hostClasses" role="tablist" [attr.aria-label]="ariaLabel">
+  <button
+    *ngFor="let tab of tabs; trackBy: trackById"
+    class="tdx-tab"
+    type="button"
+    role="tab"
+    [class.tdx-tab--active]="tab.id === activeId"
+    [disabled]="tab.disabled"
+    [attr.aria-selected]="tab.id === activeId"
+    [attr.tabindex]="tab.id === activeId ? 0 : -1"
+    (click)="select(tab)"
+  >
+    <span class="tdx-tab__label">{{ tab.label }}</span>
+  </button>
+</div>

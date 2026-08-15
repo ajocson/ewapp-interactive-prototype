@@ -1,0 +1,10 @@
+<section class="section-message" [ngClass]="hostClass" role="status">
+  <span class="section-message__icon material-symbols-rounded" aria-hidden="true">{{ icon }}</span>
+  <div class="section-message__text">
+    <strong *ngIf="title">{{ title }}</strong>
+    <p *ngIf="description">{{ description }}</p>
+  </div>
+  <button *ngIf="dismissible" type="button" class="section-message__dismiss" aria-label="Dismiss message" (click)="dismissed.emit()">
+    <span class="material-symbols-rounded" aria-hidden="true">close</span>
+  </button>
+</section>

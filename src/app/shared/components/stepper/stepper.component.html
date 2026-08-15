@@ -1,0 +1,16 @@
+<div class="tdx-stepper" [ngClass]="hostClasses">
+  <ol class="tdx-stepper__list">
+    <li *ngFor="let step of steps; let index = index; let first = first; let last = last" class="tdx-stepper__item"
+      [ngClass]="getStepClasses(step, index)" [attr.data-state]="getStepVisualState(step, index)">
+      <span class="tdx-stepper__connector tdx-stepper__connector--before" [class.tdx-stepper__connector--hidden]="first" aria-hidden="true"></span>
+      <div class="tdx-stepper__step" [attr.aria-current]="getStepVisualState(step, index) === 'current' ? 'step' : null">
+        <span class="tdx-stepper__indicator" aria-hidden="true">
+          <span class="tdx-stepper__icon material-symbols-rounded">{{ getIndicatorIcon(step, index) }}</span>
+          <span *ngIf="shouldShowStepNumber(step, index)" class="tdx-stepper__number">{{ step.number ?? index + 1 }}</span>
+        </span>
+        <span class="tdx-stepper__label">{{ step.label }}</span>
+      </div>
+      <span class="tdx-stepper__connector tdx-stepper__connector--after" [class.tdx-stepper__connector--hidden]="last" aria-hidden="true"></span>
+    </li>
+  </ol>
+</div>

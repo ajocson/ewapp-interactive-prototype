@@ -1,0 +1,12 @@
+<button type="button" class="tdx-button" [ngClass]="buttonClasses" [disabled]="isInteractionDisabled"
+  [attr.aria-busy]="isLoading ? 'true' : null" [attr.aria-label]="ariaLabel || null"
+  [attr.aria-expanded]="ariaExpanded ?? null" [attr.aria-controls]="ariaControls || null"
+  [attr.data-variant]="variant" [attr.data-emphasis]="resolvedEmphasis" [attr.data-size]="size"
+  (click)="handleClick($event)">
+  <span *ngIf="isLoading" class="tdx-button__loading" aria-hidden="true"><span></span><span></span><span></span></span>
+  <ng-container *ngIf="!isLoading">
+    <span *ngIf="leftIcon" class="tdx-button__icon material-symbols-rounded" aria-hidden="true">{{ leftIcon }}</span>
+    <span *ngIf="label" class="tdx-button__label">{{ label }}</span>
+    <span *ngIf="rightIcon" class="tdx-button__icon material-symbols-rounded" aria-hidden="true">{{ rightIcon }}</span>
+  </ng-container>
+</button>
