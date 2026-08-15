@@ -122,7 +122,7 @@
 .board-track {
   display: flex;
   width: 100%;
-  min-width: max-content;
+  min-width: var(--space-none);
   height: 100%;
   min-height: var(--space-none);
   gap: var(--board-track-gap);
@@ -159,11 +159,6 @@
 
 @media (max-width: 720px) {
   .priorities {
-    --board-width: min(
-      var(--board-max-width),
-      calc(100vw - var(--priorities-padding-compact) - var(--priorities-padding-responsive-end))
-    );
-
     padding: var(--priorities-padding-compact);
     padding-inline-end: var(--priorities-padding-responsive-end);
   }
