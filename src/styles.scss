@@ -163,6 +163,13 @@
   --button-subtle-filled-bg-default: var(--color-grey-100);
   --button-subtle-filled-bg-hover: var(--color-grey-200);
   --button-subtle-filled-bg-pressed: var(--color-grey-300);
+  --button-danger-focus-ring: var(--color-red-200);
+  --button-danger-outline-icon: var(--color-red-700);
+  --button-danger-outline-text: var(--color-red-700);
+  --button-danger-outline-border: var(--color-red-600);
+  --button-danger-outline-bg-default: transparent;
+  --button-danger-outline-bg-hover: var(--color-red-100);
+  --button-danger-outline-bg-pressed: var(--color-red-200);
 
   --tag-font-size: var(--caption-text-size);
   --tag-line-height: var(--caption-line-height);
@@ -212,6 +219,8 @@
   --section-message-icon-size: var(--icon-3xl);
   --section-message-bg-info: var(--color-cyan-75);
   --section-message-icon-info: var(--color-cyan-600);
+  --section-message-bg-success: var(--color-green-100);
+  --section-message-icon-success: var(--color-green-800);
   --section-message-text: var(--text-neutral-primary);
   --search-field-height: var(--field-height);
   --search-field-content-gap: var(--space-sm);
@@ -380,6 +389,8 @@
   --action-card-success-icon: var(--color-green-800);
   --action-card-danger-icon-bg: var(--color-red-100);
   --action-card-danger-icon: var(--color-red-700);
+  --action-card-neutral-icon-bg: var(--color-grey-100);
+  --action-card-neutral-icon: var(--color-grey-600);
 
   --priorities-min-height: 844px;
   --priorities-padding: var(--space-xl);
@@ -391,17 +402,20 @@
   --filters-gap: var(--space-lg);
   --filters-margin-bottom: var(--space-lg);
   --field-height: 40px;
+  --field-height-compact: 32px;
   --field-radius: var(--radius-md);
   --field-border-width: var(--border-width-xs-1);
   --field-border-default: var(--border-neutral-default);
+  --field-border-hover: var(--color-grey-400);
   --field-border-focus: var(--focus-ring-color);
   --field-focus-shadow: 0 0 0 var(--border-width-xs-1) var(--focus-ring-color);
   --field-bg: var(--surface-default);
+  --field-bg-hover: var(--color-grey-100);
   --field-text: var(--text-neutral-primary);
   --field-placeholder: var(--text-neutral-secondary);
   --field-icon: var(--icon-neutral-primary);
   --field-icon-size: 16px;
-  --field-padding-x: var(--space-md);
+  --field-padding: var(--space-md);
   --field-content-gap: var(--space-sm);
   --search-field-width: 340px;
   --source-field-width: 112px;
@@ -555,6 +569,7 @@
   --surface-page: #171b24;
   --surface-default: #212733;
   --surface-interactive-hover: #2b3446;
+  --field-bg-hover: var(--surface-interactive-hover);
   --text-neutral-primary: #f2f4f7;
   --text-neutral-secondary: #c7ced9;
   --icon-neutral-primary: #f2f4f7;
@@ -629,6 +644,8 @@ select {
   -webkit-font-smoothing: antialiased;
 }
 
+.activity-toast { position: fixed; z-index: var(--layer-drawer); bottom: var(--space-3xl); left: var(--space-3xl); width: 260px; border-radius: var(--section-message-radius); box-shadow: var(--shadow-xl); }
+
 /* Proposal overlays are global because they sit above component/application layers. */
 .confirmation-overlay { position: fixed; inset: var(--space-none); z-index: var(--layer-proposal-dialog); display: grid; place-items: center; background: var(--modal-overlay-bg); }
 .confirmation-dialog { width: min(calc(100% - var(--space-6xl)), var(--proposal-dialog-width)); min-height: var(--proposal-dialog-height); padding: var(--space-5xl) var(--space-4xl) var(--space-4xl); border-radius: var(--proposal-dialog-radius); background: var(--surface-default); box-shadow: var(--shadow-xl); }
@@ -653,6 +670,7 @@ select {
 .drawer-lead-actions { display: flex; width: 100%; flex-direction: column; gap: var(--space-md); }
 .drawer-full-button { display: flex; width: 100%; }
 .drawer-full-button .tdx-button { width: 100%; }
+.drawer-contact__button .tdx-button, .drawer-action-button .tdx-button { width: 100%; }
 .drawer-edit { display: flex; justify-content: center; }
 .drawer-next { padding: var(--space-3xl) var(--space-2xl) var(--space-4xl); }
 .drawer-next h3 { margin: var(--space-none); font-family: var(--typography-font-family-paragraph); font-size: var(--paragraph-md-text-size); font-weight: var(--font-weight-bold); line-height: var(--paragraph-md-line-height); }

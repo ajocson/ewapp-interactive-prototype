@@ -81,4 +81,16 @@ describe('DashboardComponent sidebar', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('lam-side-navigation')).toBeFalsy();
   });
+
+  it('moves a completed lead to Contacted with an active contacted state', () => {
+    const component = fixture.componentInstance;
+
+    const contactedLead = component.markLeadAsContacted('lead-1');
+    fixture.detectChanges();
+
+    expect(contactedLead?.leadType).toBe('Active');
+    expect(contactedLead?.tags).toEqual([{ label: 'Contacted', tone: 'success' }]);
+    expect(component.boards.find((board) => board.id === 'lead')?.leads.some((lead) => lead.id === 'lead-1')).toBe(false);
+    expect(component.boards.find((board) => board.id === 'contacted')?.leads[0]).toEqual(contactedLead);
+  });
 });

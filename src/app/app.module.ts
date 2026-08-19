@@ -11,6 +11,7 @@ import { LeadDetailComponent } from './lead-detail/lead-detail.component';
 import { ProposalFlowComponent } from './proposal-flow/proposal-flow.component';
 import { ActionCardModule } from './shared/components/action-card/action-card.module';
 import { ButtonModule } from './shared/components/button/button.module';
+import { FieldControlModule } from './shared/components/field-control/field-control.module';
 import { SectionMessageModule } from './shared/components/section-message/section-message.module';
 import { SearchFieldModule } from './shared/components/search-field/search-field.module';
 import { StepperModule } from './shared/components/stepper/stepper.module';
@@ -25,7 +26,7 @@ import { TagModule } from './shared/components/tag/tag.module';
     LeadDetailComponent,
     ProposalFlowComponent
   ],
-  imports: [BrowserModule, CommonModule, FormsModule, LamComponentsModule, ActionCardModule, ButtonModule, SearchFieldModule, SectionMessageModule, StepperModule, TabGroupModule, TagModule],
+  imports: [BrowserModule, CommonModule, FormsModule, LamComponentsModule, ActionCardModule, ButtonModule, FieldControlModule, SearchFieldModule, SectionMessageModule, StepperModule, TabGroupModule, TagModule],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [AppComponent]
 })

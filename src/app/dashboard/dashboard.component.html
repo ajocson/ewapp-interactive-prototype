@@ -12,19 +12,60 @@
       (click)="closeSidebarFromOverlay()"
     ></button>
 
-    <section class="priorities" aria-labelledby="priorities-title">
-      <h1 id="priorities-title">Today’s Priorities</h1>
-
+    <section class="priorities" aria-label="Lead priorities">
       <div class="filters" role="search">
         <app-search-field class="filters__search" name="lead-search" placeholder="Search by lead name" ariaLabel="Search by lead name" [(value)]="searchTerm" />
+        <tdx-field-control
+          name="lead-source"
+          ariaLabel="Source of lead"
+          [value]="selectedSource"
+          [options]="sourceControlOptions"
+          trailingIcon="keyboard_arrow_down"
+          [width]="112"
+          (valueChange)="selectedSource = $event"
+        />
+        <div class="filters__filter" (click)="$event.stopPropagation()">
+          <tdx-field-control label="Filter" ariaLabel="Filter leads" leadingIcon="filter_alt" [width]="76" (activated)="toggleFilterMenu()" />
 
-        <label class="source-filter">
-          <span class="visually-hidden">Source of lead</span>
-          <select name="lead-source" [(ngModel)]="selectedSource">
-            <option *ngFor="let source of sourceOptions" [value]="source">{{ source }}</option>
-          </select>
-          <span class="material-symbols-rounded" aria-hidden="true">keyboard_arrow_down</span>
-        </label>
+          <section *ngIf="filterMenuOpen" class="page-filter" aria-label="Filter leads">
+            <div class="page-filter__field">
+              <span>Filter by Lead Status</span>
+              <tdx-field-control
+                ariaLabel="Filter by Lead Status"
+                [value]="pendingLeadStatus"
+                [options]="leadStatusControlOptions"
+                trailingIcon="keyboard_arrow_down"
+                [width]="144"
+                [menuWidth]="204"
+                [compact]="true"
+                (valueChange)="pendingLeadStatus = $event"
+              />
+            </div>
+            <div class="page-filter__field">
+              <span>Filter by Lead States</span>
+              <tdx-field-control
+                ariaLabel="Filter by Lead States"
+                [value]="pendingLeadState"
+                [options]="leadStateControlOptions"
+                trailingIcon="keyboard_arrow_down"
+                [width]="144"
+                [menuWidth]="204"
+                [compact]="true"
+                (valueChange)="pendingLeadState = $event"
+              />
+            </div>
+            <fieldset>
+              <legend>Sort by</legend>
+              <label *ngFor="let option of sortOptions">
+                <input type="radio" name="page-sort" [value]="option.value" [(ngModel)]="pendingSort">{{ option.label }}
+              </label>
+            </fieldset>
+            <footer>
+              <app-button label="Reset" [variant]="buttonVariant.Subtle" [size]="buttonSize.Small" [disabled]="!filterHasValues" (clicked)="resetPendingFilters()" />
+              <app-button label="Apply" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" [disabled]="!filterDirty" (clicked)="applyFilters()" />
+            </footer>
+          </section>
+        </div>
       </div>
 
       <div class="board-viewport" tabindex="0" aria-label="Lead pipeline boards">

@@ -1,2 +1,1 @@
-export type ActionCardTone = 'brand' | 'success' | 'danger';
-
+export type ActionCardTone = 'brand' | 'success' | 'danger' | 'neutral';

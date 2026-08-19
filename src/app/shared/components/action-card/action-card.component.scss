@@ -6,8 +6,8 @@
 .action-card__icon { display: grid; width: var(--action-card-icon-box); height: var(--action-card-icon-box); flex: none; place-items: center; border-radius: var(--radius-md); background: var(--action-card-brand-icon-bg); color: var(--action-card-brand-icon); font-size: var(--button-medium-icon-size); }
 .action-card--success .action-card__icon { background: var(--action-card-success-icon-bg); color: var(--action-card-success-icon); }
 .action-card--danger .action-card__icon { background: var(--action-card-danger-icon-bg); color: var(--action-card-danger-icon); }
+.action-card--neutral .action-card__icon { background: var(--action-card-neutral-icon-bg); color: var(--action-card-neutral-icon); }
 .action-card__copy { display: flex; min-width: var(--space-none); flex: 1; flex-direction: column; }
 .action-card__copy strong { font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
 .action-card__copy small { overflow: hidden; color: var(--text-neutral-secondary); font-size: var(--caption-sm-text-size); line-height: var(--caption-sm-line-height); text-overflow: ellipsis; white-space: nowrap; }
 .action-card__arrow { flex: none; font-size: var(--action-card-arrow-size); }
-

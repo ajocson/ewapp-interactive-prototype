@@ -1,0 +1,91 @@
+<button type="button" class="drawer-overlay" aria-label="Close lead details" (click)="closed.emit()"></button>
+
+<aside id="lead-activity-drawer" class="lead-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+  <header>
+    <div class="drawer-title-row">
+      <h2 id="drawer-title">Mr. {{ lead.name }}</h2>
+      <div class="drawer-header-actions">
+        <lam-icon-button icon="close" label="Close drawer" size="icon" interactionBackground="none" [showTooltip]="false" (activated)="closed.emit()" />
+      </div>
+    </div>
+    <div class="drawer-status">
+      <app-tag [label]="statusTag" [variant]="statusVariant" [emphasis]="tagEmphasis.Subtle" />
+      <small><span class="material-symbols-rounded" aria-hidden="true">person</span>Active</small>
+      <small><span class="material-symbols-rounded" aria-hidden="true">schedule</span>1 day</small>
+    </div>
+  </header>
+
+  <app-tab-group [tabs]="tabs" [activeId]="activeTab" ariaLabel="Lead activity sections" (activeIdChange)="activeTab = $event" />
+
+  <div class="drawer-scroll">
+    <section *ngIf="activeTab === 'overview'" class="drawer-lead-info">
+      <dl class="drawer-details">
+        <div><dt>Birthdate</dt><dd>January 05, 1989</dd></div>
+        <div><dt>Gender</dt><dd>Male</dd></div>
+        <div><dt>Email</dt><dd>client@email.com</dd></div>
+        <div><dt>Mobile Number</dt><dd>+63 9226789012</dd></div>
+        <div><dt>Referrer Name</dt><dd>Maxwell Anderson</dd></div>
+        <div><dt>Referrer ID</dt><dd>100234</dd></div>
+        <div><dt>Source of Lead</dt><dd>Leads from store</dd></div>
+        <div><dt>EWB Client Financial Segmentation</dt><dd>Mid</dd></div>
+        <div><dt>Store/Branch Assignment</dt><dd>595 THE FORT - BGC CORPORATE CENTER</dd></div>
+        <div><dt>Store/Branch ID</dt><dd>RBG0380</dd></div>
+      </dl>
+
+      <div class="drawer-lead-actions">
+        <app-button
+          class="drawer-full-button"
+          [label]="isContacted ? 'Generate Full Proposal' : 'Generate Draft SI'"
+          [variant]="buttonVariant.Primary"
+          [emphasis]="buttonEmphasis.Outline"
+          [size]="buttonSize.Small"
+          (clicked)="requestPrimaryAction()"
+        />
+        <app-button class="drawer-edit" label="Edit Lead Information" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Transparent" [size]="buttonSize.Small" />
+      </div>
+    </section>
+
+    <section *ngIf="activeTab === 'overview'" class="drawer-contact" [class.drawer-contact--contacted]="isContacted">
+      <header>
+        <h3>Before you continue</h3>
+        <p>Complete the remaining steps before starting the application.</p>
+      </header>
+      <app-stepper [steps]="activitySteps" [currentIndex]="isContacted ? 1 : 0" orientation="horizontal" />
+
+      <ng-container *ngIf="!isContacted; else appointmentActions">
+      <label>Notes (Optional)
+        <textarea rows="4" placeholder="Add notes about your conversation"></textarea>
+      </label>
+      <app-button
+        class="drawer-contact__button"
+        label="Mark as Contacted"
+        [variant]="buttonVariant.Primary"
+        [size]="buttonSize.Small"
+        (clicked)="markAsContacted()"
+      />
+      </ng-container>
+
+      <ng-template #appointmentActions>
+        <app-section-message description="Schedule an appointment or indicate if you’re unable to set one." />
+        <div class="drawer-appointments">
+          <h4>Appointments</h4>
+          <lam-action-card title="Schedule Appointment" description="Set a date and time for your client appointment." icon="calendar_month" tone="success" />
+          <lam-action-card title="Unable to Set Appointment" description="An appointment could not be scheduled with the client." icon="event_busy" tone="neutral" />
+        </div>
+      </ng-template>
+    </section>
+
+    <section *ngIf="activeTab === 'overview'" class="drawer-actions">
+      <h3>Lead Actions</h3>
+      <div>
+        <app-button class="drawer-action-button" label="Park Lead" leftIcon="pause_circle" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" />
+        <app-button class="drawer-action-button" label="Drop Lead" leftIcon="stop_circle" [variant]="buttonVariant.Danger" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" />
+      </div>
+    </section>
+
+    <section *ngIf="activeTab === 'timeline'" class="drawer-empty" aria-live="polite">
+      <span class="material-symbols-rounded" aria-hidden="true">history</span>
+      <p>No recorded activity yet.</p>
+    </section>
+  </div>
+</aside>

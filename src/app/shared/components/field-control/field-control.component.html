@@ -1,0 +1,41 @@
+<div
+  class="tdx-field-control"
+  [class.tdx-field-control--disabled]="disabled"
+  [class.tdx-field-control--open]="isOpen"
+  [class.tdx-field-control--compact]="compact"
+  [style.width.px]="width"
+>
+  <span *ngIf="leadingIcon" class="material-symbols-rounded" aria-hidden="true">{{ leadingIcon }}</span>
+
+  <button
+    *ngIf="options.length; else actionControl"
+    type="button"
+    class="tdx-field-control__trigger"
+    [disabled]="disabled"
+    [attr.aria-label]="ariaLabel || label"
+    aria-haspopup="listbox"
+    [attr.aria-expanded]="isOpen"
+    (click)="toggleOptions($event)"
+  >
+    {{ value || label }}
+  </button>
+
+  <ng-template #actionControl>
+    <button type="button" class="tdx-field-control__trigger" [disabled]="disabled" [attr.aria-label]="ariaLabel || label" (click)="activate($event)">
+      {{ label }}
+    </button>
+  </ng-template>
+
+  <span *ngIf="trailingIcon" class="material-symbols-rounded tdx-field-control__trailing" aria-hidden="true">{{ trailingIcon }}</span>
+
+  <div *ngIf="options.length && isOpen" class="tdx-field-control__menu" role="listbox" [style.width.px]="menuWidth" [attr.aria-label]="ariaLabel || label" (click)="$event.stopPropagation()">
+    <button
+      *ngFor="let option of options"
+      type="button"
+      role="option"
+      [class.is-selected]="option.value === value"
+      [attr.aria-selected]="option.value === value"
+      (click)="updateValue(option.value)"
+    >{{ option.label }}</button>
+  </div>
+</div>
