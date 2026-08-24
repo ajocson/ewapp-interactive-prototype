@@ -1,9 +1,7 @@
 :host { display: inline-flex; }
-.tdx-tag { display: inline-flex; height: var(--tag-height); align-items: center; justify-content: center; padding: var(--tag-padding-y) var(--tag-padding-x); border: var(--tag-border-width) solid transparent; border-radius: var(--tag-radius); font-family: var(--typography-font-family-paragraph); font-size: var(--tag-font-size); font-weight: var(--tag-font-weight); line-height: var(--tag-line-height); transition: background-color var(--motion-duration-fast) var(--motion-easing-standard), border-color var(--motion-duration-fast) var(--motion-easing-standard), color var(--motion-duration-fast) var(--motion-easing-standard); white-space: nowrap; }
+.tdx-tag { display: inline-flex; height: var(--tag-height); align-items: center; justify-content: center; padding: var(--tag-padding-y) var(--tag-padding-x); border: var(--tag-border-width) solid transparent; border-radius: var(--tag-radius); font-family: var(--typography-font-family-paragraph); font-size: var(--tag-font-size); font-weight: var(--tag-font-weight); line-height: var(--tag-line-height); white-space: nowrap; }
 .tdx-tag__label { display: inline-flex; padding-inline: var(--tag-icon-gap); padding-block-end: var(--tag-label-offset-y); }
 .tdx-tag--success.tdx-tag--subtle { border-color: var(--tag-success-subtle-border-default); background: var(--tag-success-subtle-bg-default); color: var(--tag-success-subtle-text-default); }
-.tdx-tag--success.tdx-tag--subtle:hover { background: var(--tag-success-subtle-bg-hover); }
-.tdx-tag--success.tdx-tag--subtle:active { background: var(--tag-success-subtle-bg-pressed); }
 .tdx-tag--primary.tdx-tag--subtle { border-color: var(--tag-primary-border); background: var(--tag-primary-bg); color: var(--tag-primary-text); }
 .tdx-tag--info.tdx-tag--subtle { border-color: var(--tag-info-border); background: var(--tag-info-bg); color: var(--tag-info-text); }
 .tdx-tag--danger.tdx-tag--subtle { border-color: var(--tag-danger-border); background: var(--tag-danger-bg); color: var(--tag-danger-text); }

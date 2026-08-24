@@ -18,6 +18,7 @@ export class ButtonComponent {
   @Input() loading = false;
   @Input() leftIcon: TdxButtonIcon = null;
   @Input() rightIcon: TdxButtonIcon = null;
+  @Input() filledIcons = false;
   @Input() ariaLabel?: string;
   @Input() ariaExpanded?: boolean;
   @Input() ariaControls?: string;
@@ -36,6 +37,7 @@ export class ButtonComponent {
       [`tdx-button--${this.resolvedEmphasis}`]: true,
       [`tdx-button--${this.size}`]: true,
       'tdx-button--loading': this.isLoading,
+      'tdx-button--filled-icons': this.filledIcons,
       'tdx-button--icon-only': !this.label && Boolean(this.leftIcon || this.rightIcon)
     };
   }

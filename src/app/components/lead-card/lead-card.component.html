@@ -1,12 +1,12 @@
-<button type="button" class="lead-card" (click)="selected.emit(lead)">
+<button type="button" class="lead-card" [class.lead-card--highlighted]="highlighted" (click)="selected.emit(lead)">
   <span class="lead-card__identity">
-    <strong>{{ lead.name }}</strong>
+    <strong>{{ displayName }}</strong>
     <small>{{ lead.createdAt }}</small>
   </span>
 
-  <span class="lead-card__tags" *ngIf="lead.tags.length">
+  <span class="lead-card__tags" *ngIf="visibleTags.length">
     <app-tag
-      *ngFor="let tag of lead.tags; trackBy: trackTag"
+      *ngFor="let tag of visibleTags; trackBy: trackTag"
       [label]="tag.label"
       [variant]="tagVariant(tag.tone)"
       [emphasis]="TdxTagEmphasis.Subtle"
@@ -14,7 +14,7 @@
   </span>
 
   <span class="lead-card__metadata">
-    <span><span class="material-symbols-rounded" aria-hidden="true">person</span>{{ lead.leadType }}</span>
+    <span [class.lead-card__state--danger]="lead.leadType === 'Dropped'"><span class="material-symbols-rounded" aria-hidden="true">person</span>{{ lead.leadType }}</span>
     <span><span class="material-symbols-rounded" aria-hidden="true">schedule</span>{{ lead.aging }}</span>
   </span>
 </button>

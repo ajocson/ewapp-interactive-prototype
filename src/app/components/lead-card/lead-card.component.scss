@@ -43,6 +43,12 @@
   box-shadow: var(--lead-card-shadow-hover);
 }
 
+.lead-card--highlighted {
+  border-width: var(--lead-card-highlight-border-width);
+  border-color: var(--lead-card-highlight-border);
+  box-shadow: var(--lead-card-highlight-shadow);
+}
+
 .lead-card__identity {
   display: flex;
   width: 100%;
@@ -95,4 +101,15 @@
 .lead-card__metadata .material-symbols-rounded {
   font-size: var(--lead-card-metadata-icon-size);
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+
+.lead-card__state--danger {
+  color: var(--color-red-600);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lead-card--highlighted {
+    border-color: var(--lead-card-highlight-border);
+    box-shadow: var(--lead-card-highlight-shadow);
+  }
 }

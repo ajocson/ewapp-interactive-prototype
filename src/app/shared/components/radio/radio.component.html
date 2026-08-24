@@ -1,0 +1,11 @@
+<label class="tdx-radio" [class.tdx-radio--disabled]="disabled">
+  <input
+    type="radio"
+    [name]="name"
+    [value]="value"
+    [checked]="checked"
+    [disabled]="disabled"
+    (change)="select()"
+  >
+  <span>{{ label }}</span>
+</label>

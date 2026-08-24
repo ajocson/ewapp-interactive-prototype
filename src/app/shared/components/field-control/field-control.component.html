@@ -3,7 +3,8 @@
   [class.tdx-field-control--disabled]="disabled"
   [class.tdx-field-control--open]="isOpen"
   [class.tdx-field-control--compact]="compact"
-  [style.width.px]="width"
+  [class.tdx-field-control--fluid]="fluid"
+  [style.width.px]="fluid ? null : width"
 >
   <span *ngIf="leadingIcon" class="material-symbols-rounded" aria-hidden="true">{{ leadingIcon }}</span>
 
@@ -17,7 +18,7 @@
     [attr.aria-expanded]="isOpen"
     (click)="toggleOptions($event)"
   >
-    {{ value || label }}
+    {{ displayValue }}
   </button>
 
   <ng-template #actionControl>
@@ -28,14 +29,30 @@
 
   <span *ngIf="trailingIcon" class="material-symbols-rounded tdx-field-control__trailing" aria-hidden="true">{{ trailingIcon }}</span>
 
-  <div *ngIf="options.length && isOpen" class="tdx-field-control__menu" role="listbox" [style.width.px]="menuWidth" [attr.aria-label]="ariaLabel || label" (click)="$event.stopPropagation()">
-    <button
-      *ngFor="let option of options"
-      type="button"
-      role="option"
-      [class.is-selected]="option.value === value"
-      [attr.aria-selected]="option.value === value"
-      (click)="updateValue(option.value)"
-    >{{ option.label }}</button>
+  <div
+    *ngIf="options.length && isOpen"
+    class="tdx-field-control__menu"
+    [class.tdx-field-control__menu--checkboxes]="multiple"
+    role="listbox"
+    [attr.aria-multiselectable]="multiple || null"
+    [style.width.px]="fluid ? null : menuWidth"
+    [attr.aria-label]="ariaLabel || label"
+    (click)="$event.stopPropagation()"
+  >
+    <ng-container *ngFor="let option of options">
+      <label *ngIf="multiple; else singleOption" class="tdx-field-control__checkbox-option" role="option" [class.is-selected]="isSelected(option.value)" [attr.aria-selected]="isSelected(option.value)">
+        <input type="checkbox" [name]="name" [value]="option.value" [checked]="isSelected(option.value)" (change)="toggleValue(option.value)">
+        <span>{{ option.label }}</span>
+      </label>
+      <ng-template #singleOption>
+        <button
+          type="button"
+          role="option"
+          [class.is-selected]="isSelected(option.value)"
+          [attr.aria-selected]="isSelected(option.value)"
+          (click)="updateValue(option.value)"
+        >{{ option.label }}</button>
+      </ng-template>
+    </ng-container>
   </div>
 </div>

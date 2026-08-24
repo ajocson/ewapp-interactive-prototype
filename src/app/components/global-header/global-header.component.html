@@ -16,12 +16,13 @@
 
   <div class="global-header__actions">
     <div class="global-header__search">
-      <lam-icon-button
-        icon="search"
-        label="Global search"
-        tooltip="ASM Search"
-        emphasis="default"
-        tooltipPosition="bottom"
+      <app-button
+        label="Search"
+        ariaLabel="Search"
+        leftIcon="search"
+        [filledIcons]="true"
+        [variant]="buttonVariant.Subtle"
+        [size]="buttonSize.Small"
       />
     </div>
 

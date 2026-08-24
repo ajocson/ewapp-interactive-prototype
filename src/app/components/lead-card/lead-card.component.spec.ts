@@ -12,11 +12,14 @@ describe('LeadCardComponent', () => {
     fixture.componentRef.setInput('lead', {
       id: '1',
       name: 'John Mark Doe',
+      gender: 'Male',
       createdAt: 'Created Feb/01/2026 · 3:00 PM',
       createdAtTimestamp: new Date(2026, 1, 1, 15).getTime(),
       leadType: 'Inactive',
       aging: '1d',
       source: 'Referral',
+      referrer: 'Olivia Martinez',
+      productInterested: 'Dream Builder',
       tags: [{ label: 'New Lead', tone: 'primary' }]
     });
     fixture.detectChanges();
@@ -29,6 +32,19 @@ describe('LeadCardComponent', () => {
     expect(emitted).toHaveBeenCalledWith(fixture.componentInstance.lead);
   });
 
+  it('prefixes card names with the gender-appropriate title', () => {
+    expect(fixture.nativeElement.querySelector('strong').textContent.trim()).toBe('Mr. John Mark Doe');
+
+    fixture.componentRef.setInput('lead', {
+      ...fixture.componentInstance.lead,
+      name: 'Sarah Ann Thompson',
+      gender: 'Female'
+    });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('strong').textContent.trim()).toBe('Ms. Sarah Ann Thompson');
+  });
+
   it('uses the danger tag treatment for a dropped lead', () => {
     fixture.componentRef.setInput('lead', {
       ...fixture.componentInstance.lead,
@@ -39,5 +55,30 @@ describe('LeadCardComponent', () => {
     expect(fixture.nativeElement.querySelector('.tdx-tag--danger').textContent).toContain(
       'Drop Lead'
     );
+  });
+
+  it('uses red metadata text for the dropped lead state', () => {
+    fixture.componentRef.setInput('lead', {
+      ...fixture.componentInstance.lead,
+      leadType: 'Dropped'
+    });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.lead-card__state--danger').textContent).toContain('Dropped');
+  });
+
+  it('hides appointment schedule tags while a lead is parked or dropped', () => {
+    fixture.componentRef.setInput('lead', {
+      ...fixture.componentInstance.lead,
+      leadType: 'Parked',
+      tags: [
+        { label: 'Appointment Set', tone: 'success' },
+        { label: 'Aug 24, 2026 · 3:00-3:30 PM', tone: 'info' }
+      ]
+    });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.lead-card__tags').textContent).toContain('Appointment Set');
+    expect(fixture.nativeElement.querySelector('.lead-card__tags').textContent).not.toContain('Aug 24, 2026');
   });
 });

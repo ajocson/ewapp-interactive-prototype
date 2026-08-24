@@ -10,10 +10,11 @@ import {
 } from '@angular/core';
 
 import { LeadBoardData, LeadCardData } from '../../lead-board.model';
+import { TdxButtonSize, TdxButtonVariant } from '../../shared/components/button/button.model';
+import { TdxFieldControlOption } from '../../shared/components/field-control/field-control.component';
 import {
-  BoardLeadTypeFilter,
+  BoardLeadStateFilter,
   BoardSortOption,
-  BoardStatusFilter,
   EMPTY_LEAD_BOARD_FILTERS,
   LeadBoardFilters
 } from './lead-board-filter.model';
@@ -27,12 +28,22 @@ import {
 })
 export class LeadBoardComponent {
   @Input({ required: true }) board!: LeadBoardData;
+  @Input() highlightedLeadId: string | null = null;
   @Output() leadSelected = new EventEmitter<LeadCardData>();
 
   @ViewChild('searchInput') private searchInput?: ElementRef<HTMLInputElement>;
 
-  readonly statusOptions: readonly Exclude<BoardStatusFilter, null>[] = ['Parked', 'Drop Lead'];
-  readonly leadTypeOptions: readonly Exclude<BoardLeadTypeFilter, null>[] = ['Active', 'Inactive'];
+  readonly buttonVariant = TdxButtonVariant;
+  readonly buttonSize = TdxButtonSize;
+  readonly leadStateOptions: readonly TdxFieldControlOption[] = [
+    { label: 'All', value: 'All' },
+    { label: 'Active', value: 'Active' },
+    { label: 'Dropped', value: 'Dropped' },
+    { label: 'Inactive', value: 'Inactive' },
+    { label: 'Parked', value: 'Parked' },
+    { label: 'Re-endorsed', value: 'Re-endorsed' },
+    { label: 'Reactivated', value: 'Reactivated' }
+  ];
   readonly sortOptions: readonly { value: Exclude<BoardSortOption, null>; label: string }[] = [
     { value: 'recent', label: 'Recently Created' },
     { value: 'oldest', label: 'Oldest Created' },
@@ -43,8 +54,8 @@ export class LeadBoardComponent {
   isSearchOpen = false;
   isFilterOpen = false;
   searchTerm = '';
-  appliedFilters: LeadBoardFilters = { ...EMPTY_LEAD_BOARD_FILTERS };
-  draftFilters: LeadBoardFilters = { ...EMPTY_LEAD_BOARD_FILTERS };
+  appliedFilters: LeadBoardFilters = this.emptyFilters();
+  draftFilters: LeadBoardFilters = this.emptyFilters();
 
   constructor(private readonly elementRef: ElementRef<HTMLElement>) {}
 
@@ -54,17 +65,16 @@ export class LeadBoardComponent {
     let leads = this.board.leads.filter((lead) => {
       const normalizedName = lead.name.toLocaleLowerCase();
       const matchesSearch = searchTerms.every((term) => normalizedName.includes(term));
-      const matchesStatus =
-        !this.appliedFilters.status || lead.tags.some((tag) => tag.label === this.appliedFilters.status);
-      const matchesLeadType =
-        !this.appliedFilters.leadType || lead.leadType === this.appliedFilters.leadType;
+      const matchesLeadState =
+        !this.appliedFilters.leadStates.length ||
+        this.appliedFilters.leadStates.includes(lead.leadType as BoardLeadStateFilter);
 
-      return matchesSearch && matchesStatus && matchesLeadType;
+      return matchesSearch && matchesLeadState;
     });
 
     switch (this.appliedFilters.sort) {
       case 'recent':
-        leads = [...leads].sort((first, second) => second.createdAtTimestamp - first.createdAtTimestamp);
+        leads = [...leads].sort((first, second) => this.activityTimestamp(second) - this.activityTimestamp(first));
         break;
       case 'oldest':
         leads = [...leads].sort((first, second) => first.createdAtTimestamp - second.createdAtTimestamp);
@@ -114,29 +124,23 @@ export class LeadBoardComponent {
     }
   }
 
-  toggleStatus(status: Exclude<BoardStatusFilter, null>): void {
+  updateLeadStates(values: readonly string[]): void {
+    const leadStates = values.filter((value): value is BoardLeadStateFilter => value !== 'All');
     this.draftFilters = {
       ...this.draftFilters,
-      status: this.draftFilters.status === status ? null : status,
-    };
-  }
-
-  toggleLeadType(leadType: Exclude<BoardLeadTypeFilter, null>): void {
-    this.draftFilters = {
-      ...this.draftFilters,
-      leadType: this.draftFilters.leadType === leadType ? null : leadType,
+      leadStates
     };
   }
 
   toggleSort(sort: Exclude<BoardSortOption, null>): void {
     this.draftFilters = {
       ...this.draftFilters,
-      sort: this.draftFilters.sort === sort ? null : sort,
+      sort,
     };
   }
 
   clearDraftFilters(): void {
-    this.draftFilters = { ...EMPTY_LEAD_BOARD_FILTERS };
+    this.draftFilters = this.emptyFilters();
   }
 
   applyFilters(): void {
@@ -144,7 +148,7 @@ export class LeadBoardComponent {
       return;
     }
 
-    this.appliedFilters = { ...this.draftFilters };
+    this.appliedFilters = { ...this.draftFilters, leadStates: [...this.draftFilters.leadStates] };
     this.isFilterOpen = false;
   }
 
@@ -173,10 +177,20 @@ export class LeadBoardComponent {
   }
 
   private hasFilters(filters: LeadBoardFilters): boolean {
-    return Boolean(filters.status || filters.leadType || filters.sort);
+    return Boolean(
+      filters.leadStates.length || (filters.sort !== null && filters.sort !== EMPTY_LEAD_BOARD_FILTERS.sort)
+    );
+  }
+
+  private activityTimestamp(lead: LeadCardData): number {
+    return lead.lastActivityTimestamp ?? lead.createdAtTimestamp;
   }
 
   private filtersMatch(first: LeadBoardFilters, second: LeadBoardFilters): boolean {
-    return first.status === second.status && first.leadType === second.leadType && first.sort === second.sort;
+    return first.leadStates.join('|') === second.leadStates.join('|') && first.sort === second.sort;
+  }
+
+  private emptyFilters(): LeadBoardFilters {
+    return { ...EMPTY_LEAD_BOARD_FILTERS, leadStates: [] };
   }
 }

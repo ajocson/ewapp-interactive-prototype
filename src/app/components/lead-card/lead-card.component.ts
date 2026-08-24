@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
-import { LeadCardData } from '../../lead-board.model';
+import { LeadCardData, leadDisplayName } from '../../lead-board.model';
 import { TagTone } from '../../lead-board.model';
 import { TdxTagEmphasis, TdxTagVariant } from '../../shared/components/tag/tag.model';
 
@@ -13,9 +13,20 @@ import { TdxTagEmphasis, TdxTagVariant } from '../../shared/components/tag/tag.m
 })
 export class LeadCardComponent {
   @Input({ required: true }) lead!: LeadCardData;
+  @Input() highlighted = false;
   @Output() selected = new EventEmitter<LeadCardData>();
 
   readonly TdxTagEmphasis = TdxTagEmphasis;
+
+  get displayName(): string {
+    return leadDisplayName(this.lead);
+  }
+
+  get visibleTags() {
+    return this.lead.leadType === 'Parked' || this.lead.leadType === 'Dropped'
+      ? this.lead.tags.filter((tag) => tag.tone !== 'info')
+      : this.lead.tags;
+  }
 
   trackTag(index: number): number {
     return index;

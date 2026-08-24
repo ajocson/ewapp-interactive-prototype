@@ -1,0 +1,95 @@
+:host {
+  display: block;
+  padding-bottom: var(--scheduled-activity-card-shell-padding-bottom);
+}
+
+.scheduled-activity-card {
+  overflow: hidden;
+  border: var(--scheduled-activity-card-border-width) solid var(--scheduled-activity-card-border);
+  border-left: var(--scheduled-activity-card-accent-width) solid var(--scheduled-activity-card-accent);
+  border-radius: var(--scheduled-activity-card-radius);
+  background: var(--scheduled-activity-card-bg);
+  color: var(--scheduled-activity-card-text);
+}
+
+.scheduled-activity-card__body {
+  display: flex;
+  min-height: var(--scheduled-activity-card-body-min-height);
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--scheduled-activity-card-content-gap);
+  padding: var(--scheduled-activity-card-padding-y) var(--scheduled-activity-card-padding-x);
+}
+
+.scheduled-activity-card__details {
+  display: flex;
+  min-width: var(--space-none);
+  flex-direction: column;
+  gap: var(--scheduled-activity-card-copy-gap);
+}
+
+.scheduled-activity-card__details strong {
+  font-size: var(--paragraph-sm-text-size);
+  line-height: var(--paragraph-sm-line-height);
+}
+
+.scheduled-activity-card__date-time {
+  display: flex;
+  align-items: center;
+  gap: var(--scheduled-activity-card-date-gap);
+  color: var(--scheduled-activity-card-secondary-text);
+  font-size: var(--caption-sm-text-size);
+  line-height: var(--caption-sm-line-height);
+  white-space: nowrap;
+}
+
+.scheduled-activity-card__divider {
+  width: var(--border-width-xs-1);
+  height: var(--scheduled-activity-card-divider-height);
+  flex: none;
+  background: var(--scheduled-activity-card-divider);
+}
+
+.scheduled-activity-card__actions {
+  display: flex;
+  min-height: var(--scheduled-activity-card-actions-min-height);
+  align-items: center;
+  gap: var(--scheduled-activity-card-action-gap);
+  padding: var(--scheduled-activity-card-action-padding-y) var(--scheduled-activity-card-padding-x);
+  border-top: var(--scheduled-activity-card-border-width) solid var(--scheduled-activity-card-divider);
+}
+
+.scheduled-activity-card__actions button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-xs);
+  padding: var(--space-none);
+  border: var(--border-width-none);
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--scheduled-activity-card-action-text);
+  font-size: var(--caption-text-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--caption-line-height);
+  cursor: pointer;
+  transition: background var(--motion-duration-fast) var(--motion-easing-standard), color var(--motion-duration-fast) var(--motion-easing-standard);
+}
+
+.scheduled-activity-card__actions button:hover {
+  background: var(--scheduled-activity-card-action-hover);
+}
+
+.scheduled-activity-card__actions button:active {
+  background: var(--scheduled-activity-card-action-pressed);
+}
+
+.scheduled-activity-card__actions button:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.scheduled-activity-card__actions .material-symbols-rounded {
+  font-size: var(--icon-xl);
+}

@@ -13,7 +13,12 @@ describe('GlobalHeaderComponent', () => {
   });
 
   it('renders the shared LCAM actions and profile', () => {
-    expect(fixture.nativeElement.querySelector('[aria-label="Global search"]')).not.toBeNull();
+    const searchButton = fixture.nativeElement.querySelector('[aria-label="Search"]') as HTMLButtonElement;
+    expect(searchButton).not.toBeNull();
+    expect(searchButton.textContent).toContain('Search');
+    expect(searchButton.classList.contains('tdx-button--subtle')).toBe(true);
+    expect(searchButton.classList.contains('tdx-button--small')).toBe(true);
+    expect(searchButton.classList.contains('tdx-button--filled-icons')).toBe(true);
     expect(fixture.nativeElement.querySelector('[aria-label="Notifications"]')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('[aria-label="Open EA profile"]')?.textContent).toBe('EA');
   });

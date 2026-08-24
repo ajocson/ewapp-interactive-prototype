@@ -13,6 +13,7 @@
 .tdx-button:disabled { cursor: not-allowed; opacity: var(--button-disabled-opacity); }
 .tdx-button__label { display: inline-flex; padding-inline: var(--button-icon-gap-xs); }
 .tdx-button__icon { display: inline-flex; width: var(--button-icon-size); height: var(--button-icon-size); flex: 0 0 auto; place-content: center; font-size: var(--button-icon-size); line-height: 1; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+.tdx-button--filled-icons .tdx-button__icon { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
 .tdx-button__loading { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xs); }
 .tdx-button__loading span { width: var(--space-xs); height: var(--space-xs); border-radius: var(--radius-round); background: currentColor; animation: tdx-button-loading-dot 900ms ease-in-out infinite; }
 .tdx-button__loading span:nth-child(2) { animation-delay: 150ms; }

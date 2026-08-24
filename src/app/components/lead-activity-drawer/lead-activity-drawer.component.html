@@ -3,89 +3,313 @@
 <aside id="lead-activity-drawer" class="lead-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
   <header>
     <div class="drawer-title-row">
-      <h2 id="drawer-title">Mr. {{ lead.name }}</h2>
+      <h2 id="drawer-title">{{ displayName }}</h2>
       <div class="drawer-header-actions">
         <lam-icon-button icon="close" label="Close drawer" size="icon" interactionBackground="none" [showTooltip]="false" (activated)="closed.emit()" />
       </div>
     </div>
     <div class="drawer-status">
       <app-tag [label]="statusTag" [variant]="statusVariant" [emphasis]="tagEmphasis.Subtle" />
-      <small><span class="material-symbols-rounded" aria-hidden="true">person</span>Active</small>
+      <small [class.drawer-status__state--danger]="lead.leadType === 'Dropped'"><span class="material-symbols-rounded" aria-hidden="true">person</span>{{ lead.leadType }}</small>
       <small><span class="material-symbols-rounded" aria-hidden="true">schedule</span>1 day</small>
     </div>
   </header>
 
-  <app-tab-group [tabs]="tabs" [activeId]="activeTab" ariaLabel="Lead activity sections" (activeIdChange)="activeTab = $event" />
+  <app-tab-group [tabs]="tabs" [activeId]="activeTab" ariaLabel="Lead activity sections" (activeIdChange)="activeTab = $event; scheduling = false; rescheduling = false; cancellingAppointment = false; followUpRecording = false" />
 
   <div class="drawer-scroll">
-    <section *ngIf="activeTab === 'overview'" class="drawer-lead-info">
-      <dl class="drawer-details">
-        <div><dt>Birthdate</dt><dd>January 05, 1989</dd></div>
-        <div><dt>Gender</dt><dd>Male</dd></div>
-        <div><dt>Email</dt><dd>client@email.com</dd></div>
-        <div><dt>Mobile Number</dt><dd>+63 9226789012</dd></div>
-        <div><dt>Referrer Name</dt><dd>Maxwell Anderson</dd></div>
-        <div><dt>Referrer ID</dt><dd>100234</dd></div>
-        <div><dt>Source of Lead</dt><dd>Leads from store</dd></div>
-        <div><dt>EWB Client Financial Segmentation</dt><dd>Mid</dd></div>
-        <div><dt>Store/Branch Assignment</dt><dd>595 THE FORT - BGC CORPORATE CENTER</dd></div>
-        <div><dt>Store/Branch ID</dt><dd>RBG0380</dd></div>
-      </dl>
+    <ng-container *ngIf="activeTab === 'overview'">
+      <section class="drawer-lead-info" [class.drawer-lead-info--action-open]="actionMode || cancellingAppointment">
+        <dl class="drawer-details">
+          <div><dt>Birthdate</dt><dd>January 05, 1989</dd></div>
+          <div><dt>Gender</dt><dd>{{ lead.gender }}</dd></div>
+          <div><dt>Email</dt><dd>client@email.com</dd></div>
+          <div><dt>Mobile Number</dt><dd>+63 9226789012</dd></div>
+          <div><dt>Product Interested</dt><dd>{{ lead.productInterested }}</dd></div>
+          <div><dt>EWB Client Financial Segmentation</dt><dd>Mid</dd></div>
+          <div><dt>Source of Lead</dt><dd>{{ lead.source }}</dd></div>
+          <div><dt>Referrer Name</dt><dd>{{ lead.referrer }}</dd></div>
+          <div><dt>Referrer ID</dt><dd>100234</dd></div>
+          <div><dt>Store/Branch ID</dt><dd>RBG0380</dd></div>
+          <div class="drawer-details__wide"><dt>Store/Branch Assignment</dt><dd>595 THE FORT - BGC CORPORATE CENTER</dd></div>
+        </dl>
 
-      <div class="drawer-lead-actions">
-        <app-button
-          class="drawer-full-button"
-          [label]="isContacted ? 'Generate Full Proposal' : 'Generate Draft SI'"
-          [variant]="buttonVariant.Primary"
-          [emphasis]="buttonEmphasis.Outline"
-          [size]="buttonSize.Small"
-          (clicked)="requestPrimaryAction()"
-        />
-        <app-button class="drawer-edit" label="Edit Lead Information" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Transparent" [size]="buttonSize.Small" />
-      </div>
-    </section>
+        <div *ngIf="!isLeadPaused" class="drawer-lead-actions">
+          <app-button
+            class="drawer-full-button"
+            [label]="isContacted || isAppointmentSet || isMeeting ? 'Generate Full Proposal' : 'Generate Draft SI'"
+            [variant]="buttonVariant.Primary"
+            [emphasis]="buttonEmphasis.Outline"
+            [size]="buttonSize.Small"
+            (clicked)="requestPrimaryAction()"
+          />
+          <app-button class="drawer-edit" label="Edit Lead Information" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Transparent" [size]="buttonSize.Small" />
+        </div>
+      </section>
 
-    <section *ngIf="activeTab === 'overview'" class="drawer-contact" [class.drawer-contact--contacted]="isContacted">
-      <header>
-        <h3>Before you continue</h3>
-        <p>Complete the remaining steps before starting the application.</p>
-      </header>
-      <app-stepper [steps]="activitySteps" [currentIndex]="isContacted ? 1 : 0" orientation="horizontal" />
+      <section *ngIf="actionMode" class="drawer-state-confirmation" [attr.aria-labelledby]="actionMode + '-lead-title'">
+        <div class="drawer-state-confirmation__content">
+          <img class="drawer-state-confirmation__icon" [src]="actionMode === 'park' ? 'assets/icons/lead-parked.svg' : 'assets/icons/lead-dropped.svg'" alt="" aria-hidden="true" />
+          <div class="drawer-state-confirmation__copy">
+            <h3 [id]="actionMode + '-lead-title'">{{ actionMode === 'park' ? 'Park Lead' : 'Drop Lead' }}</h3>
+            <p>{{ actionMode === 'park' ? 'This lead will be parked and its activities will be paused.' : 'This lead will be dropped and no activities can be recorded.' }}</p>
+          </div>
+        </div>
 
-      <ng-container *ngIf="!isContacted; else appointmentActions">
-      <label>Notes (Optional)
-        <textarea rows="4" placeholder="Add notes about your conversation"></textarea>
-      </label>
-      <app-button
-        class="drawer-contact__button"
-        label="Mark as Contacted"
-        [variant]="buttonVariant.Primary"
-        [size]="buttonSize.Small"
-        (clicked)="markAsContacted()"
-      />
+        <label *ngIf="actionMode === 'park'" class="drawer-notes">
+          <span>Notes</span>
+          <textarea rows="4" [(ngModel)]="parkNotes" placeholder="Add notes or important details"></textarea>
+        </label>
+
+        <div *ngIf="actionMode === 'drop'" class="drawer-drop-fields">
+          <label class="drawer-drop-reason">
+            <span>Reason for Dropping</span>
+            <app-field-control
+              label="Select a reason"
+              ariaLabel="Reason for Dropping"
+              [value]="dropReason"
+              [options]="dropReasonOptions"
+              trailingIcon="keyboard_arrow_down"
+              [fluid]="true"
+              (valueChange)="dropReasonChanged($event)"
+            />
+          </label>
+
+          <label *ngIf="dropReason === 'Others'" class="drawer-notes drawer-drop-other">
+            <span>Others</span>
+            <textarea rows="3" [(ngModel)]="dropOtherReason" placeholder="Add reason for dropping"></textarea>
+          </label>
+        </div>
+
+        <footer>
+          <app-button class="drawer-action-button" label="Cancel" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="cancelLeadAction()" />
+          <app-button class="drawer-action-button" [label]="actionMode === 'park' ? 'Park Lead' : 'Drop Lead'" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" [disabled]="actionMode === 'drop' && isDropActionDisabled" (clicked)="confirmLeadAction()" />
+        </footer>
+      </section>
+
+      <section *ngIf="isLeadPaused && !actionMode" class="drawer-state-summary" aria-labelledby="paused-lead-title">
+        <img class="drawer-state-summary__icon" [src]="pausedStateIcon" alt="" aria-hidden="true" />
+        <div class="drawer-state-summary__copy">
+          <h3 id="paused-lead-title">{{ pausedStateTitle }}</h3>
+          <p>{{ pausedStateDescription }}</p>
+        </div>
+        <app-button class="drawer-state-summary__button" label="Reactivate Lead" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="reactivateLead()" />
+      </section>
+
+      <ng-container *ngIf="!actionMode && !isLeadPaused">
+
+      <section *ngIf="scheduling; else appointmentActionState" class="drawer-scheduler" aria-labelledby="scheduler-title">
+        <header class="drawer-scheduler__title">
+          <span class="drawer-scheduler__icon material-symbols-rounded" aria-hidden="true">calendar_month</span>
+          <h3 id="scheduler-title">{{ schedulerTitle }}</h3>
+        </header>
+
+        <div class="drawer-scheduler__fields">
+          <label>
+            <span>Date</span>
+            <input type="date" [min]="minimumDate" [(ngModel)]="selectedDate" (ngModelChange)="dateChanged()" />
+          </label>
+          <label>
+            <span>Start Time</span>
+            <select [(ngModel)]="selectedStartMinutes" (ngModelChange)="startTimeChanged()">
+              <option *ngFor="let option of startTimeOptions" [ngValue]="option.value">{{ option.label }}</option>
+            </select>
+          </label>
+          <label>
+            <span>End Time</span>
+            <select [(ngModel)]="selectedEndMinutes">
+              <option *ngFor="let option of endTimeOptions" [ngValue]="option.value">{{ option.label }}</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="drawer-notes">
+          <span>Notes (Optional)</span>
+          <textarea rows="3" [(ngModel)]="appointmentNotes" [placeholder]="schedulerNotesPlaceholder"></textarea>
+        </label>
+
+        <footer class="drawer-scheduler__actions">
+          <app-button class="drawer-action-button" label="Cancel" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="cancelScheduler()" />
+          <app-button class="drawer-action-button" [label]="schedulerTitle" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="scheduleAppointment()" />
+        </footer>
+      </section>
+
+      <ng-template #appointmentActionState>
+        <section *ngIf="cancellingAppointment; else activityFlow" class="drawer-appointment-action drawer-appointment-action--cancel" aria-labelledby="cancel-appointment-title">
+          <div class="drawer-appointment-action__content">
+            <span class="drawer-appointment-action__icon material-symbols-rounded" aria-hidden="true">delete</span>
+            <h3 id="cancel-appointment-title">Cancel Appointment</h3>
+          </div>
+
+          <label class="drawer-notes">
+            <span>Notes (Optional)</span>
+            <textarea rows="3" [(ngModel)]="appointmentNotes" placeholder="Add notes about your conversation"></textarea>
+          </label>
+
+          <footer>
+            <app-button class="drawer-action-button" label="Cancel" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="closeCancelAppointment()" />
+            <app-button class="drawer-action-button" label="Cancel Appointment" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="confirmCancelAppointment()" />
+          </footer>
+        </section>
+      </ng-template>
+
+      <ng-template #activityFlow>
+        <section class="drawer-contact" [class.drawer-contact--contacted]="isContacted || isAppointmentSet || isMeeting">
+          <header *ngIf="!followUpRecording">
+            <h3>Before you continue</h3>
+            <p>Complete the remaining steps before starting the application.</p>
+          </header>
+          <app-stepper *ngIf="!followUpRecording" [steps]="activitySteps" [currentIndex]="currentStepIndex" orientation="horizontal" />
+
+          <ng-container *ngIf="!isContacted && !isAppointmentSet && !isMeeting">
+            <label class="drawer-notes">
+              <span>Notes (Optional)</span>
+              <textarea rows="4" [(ngModel)]="activityNotes" placeholder="Add notes about your conversation"></textarea>
+            </label>
+            <app-button class="drawer-contact__button" label="Mark as Contacted" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="markAsContacted()" />
+          </ng-container>
+
+          <ng-container *ngIf="isContacted">
+            <app-section-message description="Schedule an appointment or indicate if you’re unable to set one." />
+            <div class="drawer-appointments">
+              <h4>Appointments</h4>
+              <lam-action-card title="Schedule Appointment" description="Set a date and time for your client appointment." icon="calendar_month" tone="success" (click)="openScheduler()" />
+              <lam-action-card title="Unable to Set Appointment" description="An appointment could not be scheduled with the client." icon="event_busy" tone="neutral" />
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="isAppointmentSet && lead.appointment">
+            <app-section-message description="Record your appointment result." />
+            <app-scheduled-activity-card
+              [date]="lead.appointment.dateLabel"
+              [time]="lead.appointment.timeLabel"
+              (reschedule)="openRescheduler()"
+              (cancelAppointment)="openCancelAppointment()"
+            />
+            <label class="drawer-notes">
+              <span>Notes (Optional)</span>
+              <textarea rows="4" [(ngModel)]="activityNotes" placeholder="Add notes about your conversation"></textarea>
+            </label>
+            <app-button class="drawer-contact__button" label="Appointment Completed" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="completeAppointment()" />
+          </ng-container>
+
+          <ng-container *ngIf="isAppointmentSet && !lead.appointment">
+            <app-section-message description="Schedule an appointment or indicate if you’re unable to set one." />
+            <div class="drawer-appointments">
+              <h4>Appointments</h4>
+              <lam-action-card title="Schedule Appointment" description="Set a date and time for your client appointment." icon="calendar_month" tone="success" (activated)="openScheduler()" />
+              <lam-action-card title="Unable to Set Appointment" description="An appointment could not be scheduled with the client." icon="event_busy" tone="neutral" />
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="isMeeting && !followUpRecording">
+            <div class="drawer-meeting-actions">
+              <lam-action-card title="Proceed to Application" description="Start the client’s application process." icon="contract_edit" tone="success" />
+              <lam-action-card title="For Follow-up" description="Mark this lead for follow-up and add any relevant notes." icon="chat_add_on" tone="brand" (activated)="openFollowUpForm()" />
+            </div>
+          </ng-container>
+
+          <section *ngIf="isMeeting && followUpRecording" class="drawer-follow-up" aria-labelledby="follow-up-title">
+            <header>
+              <span class="drawer-follow-up__icon material-symbols-rounded" aria-hidden="true">chat_add_on</span>
+              <h3 id="follow-up-title">For Follow-up</h3>
+            </header>
+            <label class="drawer-notes">
+              <span>Notes (Optional)</span>
+              <textarea rows="4" [(ngModel)]="followUpNotes" placeholder="Add notes or important details"></textarea>
+            </label>
+            <footer>
+              <app-button class="drawer-action-button" label="Cancel" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="cancelFollowUpForm()" />
+              <app-button class="drawer-action-button" label="Save" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="saveFollowUp()" />
+            </footer>
+          </section>
+        </section>
+      </ng-template>
+
+      <section *ngIf="!scheduling && !cancellingAppointment && !followUpRecording" class="drawer-actions">
+        <h3>Lead Actions</h3>
+        <div>
+          <app-button class="drawer-action-button" label="Park Lead" leftIcon="pause_circle" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="openLeadAction('park')" />
+          <app-button class="drawer-action-button" label="Drop Lead" leftIcon="stop_circle" [variant]="buttonVariant.Danger" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="openLeadAction('drop')" />
+        </div>
+      </section>
+      </ng-container>
+    </ng-container>
+
+    <section *ngIf="activeTab === 'timeline'" class="drawer-timeline" aria-live="polite">
+      <ng-container *ngIf="hasActivities; else emptyTimeline">
+        <div *ngIf="salesActivities.length" class="activity-group">
+          <h3>Sales Activities</h3>
+          <ol>
+            <li *ngFor="let activity of salesActivities; trackBy: trackActivity">
+              <span class="activity-group__marker material-symbols-rounded" aria-hidden="true">check_circle</span>
+              <div class="activity-group__content">
+                <span class="activity-group__label">{{ activity.label }}</span>
+                <span class="activity-group__date"><span class="material-symbols-rounded" aria-hidden="true">calendar_month</span>{{ activity.dateLabel }}<span class="activity-group__divider" aria-hidden="true"></span><span class="material-symbols-rounded" aria-hidden="true">schedule</span>{{ activity.timeLabel }}</span>
+                <p *ngIf="activity.notes">{{ activity.notes }}</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <div *ngIf="systemActivities.length" class="activity-group">
+          <h3>System Transactions</h3>
+          <ol>
+            <li *ngFor="let activity of systemActivities; trackBy: trackActivity">
+              <span class="activity-group__marker material-symbols-rounded" aria-hidden="true">check_circle</span>
+              <div class="activity-group__content">
+                <span class="activity-group__label">{{ activity.label }}</span>
+                <span class="activity-group__date"><span class="material-symbols-rounded" aria-hidden="true">calendar_month</span>{{ activity.dateLabel }}<span class="activity-group__divider" aria-hidden="true"></span><span class="material-symbols-rounded" aria-hidden="true">schedule</span>{{ activity.timeLabel }}</span>
+                <p *ngIf="activity.notes">{{ activity.notes }}</p>
+              </div>
+            </li>
+          </ol>
+        </div>
       </ng-container>
 
-      <ng-template #appointmentActions>
-        <app-section-message description="Schedule an appointment or indicate if you’re unable to set one." />
-        <div class="drawer-appointments">
-          <h4>Appointments</h4>
-          <lam-action-card title="Schedule Appointment" description="Set a date and time for your client appointment." icon="calendar_month" tone="success" />
-          <lam-action-card title="Unable to Set Appointment" description="An appointment could not be scheduled with the client." icon="event_busy" tone="neutral" />
+      <ng-template #emptyTimeline>
+        <div class="drawer-empty">
+          <span class="material-symbols-rounded" aria-hidden="true">history</span>
+          <p>No recorded activity yet.</p>
         </div>
       </ng-template>
     </section>
-
-    <section *ngIf="activeTab === 'overview'" class="drawer-actions">
-      <h3>Lead Actions</h3>
-      <div>
-        <app-button class="drawer-action-button" label="Park Lead" leftIcon="pause_circle" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" />
-        <app-button class="drawer-action-button" label="Drop Lead" leftIcon="stop_circle" [variant]="buttonVariant.Danger" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" />
-      </div>
-    </section>
-
-    <section *ngIf="activeTab === 'timeline'" class="drawer-empty" aria-live="polite">
-      <span class="material-symbols-rounded" aria-hidden="true">history</span>
-      <p>No recorded activity yet.</p>
-    </section>
   </div>
 </aside>
+
+<button
+  *ngIf="stateConfirmation"
+  type="button"
+  class="lead-state-modal__backdrop"
+  aria-label="Cancel lead state confirmation"
+  (click)="cancelStateConfirmation()"
+></button>
+
+<section
+  *ngIf="stateConfirmation"
+  class="lead-state-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="lead-state-modal-title"
+  aria-describedby="lead-state-modal-description"
+>
+  <div class="lead-state-modal__copy">
+    <h2 id="lead-state-modal-title">{{ stateConfirmationTitle }}</h2>
+    <p id="lead-state-modal-description">{{ stateConfirmationDescription }}</p>
+  </div>
+  <footer>
+    <app-button
+      label="Cancel"
+      [variant]="buttonVariant.Primary"
+      [emphasis]="buttonEmphasis.Outline"
+      [size]="buttonSize.Medium"
+      (clicked)="cancelStateConfirmation()"
+    />
+    <app-button
+      [label]="stateConfirmationActionLabel"
+      [variant]="buttonVariant.Primary"
+      [size]="buttonSize.Medium"
+      (clicked)="confirmStateChange()"
+    />
+  </footer>
+</section>

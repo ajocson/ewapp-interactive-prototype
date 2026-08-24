@@ -46,12 +46,11 @@
 }
 
 .filters__filter { position: relative; }
-.page-filter { position: absolute; z-index: var(--layer-popover); top: calc(100% + var(--space-xs)); right: var(--space-none); display: flex; width: 176px; min-height: 342px; flex-direction: column; gap: var(--space-xl); padding: var(--space-xl); border-radius: var(--radius-md); background: var(--surface-default); box-shadow: var(--board-filter-menu-shadow); }
+.filters__filter--active::after { position: absolute; z-index: 1; top: var(--board-filter-indicator-offset); right: var(--board-filter-indicator-offset); width: var(--board-filter-indicator-size); height: var(--board-filter-indicator-size); border-radius: var(--radius-round); background: var(--board-filter-indicator-bg); content: ''; pointer-events: none; }
+.page-filter { position: absolute; z-index: var(--layer-popover); top: calc(100% + var(--space-xs)); right: var(--space-none); box-sizing: border-box; display: flex; width: 176px; min-height: 414px; flex-direction: column; gap: var(--space-xl); padding: var(--space-xl); border-radius: var(--radius-md); background: var(--surface-default); box-shadow: var(--board-filter-menu-shadow); }
 .page-filter__field { display: flex; height: 56px; flex-direction: column; gap: var(--space-xs); color: var(--text-neutral-primary); font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
 .page-filter fieldset { display: flex; margin: var(--space-none); padding: var(--space-none); border: var(--border-width-none); flex-direction: column; gap: var(--space-none); }
-.page-filter legend { margin-bottom: var(--space-2xs); font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
-.page-filter fieldset label { display: flex; height: var(--space-3xl); align-items: center; gap: var(--space-xs); font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
-.page-filter input { width: 14px; height: 14px; margin: var(--space-none) var(--space-xs); accent-color: var(--color-purple-500); }
+.page-filter legend { margin-bottom: var(--space-2xs); padding: var(--space-none); color: var(--radio-text-default); font-size: var(--paragraph-sm-text-size); font-weight: var(--font-weight-regular); line-height: var(--paragraph-sm-line-height); }
 .page-filter footer { display: flex; gap: var(--space-md); }
 
 .board-viewport {

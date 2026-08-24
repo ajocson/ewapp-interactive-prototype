@@ -1,0 +1,24 @@
+<article class="scheduled-activity-card" [attr.aria-label]="title">
+  <div class="scheduled-activity-card__body">
+    <div class="scheduled-activity-card__details">
+      <strong>{{ title }}</strong>
+      <span class="scheduled-activity-card__date-time">
+        <span>{{ date }}</span>
+        <span class="scheduled-activity-card__divider" aria-hidden="true"></span>
+        <span>{{ time }}</span>
+      </span>
+    </div>
+    <app-tag [label]="status" [variant]="tagVariant" [emphasis]="tagEmphasis" />
+  </div>
+
+  <footer class="scheduled-activity-card__actions">
+    <button type="button" (click)="reschedule.emit()">
+      <span class="material-symbols-rounded" aria-hidden="true">schedule</span>
+      <span>Reschedule</span>
+    </button>
+    <button type="button" (click)="cancelAppointment.emit()">
+      <span class="material-symbols-rounded" aria-hidden="true">delete</span>
+      <span>Cancel Appointment</span>
+    </button>
+  </footer>
+</article>

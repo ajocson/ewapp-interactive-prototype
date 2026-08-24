@@ -55,4 +55,38 @@ describe('FieldControlComponent', () => {
     expect(fixture.nativeElement.querySelector('.tdx-field-control').classList).toContain('tdx-field-control--compact');
     expect((fixture.nativeElement.querySelector('.tdx-field-control__menu') as HTMLElement).style.width).toBe('204px');
   });
+
+  it('supports a fluid design-system field and menu', () => {
+    fixture.componentRef.setInput('fluid', true);
+    fixture.componentRef.setInput('options', [{ label: 'All', value: 'All' }]);
+    fixture.detectChanges();
+
+    const control = fixture.nativeElement.querySelector('.tdx-field-control') as HTMLElement;
+    expect(control.classList).toContain('tdx-field-control--fluid');
+    expect(control.style.width).toBe('');
+
+    (fixture.nativeElement.querySelector('.tdx-field-control__trigger') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect((fixture.nativeElement.querySelector('.tdx-field-control__menu') as HTMLElement).style.width).toBe('');
+  });
+
+  it('keeps a multi-select menu open and emits checkbox selections', () => {
+    const values: Array<readonly string[]> = [];
+    fixture.componentRef.setInput('multiple', true);
+    fixture.componentRef.setInput('selectedValues', ['All']);
+    fixture.componentRef.setInput('options', [
+      { label: 'All', value: 'All' },
+      { label: 'Parked', value: 'Parked' }
+    ]);
+    fixture.componentInstance.selectedValuesChange.subscribe((value) => values.push(value));
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('.tdx-field-control__trigger') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    const inputs = fixture.nativeElement.querySelectorAll('input[type="checkbox"]') as NodeListOf<HTMLInputElement>;
+    inputs[1].click();
+
+    expect(values).toEqual([['Parked']]);
+    expect(fixture.componentInstance.isOpen).toBe(true);
+  });
 });

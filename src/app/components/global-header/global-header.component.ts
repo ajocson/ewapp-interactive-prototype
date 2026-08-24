@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 import { AppNavigationStateService } from '../../shared/services/app-navigation-state.service';
+import { TdxButtonSize, TdxButtonVariant } from '../../shared/components/button/button.model';
 
 @Component({
   selector: 'lam-global-header',
@@ -10,5 +11,8 @@ import { AppNavigationStateService } from '../../shared/services/app-navigation-
   standalone: false
 })
 export class GlobalHeaderComponent {
+  readonly buttonSize = TdxButtonSize;
+  readonly buttonVariant = TdxButtonVariant;
+
   constructor(readonly navigation: AppNavigationStateService) {}
 }

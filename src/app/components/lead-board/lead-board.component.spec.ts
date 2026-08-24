@@ -14,21 +14,29 @@ describe('LeadBoardComponent', () => {
       {
         id: '1',
         name: 'John Mark Doe',
+        gender: 'Male',
         createdAt: 'Created Feb/02/2026 · 3:00 PM',
         createdAtTimestamp: new Date(2026, 1, 2, 15).getTime(),
         leadType: 'Active',
         aging: '1d',
         source: 'Referral',
+        referrer: 'Olivia Martinez',
+        productInterested: 'Dream Builder',
+        activities: [],
         tags: [{ label: 'SI Generated', tone: 'success' }]
       },
       {
         id: '2',
         name: 'David Robert Brown',
+        gender: 'Male',
         createdAt: 'Created Feb/01/2026 · 3:00 PM',
         createdAtTimestamp: new Date(2026, 1, 1, 15).getTime(),
-        leadType: 'Inactive',
+        leadType: 'Parked',
         aging: '1d',
         source: 'Event',
+        referrer: 'James Anderson',
+        productInterested: 'Dream Builder',
+        activities: [],
         tags: [
           { label: 'SI Generated', tone: 'success' },
           { label: 'Parked', tone: 'neutral' }
@@ -74,33 +82,48 @@ describe('LeadBoardComponent', () => {
     expect(fixture.nativeElement.querySelector('.lead-board__empty-state')).toBeNull();
   });
 
-  it('lets users deselect the active option in every filter group', () => {
+  it('uses the TDX checkbox dropdown for lead-state filters', () => {
     const component = fixture.componentInstance;
 
-    component.toggleStatus('Drop Lead');
-    component.toggleStatus('Drop Lead');
-    component.toggleLeadType('Inactive');
-    component.toggleLeadType('Inactive');
-    component.toggleSort('name-asc');
+    component.updateLeadStates(['Parked', 'Dropped']);
     component.toggleSort('name-asc');
 
     expect(component.draftFilters).toEqual({
-      status: null,
-      leadType: null,
-      sort: null,
+      leadStates: ['Parked', 'Dropped'],
+      sort: 'name-asc',
     });
+  });
+
+  it('defaults to Recently Created without marking the filter as active', () => {
+    const component = fixture.componentInstance;
+
+    expect(component.appliedFilters.sort).toBe('recent');
+    expect(component.draftFilters.sort).toBe('recent');
+    expect(component.hasAppliedFilters).toBe(false);
+    expect(component.visibleLeads.map((lead) => lead.name)).toEqual([
+      'John Mark Doe',
+      'David Robert Brown'
+    ]);
+
+    (fixture.nativeElement.querySelector('.lead-board__filter-control button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    const recentlyCreated = Array.from(
+      fixture.nativeElement.querySelectorAll('.lead-board__radio') as NodeListOf<HTMLLabelElement>
+    ).find((option) => option.textContent?.trim() === 'Recently Created');
+    expect((recentlyCreated?.querySelector('input') as HTMLInputElement).checked).toBe(true);
   });
 
   it('sorts leads by their actual creation timestamps', () => {
     const component = fixture.componentInstance;
 
-    component.appliedFilters = { status: null, leadType: null, sort: 'oldest' };
+    component.appliedFilters = { leadStates: [], sort: 'oldest' };
     expect(component.visibleLeads.map((lead) => lead.name)).toEqual([
       'David Robert Brown',
       'John Mark Doe'
     ]);
 
-    component.appliedFilters = { status: null, leadType: null, sort: 'recent' };
+    component.appliedFilters = { leadStates: [], sort: 'recent' };
     expect(component.visibleLeads.map((lead) => lead.name)).toEqual([
       'John Mark Doe',
       'David Robert Brown'
@@ -111,14 +134,20 @@ describe('LeadBoardComponent', () => {
     (fixture.nativeElement.querySelector('.lead-board__filter-control button') as HTMLButtonElement).click();
     fixture.detectChanges();
 
+    const stateTrigger = fixture.nativeElement.querySelector(
+      'button[aria-label="Filter by Lead State"]'
+    ) as HTMLButtonElement;
+    stateTrigger.click();
+    fixture.detectChanges();
+
     const parkedOption = Array.from(
-      fixture.nativeElement.querySelectorAll('.lead-board__radio') as NodeListOf<HTMLLabelElement>
+      fixture.nativeElement.querySelectorAll('.tdx-field-control__checkbox-option') as NodeListOf<HTMLLabelElement>
     ).find((option) => option.textContent?.trim() === 'Parked');
     (parkedOption?.querySelector('input') as HTMLInputElement).click();
     fixture.detectChanges();
 
     const applyButton = Array.from(
-      fixture.nativeElement.querySelectorAll('.lead-board__button') as NodeListOf<HTMLButtonElement>
+      fixture.nativeElement.querySelectorAll('.lead-board__filter-actions .tdx-button') as NodeListOf<HTMLButtonElement>
     ).find((button) => button.textContent?.trim() === 'Apply');
     applyButton?.click();
     fixture.detectChanges();

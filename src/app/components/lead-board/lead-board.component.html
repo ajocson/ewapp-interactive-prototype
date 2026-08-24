@@ -56,6 +56,7 @@
     <lam-lead-card
       *ngFor="let lead of visibleLeads; trackBy: trackLead"
       [lead]="lead"
+      [highlighted]="lead.id === highlightedLeadId"
       (selected)="leadSelected.emit($event)"
     />
   </div>
@@ -66,37 +67,27 @@
     aria-label="Filter and sort leads"
     (submit)="$event.preventDefault(); applyFilters()"
   >
-    <fieldset>
-      <legend>Filter by Status</legend>
-      <label *ngFor="let status of statusOptions" class="lead-board__radio">
-        <input
-          type="checkbox"
-          [name]="board.id + '-status-filter'"
-          [checked]="draftFilters.status === status"
-          (change)="toggleStatus(status)"
-        >
-        <span>{{ status }}</span>
-      </label>
-    </fieldset>
-
-    <fieldset>
-      <legend>Filter by Lead Type</legend>
-      <label *ngFor="let leadType of leadTypeOptions" class="lead-board__radio">
-        <input
-          type="checkbox"
-          [name]="board.id + '-lead-type-filter'"
-          [checked]="draftFilters.leadType === leadType"
-          (change)="toggleLeadType(leadType)"
-        >
-        <span>{{ leadType }}</span>
-      </label>
-    </fieldset>
+    <label class="lead-board__state-filter">
+      <span>Filter by Lead State</span>
+      <app-field-control
+        ariaLabel="Filter by Lead State"
+        [name]="board.id + '-lead-state-filter'"
+        [width]="159"
+        [menuWidth]="204"
+        [compact]="true"
+        [multiple]="true"
+        [options]="leadStateOptions"
+        [selectedValues]="draftFilters.leadStates.length ? draftFilters.leadStates : ['All']"
+        trailingIcon="keyboard_arrow_down"
+        (selectedValuesChange)="updateLeadStates($event)"
+      />
+    </label>
 
     <fieldset>
       <legend>Sort by</legend>
       <label *ngFor="let option of sortOptions" class="lead-board__radio">
         <input
-          type="checkbox"
+          type="radio"
           [name]="board.id + '-sort-filter'"
           [checked]="draftFilters.sort === option.value"
           (change)="toggleSort(option.value)"
@@ -106,12 +97,8 @@
     </fieldset>
 
     <div class="lead-board__filter-actions">
-      <button type="button" class="lead-board__button lead-board__button--subtle" [disabled]="!hasDraftFilters" (click)="clearDraftFilters()">
-        Clear all
-      </button>
-      <button type="submit" class="lead-board__button lead-board__button--primary" [disabled]="!canApplyFilters">
-        Apply
-      </button>
+      <app-button label="Reset" [variant]="buttonVariant.Subtle" [size]="buttonSize.Small" [disabled]="!hasDraftFilters" (clicked)="clearDraftFilters()" />
+      <app-button label="Apply" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" [disabled]="!canApplyFilters" (clicked)="applyFilters()" />
     </div>
   </form>
 </section>

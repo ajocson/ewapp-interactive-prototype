@@ -24,41 +24,68 @@
           [width]="112"
           (valueChange)="selectedSource = $event"
         />
-        <div class="filters__filter" (click)="$event.stopPropagation()">
+        <div
+          class="filters__filter"
+          [class.filters__filter--active]="filterHasAppliedValues"
+          (click)="$event.stopPropagation()"
+        >
           <tdx-field-control label="Filter" ariaLabel="Filter leads" leadingIcon="filter_alt" [width]="76" (activated)="toggleFilterMenu()" />
+          <span *ngIf="filterHasAppliedValues" class="visually-hidden" aria-live="polite">Active filters applied</span>
 
           <section *ngIf="filterMenuOpen" class="page-filter" aria-label="Filter leads">
             <div class="page-filter__field">
-              <span>Filter by Lead Status</span>
+              <span>Lead States</span>
               <tdx-field-control
-                ariaLabel="Filter by Lead Status"
-                [value]="pendingLeadStatus"
-                [options]="leadStatusControlOptions"
-                trailingIcon="keyboard_arrow_down"
-                [width]="144"
-                [menuWidth]="204"
-                [compact]="true"
-                (valueChange)="pendingLeadStatus = $event"
-              />
-            </div>
-            <div class="page-filter__field">
-              <span>Filter by Lead States</span>
-              <tdx-field-control
+                name="lead-states"
                 ariaLabel="Filter by Lead States"
-                [value]="pendingLeadState"
+                [selectedValues]="pendingLeadStates"
                 [options]="leadStateControlOptions"
                 trailingIcon="keyboard_arrow_down"
                 [width]="144"
                 [menuWidth]="204"
                 [compact]="true"
-                (valueChange)="pendingLeadState = $event"
+                [multiple]="true"
+                (selectedValuesChange)="pendingLeadStates = $event"
+              />
+            </div>
+            <div class="page-filter__field">
+              <span>Lead Status</span>
+              <tdx-field-control
+                name="lead-statuses"
+                ariaLabel="Filter by Lead Status"
+                [selectedValues]="pendingLeadStatuses"
+                [options]="leadStatusControlOptions"
+                trailingIcon="keyboard_arrow_down"
+                [width]="144"
+                [menuWidth]="204"
+                [compact]="true"
+                [multiple]="true"
+                (selectedValuesChange)="pendingLeadStatuses = $event"
+              />
+            </div>
+            <div class="page-filter__field">
+              <span>Referrer</span>
+              <tdx-field-control
+                ariaLabel="Filter by Referrer"
+                [value]="pendingReferrer"
+                [options]="referrerControlOptions"
+                trailingIcon="keyboard_arrow_down"
+                [width]="144"
+                [menuWidth]="204"
+                [compact]="true"
+                (valueChange)="pendingReferrer = $event"
               />
             </div>
             <fieldset>
               <legend>Sort by</legend>
-              <label *ngFor="let option of sortOptions">
-                <input type="radio" name="page-sort" [value]="option.value" [(ngModel)]="pendingSort">{{ option.label }}
-              </label>
+              <app-radio
+                *ngFor="let option of sortOptions"
+                name="page-sort"
+                [label]="option.label"
+                [value]="option.value"
+                [checked]="pendingSort === option.value"
+                (changed)="pendingSort = $event"
+              />
             </fieldset>
             <footer>
               <app-button label="Reset" [variant]="buttonVariant.Subtle" [size]="buttonSize.Small" [disabled]="!filterHasValues" (clicked)="resetPendingFilters()" />
@@ -73,6 +100,7 @@
           <lam-lead-board
             *ngFor="let board of filteredBoards; trackBy: trackBoard"
             [board]="board"
+            [highlightedLeadId]="highlightedLeadId"
             (leadSelected)="selectLead($event)"
           />
         </div>
