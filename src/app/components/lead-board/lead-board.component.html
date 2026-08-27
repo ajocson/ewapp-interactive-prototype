@@ -61,6 +61,7 @@
       *ngFor="let lead of visibleLeads; trackBy: trackLead"
       [lead]="lead"
       [highlighted]="lead.id === highlightedLeadId"
+      [showTatAging]="board.id !== 'lead'"
       (selected)="leadSelected.emit($event)"
     />
   </div>

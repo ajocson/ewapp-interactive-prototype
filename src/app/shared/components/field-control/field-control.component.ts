@@ -41,6 +41,7 @@ export class FieldControlComponent implements AfterViewInit, OnDestroy {
   @Input() trailingIcon = '';
   @Input() width = 112;
   @Input() menuWidth = 250;
+  @Input() menuFitContent = false;
   @Input() fluid = false;
   @Input() compact = false;
   @Input() multiple = false;
@@ -195,8 +196,13 @@ export class FieldControlComponent implements AfterViewInit, OnDestroy {
     const gutter = 8;
     const gap = 8;
     const controlRect = control.getBoundingClientRect();
+    const preferredWidth = this.fluid
+      ? controlRect.width
+      : this.menuFitContent
+        ? Math.ceil(menu.scrollWidth)
+        : this.menuWidth;
     const width = Math.min(
-      this.fluid ? controlRect.width : this.menuWidth,
+      preferredWidth,
       Math.max(0, viewport.innerWidth - gutter * 2)
     );
     const naturalHeight = Math.min(menu.scrollHeight || menu.offsetHeight, 624);

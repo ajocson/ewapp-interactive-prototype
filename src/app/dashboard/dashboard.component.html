@@ -55,6 +55,7 @@
                 [menuWidth]="204"
                 [compact]="true"
                 [multiple]="true"
+                [menuFitContent]="true"
                 (selectedValuesChange)="pendingLeadStates = $event"
               />
             </div>
@@ -70,6 +71,7 @@
                 [menuWidth]="204"
                 [compact]="true"
                 [multiple]="true"
+                [menuFitContent]="true"
                 (selectedValuesChange)="pendingLeadStatuses = $event"
               />
             </div>
@@ -98,6 +100,9 @@
                     [attr.aria-selected]="pendingReferrer === referrer"
                     (click)="selectReferrer(referrer); $event.stopPropagation()"
                   >{{ referrer }}</button>
+                </div>
+                <div *ngIf="hasNoReferrerResults" class="page-filter__referrer-options page-filter__referrer-options--empty" role="status">
+                  No results found
                 </div>
               </div>
             </div>

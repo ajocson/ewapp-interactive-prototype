@@ -73,6 +73,23 @@ describe('FieldControlComponent', () => {
     expect((fixture.nativeElement.querySelector('.tdx-field-control__menu') as HTMLElement).style.width).toBe('');
   });
 
+  it('supports a content-hugging menu for compact checkbox options', () => {
+    fixture.componentRef.setInput('compact', true);
+    fixture.componentRef.setInput('multiple', true);
+    fixture.componentRef.setInput('menuFitContent', true);
+    fixture.componentRef.setInput('options', [{ label: 'Appointment Rescheduled', value: 'rescheduled' }]);
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('.tdx-field-control__trigger') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    const menu = fixture.nativeElement.querySelector('.tdx-field-control__menu') as HTMLElement;
+    const option = fixture.nativeElement.querySelector('.tdx-field-control__checkbox-option') as HTMLElement;
+    expect(menu.classList).toContain('tdx-field-control__menu--fit-content');
+    expect(menu.style.width).toBe('');
+    expect(option.style.whiteSpace).toBe('');
+  });
+
   it('keeps a multi-select menu open and emits checkbox selections', () => {
     const values: Array<readonly string[]> = [];
     fixture.componentRef.setInput('multiple', true);

@@ -75,6 +75,17 @@ describe('DashboardComponent sidebar', () => {
     expect(searchInput.getAttribute('aria-label')).toBe('Search by lead name or ID');
   });
 
+  it('removes Application Start from the lead status filter and reports no referrer matches', () => {
+    const component = fixture.componentInstance;
+
+    expect(component.leadStatusOptions).not.toContain('Application Start');
+
+    component.filterMenuOpen = true;
+    component.updateReferrerSearch('zzzz');
+
+    expect(component.hasNoReferrerResults).toBe(true);
+  });
+
   it('hides at tablet size and opens as a dismissible overlay when requested', () => {
     desktopMediaQuery.setMatches(false);
     fixture.detectChanges();
@@ -281,7 +292,6 @@ describe('DashboardComponent sidebar', () => {
   it('only exposes the supported lead-status filters', () => {
     expect(fixture.componentInstance.leadStatusOptions).toEqual([
       'All',
-      'Application Start',
       'Appointment Scheduled',
       'Appointment Rescheduled',
       'Appointment Canceled',

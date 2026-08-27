@@ -13,12 +13,14 @@ describe('LeadBoardComponent', () => {
     leads: [
       {
         id: '1',
+        leadId: '22742',
         name: 'John Mark Doe',
         gender: 'Male',
         createdAt: 'Created Feb/02/2026 · 3:00 PM',
         createdAtTimestamp: new Date(2026, 1, 2, 15).getTime(),
         leadType: 'Active',
         aging: '1d',
+        tatAging: '3d',
         source: 'Referral',
         referrer: 'Olivia Martinez',
         productInterested: 'Dream Builder',
@@ -27,12 +29,14 @@ describe('LeadBoardComponent', () => {
       },
       {
         id: '2',
+        leadId: '22743',
         name: 'David Robert Brown',
         gender: 'Male',
         createdAt: 'Created Feb/01/2026 · 3:00 PM',
         createdAtTimestamp: new Date(2026, 1, 1, 15).getTime(),
         leadType: 'Parked',
         aging: '1d',
+        tatAging: '3d',
         source: 'Event',
         referrer: 'James Anderson',
         productInterested: 'Dream Builder',
@@ -67,6 +71,15 @@ describe('LeadBoardComponent', () => {
     const cards = fixture.nativeElement.querySelectorAll('lam-lead-card');
     expect(cards).toHaveLength(1);
     expect(cards[0].textContent).toContain('John Mark Doe');
+  });
+
+  it('shows TAT aging only outside the Lead board', () => {
+    expect(fixture.nativeElement.querySelectorAll('.lead-card__aging')).toHaveLength(4);
+
+    fixture.componentRef.setInput('board', { ...board, id: 'lead', title: 'Lead' });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('.lead-card__aging')).toHaveLength(2);
   });
 
   it('leaves the board blank when a search has no matches', () => {

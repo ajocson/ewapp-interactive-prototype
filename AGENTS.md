@@ -212,10 +212,10 @@ Verified on **2026-08-27**:
 
 - Branch: `main`.
 - Latest checked-in commit at inspection time: `b13b369` (`feat: expand LCAM lead lifecycle and update project context`).
-- Unit tests: **21 files, 95 tests passing** via `npm test -- --watch=false`.
+- Unit tests: **21 files, 100 tests passing** via `npm test -- --watch=false`.
 - Production build: succeeds via `npm run build`.
-- Current initial production bundle reported by Angular: approximately 488.47 kB raw / 97.52 kB estimated transfer (`main` 449.11 kB plus global styles 39.36 kB).
-- The worktree contains substantial uncommitted changes across LCAM drawer and timeline behavior, field controls/filters, follow-up actions, proposal creation, shared-control styling and tests, plus this documentation. It also contains an untracked `src/app/components/.DS_Store`; preserve and inspect the worktree before editing. Do not reset, discard, or overwrite unrelated changes.
+- Current initial production bundle reported by Angular: approximately 496.93 kB raw / 98.82 kB estimated transfer (`main` 456.59 kB plus global styles 40.34 kB).
+- The worktree contains uncommitted changes focused on lead-card metadata and aging indicators, content-fitting field-control menus, referrer-filter empty state, and their related tests. Preserve and inspect the worktree before editing. Do not reset, discard, or overwrite unrelated changes.
 - The validated state includes the uncommitted working tree, not only `HEAD`; do not infer that these application changes are committed or ready to push.
 
 ## Known Issues and Limitations
@@ -251,7 +251,7 @@ There are no explicit `TODO`/`FIXME` markers in the inspected source. The follow
 - Decide whether `LeadDetailComponent` should be connected or retired.
 - Derive sample summaries from current lead/form state where prototype fidelity requires it.
 - Support remaining SI pages/products if the intended flow includes them.
-- Reduce or formally adjust the two SCSS style-budget warnings.
+- Reduce or formally adjust the three SCSS style-budget warnings.
 - Add E2E/visual/accessibility coverage for critical interactive flows.
 
 These are not confirmed product requirements; verify against the current Figma nodes or an explicit user request before implementing.

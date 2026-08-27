@@ -11,6 +11,7 @@ describe('LeadDetailComponent', () => {
     fixture = TestBed.createComponent(LeadDetailComponent);
     fixture.componentRef.setInput('lead', {
       id: 'lead-1',
+      leadId: '22742',
       name: 'John Mark Doe',
       createdAt: 'Created Feb/03/2026 · 9:15 AM',
       createdAtTimestamp: new Date(2026, 1, 3, 9, 15).getTime(),

@@ -160,6 +160,7 @@ describe('LeadActivityDrawerComponent', () => {
 function createLead(): LeadCardData {
   return {
     id: 'lead-1',
+    leadId: '22742',
     name: 'Sarah Ann Thompson',
     gender: 'Female',
     createdAt: 'Feb/05/2026 ∙ 2:00 PM',

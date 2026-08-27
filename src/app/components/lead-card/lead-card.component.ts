@@ -14,6 +14,7 @@ import { TdxTagEmphasis, TdxTagVariant } from '../../shared/components/tag/tag.m
 export class LeadCardComponent {
   @Input({ required: true }) lead!: LeadCardData;
   @Input() highlighted = false;
+  @Input() showTatAging = false;
   @Output() selected = new EventEmitter<LeadCardData>();
 
   readonly TdxTagEmphasis = TdxTagEmphasis;

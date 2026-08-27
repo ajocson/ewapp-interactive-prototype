@@ -14,7 +14,8 @@
 .tdx-field-control__menu button:hover, .tdx-field-control__menu button.is-selected { background: var(--color-purple-100); }
 .tdx-field-control__menu button:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring-color); outline-offset: calc(var(--focus-ring-offset) * -1); }
 .tdx-field-control__menu--checkboxes { padding-block: var(--space-xs); }
-.tdx-field-control__checkbox-option { display: flex; min-height: 36px; flex: 0 0 36px; align-items: center; gap: var(--space-xs); padding: var(--space-sm) var(--space-md); color: var(--text-neutral-primary); font-family: var(--typography-font-family-paragraph); font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); cursor: pointer; }
+.tdx-field-control__menu--fit-content { width: max-content; max-width: calc(100vw - var(--space-xl)); }
+.tdx-field-control__checkbox-option { display: flex; min-height: 36px; flex: 0 0 36px; align-items: center; gap: var(--space-xs); padding: var(--space-sm) var(--space-md); color: var(--text-neutral-primary); font-family: var(--typography-font-family-paragraph); font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); white-space: nowrap; cursor: pointer; }
 .tdx-field-control__checkbox-option:hover, .tdx-field-control__checkbox-option.is-selected { background: var(--color-purple-100); }
 .tdx-field-control__checkbox-option:focus-within { outline: var(--focus-ring-width) solid var(--focus-ring-color); outline-offset: calc(var(--focus-ring-offset) * -1); }
 .tdx-field-control__checkbox-option input { box-sizing: border-box; width: 14px; height: 14px; margin: var(--space-xs); accent-color: var(--tab-text-active); cursor: pointer; }

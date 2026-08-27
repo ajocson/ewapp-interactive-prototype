@@ -11,6 +11,7 @@ describe('LeadCardComponent', () => {
     fixture = TestBed.createComponent(LeadCardComponent);
     fixture.componentRef.setInput('lead', {
       id: '1',
+      leadId: '22742',
       name: 'John Mark Doe',
       gender: 'Male',
       createdAt: 'Created Feb/01/2026 · 3:00 PM',
@@ -43,6 +44,28 @@ describe('LeadCardComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('strong').textContent.trim()).toBe('Ms. Sarah Ann Thompson');
+  });
+
+  it('displays the lead ID above the lead name', () => {
+    const identity = fixture.nativeElement.querySelector('.lead-card__identity') as HTMLElement;
+
+    expect(identity.firstElementChild?.textContent?.trim()).toBe('22742');
+    expect(identity.querySelector('strong')?.textContent?.trim()).toBe('Mr. John Mark Doe');
+  });
+
+  it('shows overall and TAT aging with hover tooltips when the board supports TAT aging', () => {
+    fixture.componentRef.setInput('lead', {
+      ...fixture.componentInstance.lead,
+      tatAging: '3d'
+    });
+    fixture.componentRef.setInput('showTatAging', true);
+    fixture.detectChanges();
+
+    const agingItems = fixture.nativeElement.querySelectorAll('.lead-card__aging');
+    expect(agingItems).toHaveLength(2);
+    expect(agingItems[0].getAttribute('aria-label')).toContain('Total days since Lead Generation');
+    expect(agingItems[1].getAttribute('aria-label')).toContain('90-day Active Lead cycle');
+    expect(agingItems[1].textContent).toContain('3d');
   });
 
   it('uses the danger tag treatment for a dropped lead', () => {

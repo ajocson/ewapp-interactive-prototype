@@ -10,7 +10,7 @@ describe('ProposalFlowComponent', () => {
     await TestBed.configureTestingModule({ imports: [AppModule] }).compileComponents();
     fixture = TestBed.createComponent(ProposalFlowComponent);
     fixture.componentRef.setInput('lead', {
-      id: 'lead-1', name: 'John Mark Doe', createdAt: 'Created Feb/03/2026 · 9:15 AM',
+      id: 'lead-1', leadId: '22742', name: 'John Mark Doe', createdAt: 'Created Feb/03/2026 · 9:15 AM',
       createdAtTimestamp: 0, leadType: 'Inactive', aging: '1d', source: 'Referral',
       referrer: 'Olivia Martinez', productInterested: 'Dream Builder',
       tags: [{ label: 'New Lead', tone: 'primary' }]

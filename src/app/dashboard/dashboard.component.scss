@@ -53,6 +53,7 @@
 .page-filter__referrer { position: relative; width: 100%; }
 .page-filter__referrer app-search-field { display: block; width: 100%; --search-field-width: 100%; }
 .page-filter__referrer-options { position: absolute; z-index: calc(var(--layer-popover) + 1); top: calc(100% + var(--space-xs)); right: var(--space-none); display: flex; width: 204px; max-width: calc(100vw - (var(--space-md) * 2)); max-height: 224px; flex-direction: column; padding: var(--space-xs); border-radius: var(--radius-md); background: var(--surface-default); box-shadow: var(--board-filter-menu-shadow); overflow-y: auto; }
+.page-filter__referrer-options--empty { min-height: 36px; justify-content: center; padding-inline: var(--space-md); color: var(--text-neutral-secondary); font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
 .page-filter__referrer-options button { min-height: 36px; padding: var(--space-sm) var(--space-md); border: var(--border-width-none); border-radius: var(--radius-sm); background: transparent; color: var(--text-neutral-primary); font: inherit; text-align: left; cursor: pointer; }
 .page-filter__referrer-options button:hover { background: var(--surface-neutral-subtle); }
 .page-filter__referrer-options button:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring-color); outline-offset: calc(var(--focus-ring-offset) * -1); }

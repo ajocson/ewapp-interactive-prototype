@@ -98,6 +98,48 @@
   gap: var(--lead-card-metadata-gap);
 }
 
+.lead-card__metadata > .lead-card__aging-group {
+  gap: var(--space-md);
+}
+
+.lead-card__aging {
+  display: flex;
+  align-items: center;
+  gap: var(--lead-card-metadata-gap);
+  position: relative;
+  white-space: nowrap;
+}
+
+.lead-card__tooltip {
+  position: absolute;
+  z-index: var(--layer-tooltip);
+  top: calc(100% + var(--space-xs));
+  right: 0;
+  display: none;
+  max-width: 240px;
+  padding: var(--tooltip-padding-y) var(--tooltip-padding-x);
+  border-radius: var(--tooltip-radius);
+  background: var(--tooltip-bg);
+  color: var(--tooltip-text);
+  font-size: var(--caption-text-size);
+  line-height: var(--caption-line-height);
+  white-space: normal;
+}
+
+.lead-card__aging--overall .lead-card__tooltip {
+  width: 102px;
+  text-align: end;
+}
+
+.lead-card__aging--tat .lead-card__tooltip {
+  width: 155px;
+  text-align: center;
+}
+
+.lead-card__aging:hover .lead-card__tooltip {
+  display: block;
+}
+
 .lead-card__metadata .material-symbols-rounded {
   font-size: var(--lead-card-metadata-icon-size);
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;

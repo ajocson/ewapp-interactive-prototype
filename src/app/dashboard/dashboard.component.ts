@@ -62,7 +62,6 @@ export class DashboardComponent implements OnDestroy {
   ];
   readonly leadStatusOptions = [
     'All',
-    'Application Start',
     'Appointment Scheduled',
     'Appointment Rescheduled',
     'Appointment Canceled',
@@ -182,6 +181,12 @@ export class DashboardComponent implements OnDestroy {
     const query = this.referrerSearchTerm.trim().toLocaleLowerCase();
     if (!query) return [];
     return this.referrerOptions.filter((referrer) => referrer.toLocaleLowerCase().includes(query));
+  }
+
+  get hasNoReferrerResults(): boolean {
+    return this.referrerSuggestionsOpen
+      && Boolean(this.referrerSearchTerm.trim())
+      && this.filteredReferrerOptions.length === 0;
   }
 
   updateReferrerSearch(value: string): void {
@@ -576,6 +581,7 @@ export class DashboardComponent implements OnDestroy {
 
       return {
         id,
+        leadId: this.createLeadId(id),
         name,
         gender,
         createdAt: this.formatCreatedAt(createdAt),
@@ -583,6 +589,7 @@ export class DashboardComponent implements OnDestroy {
         lastActivityTimestamp: createdAt.getTime(),
         leadType,
         aging: '1d',
+        tatAging: '3d',
         source,
         referrer,
         productInterested,
@@ -673,6 +680,15 @@ export class DashboardComponent implements OnDestroy {
 
   private normalizeStatus(status: string): string {
     return status.toLocaleLowerCase().replaceAll('-', ' ').replaceAll(/\s+/g, ' ').trim();
+  }
+
+  private createLeadId(value: string): string {
+    const hash = Array.from(value).reduce(
+      (total, character) => (total * 31 + character.charCodeAt(0)) % 90_000,
+      0
+    );
+
+    return String(10_000 + hash);
   }
 
   private initialActivities(

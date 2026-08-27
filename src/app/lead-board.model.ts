@@ -31,6 +31,7 @@ export interface LeadAppointment {
 
 export interface LeadCardData {
   id: string;
+  leadId: string;
   name: string;
   gender: LeadGender;
   createdAt: string;
@@ -38,6 +39,7 @@ export interface LeadCardData {
   lastActivityTimestamp?: number;
   leadType: LeadState;
   aging: string;
+  tatAging?: string;
   source: string;
   referrer: string;
   productInterested: string;
