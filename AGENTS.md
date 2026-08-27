@@ -217,12 +217,11 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 Verified on **2026-08-27**:
 
 - Branch: `main`.
-- Latest checked-in commit at inspection time: `b13b369` (`feat: expand LCAM lead lifecycle and update project context`).
+- Latest checked-in commit at inspection time: `32f88df` (`Update lead management flow`).
 - Unit tests: **22 files, 105 tests passing** via `npm test -- --watch=false`.
 - Production build: succeeds via `npm run build`.
 - Current initial production bundle reported by Angular: approximately 520.48 kB raw / 100.99 kB estimated transfer (`main` 480.08 kB plus global styles 40.40 kB).
-- The worktree contains uncommitted changes covering the Applications page, lead-card metadata and aging indicators, activity timeline metadata, content-fitting field-control menus, and related tests. Preserve and inspect the worktree before editing. Do not reset, discard, or overwrite unrelated changes.
-- The validated state includes the uncommitted working tree, not only `HEAD`; do not infer that these application changes are committed or ready to push.
+- The worktree was clean at inspection time, and the validated state matches `HEAD`; preserve any new user changes that appear before future edits.
 
 ## Known Issues and Limitations
 
