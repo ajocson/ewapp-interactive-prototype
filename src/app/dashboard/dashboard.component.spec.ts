@@ -133,12 +133,36 @@ describe('DashboardComponent sidebar', () => {
     expect(component.filteredBoards.find((board) => board.id === 'appointments')?.leads[0]).toEqual(scheduled);
     expect(scheduled?.activities.at(-1)).toMatchObject({ category: 'sales', label: 'Appointment Scheduled', notes: appointment.notes });
     expect(scheduled?.activities.at(-1)?.timeLabel).toBe('3:00-3:30 PM');
+    expect(scheduled?.activities.at(-1)).toMatchObject({
+      scheduledDateLabel: 'August 24, 2026',
+      scheduledTimeLabel: '3:00-3:30 PM'
+    });
+    expect(scheduled?.activities.at(-1)?.recordedDateLabel).toBeTruthy();
 
+    const rescheduled = component.rescheduleLeadAppointment('contacted-1', appointment);
+    expect(rescheduled?.tags[0]).toEqual({ label: 'Appointment Rescheduled', tone: 'primary' });
+
+    const cancelled = component.cancelLeadAppointment('contacted-1');
+    expect(cancelled?.tags).toEqual([{ label: 'Appointment Canceled', tone: 'danger' }]);
+
+    const rescheduledAgain = component.rescheduleLeadAppointment('contacted-1', appointment);
     const meeting = component.completeLeadAppointment('contacted-1', 'Client attended.');
     expect(meeting?.tags).toEqual([{ label: 'Meeting', tone: 'success' }]);
     expect(component.boards.find((board) => board.id === 'appointments')?.leads.some((lead) => lead.id === 'contacted-1')).toBe(false);
     expect(component.filteredBoards.find((board) => board.id === 'meetings')?.leads[0]).toEqual(meeting);
     expect(meeting?.activities.at(-1)).toMatchObject({ category: 'sales', label: 'Meeting (Proposal Presented)', notes: 'Client attended.' });
+    expect(rescheduledAgain?.appointment).toEqual(appointment);
+  });
+
+  it('includes a Past Due appointment sample with a danger date-time tag', () => {
+    const pastDueLead = fixture.componentInstance.boards
+      .find((board) => board.id === 'appointments')?.leads
+      .find((lead) => lead.id === 'appointment-past-due');
+
+    expect(pastDueLead?.tags).toEqual([
+      { label: 'Appointment Scheduled', tone: 'success' },
+      { label: 'Feb 3, 2026 · 2:00-3:00 PM', tone: 'danger' }
+    ]);
   });
 
   it('moves a meeting to Follow-Up and records the supplied notes', () => {

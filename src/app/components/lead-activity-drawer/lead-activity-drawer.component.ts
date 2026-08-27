@@ -121,6 +121,7 @@ export class LeadActivityDrawerComponent implements OnChanges {
   selectedDate = '';
   selectedStartMinutes: number | null = null;
   selectedEndMinutes: number | null = null;
+  private readonly expandedActivityNoteIds = new Set<string>();
   private readonly baseActivitySteps: StepperStep[] = [
     { label: 'Contacted', number: 1 },
     { label: 'Appointment', number: 2 },
@@ -281,6 +282,19 @@ export class LeadActivityDrawerComponent implements OnChanges {
     return this.salesActivities.length > 0 || this.systemActivities.length > 0;
   }
 
+  isActivityNoteExpanded(activityId: string): boolean {
+    return this.expandedActivityNoteIds.has(activityId);
+  }
+
+  toggleActivityNote(activityId: string): void {
+    if (this.expandedActivityNoteIds.has(activityId)) {
+      this.expandedActivityNoteIds.delete(activityId);
+    } else {
+      this.expandedActivityNoteIds.add(activityId);
+    }
+    this.changeDetectorRef.markForCheck();
+  }
+
   ngOnChanges(): void {
     this.scheduling = false;
     this.rescheduling = false;
@@ -288,6 +302,7 @@ export class LeadActivityDrawerComponent implements OnChanges {
     this.followUpRecording = false;
     this.schedulerMode = 'appointment';
     this.actionMode = null;
+    this.expandedActivityNoteIds.clear();
     this.stateConfirmation = null;
     this.activityNotes = '';
     this.followUpNotes = '';

@@ -287,10 +287,11 @@ export class DashboardComponent implements OnDestroy {
 
     if (!contactedBoard || !appointmentsBoard || !lead) return null;
 
+    const activityDate = new Date();
     const scheduledLead: LeadCardData = {
       ...lead,
       leadType: 'Active',
-      lastActivityTimestamp: Date.now(),
+      lastActivityTimestamp: activityDate.getTime(),
       appointment,
       tags: [
         { label: 'Appointment Scheduled', tone: 'success' },
@@ -301,8 +302,9 @@ export class DashboardComponent implements OnDestroy {
         this.createActivity(
           'sales',
           'Appointment Scheduled',
-          this.dateFromAppointment(appointment),
+          activityDate,
           appointment.notes,
+          this.dateFromAppointment(appointment),
           appointment.timeLabel
         )
       ]
@@ -328,7 +330,7 @@ export class DashboardComponent implements OnDestroy {
       lastActivityTimestamp: activityDate.getTime(),
       appointment,
       tags: [
-        { label: 'Appointment Rescheduled', tone: 'success' },
+        { label: 'Appointment Rescheduled', tone: 'primary' },
         { label: `${this.shortAppointmentDate(appointment.date)} · ${appointment.timeLabel}`, tone: 'info' }
       ],
       activities: [
@@ -336,8 +338,9 @@ export class DashboardComponent implements OnDestroy {
         this.createActivity(
           'sales',
           'Appointment Rescheduled',
-          this.dateFromAppointment(appointment),
+          activityDate,
           appointment.notes,
+          this.dateFromAppointment(appointment),
           appointment.timeLabel
         )
       ]
@@ -361,7 +364,7 @@ export class DashboardComponent implements OnDestroy {
       ...leadWithoutAppointment,
       leadType: 'Active',
       lastActivityTimestamp: activityDate.getTime(),
-      tags: [{ label: 'Appointment Canceled', tone: 'success' }],
+      tags: [{ label: 'Appointment Canceled', tone: 'danger' }],
       activities: [...lead.activities, this.createActivity('sales', 'Appointment Canceled', activityDate, notes)]
     };
 
@@ -434,8 +437,9 @@ export class DashboardComponent implements OnDestroy {
         this.createActivity(
           'sales',
           'Appointment Scheduled',
-          this.dateFromAppointment(appointment),
+          activityDate,
           appointment.notes,
+          this.dateFromAppointment(appointment),
           appointment.timeLabel
         )
       ]
@@ -555,6 +559,7 @@ export class DashboardComponent implements OnDestroy {
     const meeting: LeadTag = { label: 'Meeting', tone: 'success' };
     const followUp: LeadTag = { label: 'Follow-up', tone: 'success' };
     const appointment: LeadTag = { label: 'Feb 2, 2026 · 2:00-3:00 PM', tone: 'info' };
+    const pastDueAppointment: LeadTag = { label: 'Feb 3, 2026 · 2:00-3:00 PM', tone: 'danger' };
     const sampleAppointment: LeadAppointment = {
       date: '2026-02-02',
       dateLabel: 'February 02, 2026',
@@ -635,6 +640,24 @@ export class DashboardComponent implements OnDestroy {
             'Dream Builder',
             'Maxwell Anderson',
             sampleAppointment
+          ),
+          lead(
+            'appointment-past-due',
+            'John Mark Doe',
+            'Male',
+            true,
+            'Leads from store',
+            [appointmentScheduled, pastDueAppointment],
+            createdOn(1, 15),
+            'Dream Builder',
+            'Maxwell Anderson',
+            {
+              date: '2026-02-03',
+              dateLabel: 'February 03, 2026',
+              startMinutes: 14 * 60,
+              endMinutes: 15 * 60,
+              timeLabel: '2:00-3:00 PM'
+            }
           ),
           lead('appointment-parked', 'Olivia Mae Navarro', 'Female', 'Parked', 'Branch', [appointmentScheduled], new Date(2026, 0, 31, 14, 30)),
           lead('appointment-dropped', 'Ethan Gabriel Ramos', 'Male', 'Dropped', 'Event', [appointmentScheduled], new Date(2026, 0, 30, 11))
@@ -728,8 +751,16 @@ export class DashboardComponent implements OnDestroy {
       );
     }
     if (hasReachedAppointment) {
+      const scheduledAt = activityDate(1, 14);
       activities.push(
-        this.createActivity('sales', 'Appointment Scheduled', activityDate(1, 14), '', appointment?.timeLabel ?? '2:00-3:00 PM')
+        this.createActivity(
+          'sales',
+          'Appointment Scheduled',
+          scheduledAt,
+          '',
+          scheduledAt,
+          appointment?.timeLabel ?? '2:00-3:00 PM'
+        )
       );
     }
     if (hasReachedAppointment) {
@@ -764,17 +795,28 @@ export class DashboardComponent implements OnDestroy {
   private createActivity(
     category: LeadActivityCategory,
     label: string,
-    value: Date,
+    recordedAt: Date,
     notes = '',
-    timeLabel = value.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+    scheduledAt?: Date,
+    scheduledTimeLabel?: string
   ): LeadActivityRecord {
+    const recordedDateLabel = recordedAt.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const recordedTimeLabel = recordedAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    const scheduledDateLabel = scheduledAt?.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const resolvedScheduledTimeLabel = scheduledAt
+      ? scheduledTimeLabel ?? scheduledAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+      : undefined;
+
     return {
-      id: `${label.toLocaleLowerCase().replaceAll(/[^a-z0-9]+/g, '-')}-${value.getTime()}-${this.activitySequence++}`,
+      id: `${label.toLocaleLowerCase().replaceAll(/[^a-z0-9]+/g, '-')}-${recordedAt.getTime()}-${this.activitySequence++}`,
       category,
       label,
-      dateLabel: value.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
-      timeLabel,
-      occurredAtTimestamp: value.getTime(),
+      dateLabel: scheduledDateLabel ?? recordedDateLabel,
+      timeLabel: resolvedScheduledTimeLabel ?? recordedTimeLabel,
+      occurredAtTimestamp: recordedAt.getTime(),
+      recordedDateLabel,
+      recordedTimeLabel,
+      ...(scheduledDateLabel && resolvedScheduledTimeLabel ? { scheduledDateLabel, scheduledTimeLabel: resolvedScheduledTimeLabel } : {}),
       ...(notes.trim() ? { notes: notes.trim() } : {})
     };
   }

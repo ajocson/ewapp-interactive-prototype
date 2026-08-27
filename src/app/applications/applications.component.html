@@ -1,0 +1,73 @@
+<main class="applications">
+  <lam-global-header />
+  <div class="applications__body">
+    <lam-side-navigation *ngIf="navigation.isSidebarOpen()" />
+    <button *ngIf="navigation.isSidebarOpen() && !isDesktopViewport" type="button" class="sidebar-backdrop" aria-label="Close navigation" (click)="closeSidebarFromOverlay()"></button>
+    <section class="applications__content" aria-label="Applications">
+      <div class="applications__filters" role="search">
+        <app-search-field class="applications__search" name="application-search" placeholder="Search by lead name or ID" ariaLabel="Search by lead name or ID" [(value)]="searchTerm" />
+        <tdx-field-control name="application-source" ariaLabel="Source of application" [selectedValues]="pendingSources" [options]="sourceControlOptions" trailingIcon="keyboard_arrow_down" [width]="112" [menuWidth]="250" [menuFitContent]="true" [multiple]="true" allValue="All" allLabel="All Sources" (selectedValuesChange)="pendingSources = $event" />
+        <div class="applications__filter" [class.applications__filter--active]="filterHasAppliedValues" (click)="$event.stopPropagation()">
+          <tdx-field-control label="Filter" ariaLabel="Filter applications" leadingIcon="filter_alt" [width]="76" (activated)="toggleFilterMenu()" />
+          <span *ngIf="filterHasAppliedValues" class="visually-hidden" aria-live="polite">Active filters applied</span>
+
+          <section *ngIf="filterMenuOpen" class="applications__page-filter" aria-label="Filter applications">
+            <div class="applications__page-filter-field">
+              <span>Lead Status</span>
+              <tdx-field-control
+                name="application-lead-statuses"
+                ariaLabel="Filter by Lead Status"
+                [selectedValues]="pendingLeadStatuses"
+                [options]="leadStatusControlOptions"
+                trailingIcon="keyboard_arrow_down"
+                [width]="144"
+                [menuWidth]="204"
+                [compact]="true"
+                [multiple]="true"
+                [menuFitContent]="true"
+                (selectedValuesChange)="pendingLeadStatuses = $event"
+              />
+            </div>
+            <div class="applications__page-filter-field applications__page-filter-field--referrer">
+              <span>Referrer</span>
+              <div class="applications__referrer">
+                <app-search-field
+                  name="application-referrer-search"
+                  placeholder="Search referrer"
+                  ariaLabel="Search referrer"
+                  [compact]="true"
+                  [value]="referrerSearchTerm"
+                  (focused)="openReferrerSuggestions()"
+                  (valueChange)="updateReferrerSearch($event)"
+                />
+                <div *ngIf="referrerSuggestionsOpen && filteredReferrerOptions.length" class="applications__referrer-options" role="listbox" aria-label="Referrer suggestions">
+                  <button *ngFor="let referrer of filteredReferrerOptions" type="button" role="option" [attr.aria-selected]="pendingReferrer === referrer" (click)="selectReferrer(referrer); $event.stopPropagation()">{{ referrer }}</button>
+                </div>
+                <div *ngIf="hasNoReferrerResults" class="applications__referrer-options applications__referrer-options--empty" role="status">No results found</div>
+              </div>
+            </div>
+            <fieldset>
+              <legend>Sort by</legend>
+              <app-radio *ngFor="let option of sortOptions" name="application-page-sort" [label]="option.label" [value]="option.value" [checked]="pendingSort === option.value" (changed)="pendingSort = $event" />
+            </fieldset>
+            <footer>
+              <app-button label="Reset" [variant]="buttonVariant.Subtle" [size]="buttonSize.Small" [disabled]="!filterHasValues" (clicked)="resetPendingFilters()" />
+              <app-button label="Apply" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" [disabled]="!filterDirty" (clicked)="applyFilters()" />
+            </footer>
+          </section>
+        </div>
+      </div>
+      <div class="applications__board-viewport" tabindex="0" aria-label="Application pipeline boards">
+        <div class="applications__board-track">
+          <lam-lead-board
+            *ngFor="let board of filteredBoards; trackBy: trackBoard"
+            [board]="board"
+            filterLabel="Filter by Lead Status"
+            [filterOptions]="statusOptionsFor(board)"
+            [filterByTag]="true"
+          />
+        </div>
+      </div>
+    </section>
+  </div>
+</main>

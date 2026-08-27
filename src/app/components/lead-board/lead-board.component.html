@@ -6,8 +6,8 @@
   <header class="lead-board__header">
     <span *ngIf="!isSearchOpen" class="lead-board__heading">
       <h2 [id]="board.id + '-title'">{{ board.title }}</h2>
-      <span class="lead-board__count" [attr.aria-label]="board.leads.length + ' leads'">
-        {{ board.leads.length }}
+      <span class="lead-board__count" [attr.aria-label]="displayCount + ' leads'">
+        {{ displayCount }}
       </span>
     </span>
 
@@ -73,14 +73,15 @@
     (submit)="$event.preventDefault(); applyFilters()"
   >
     <label class="lead-board__state-filter">
-      <span>Filter by Lead State</span>
+      <span>{{ filterLabel }}</span>
       <app-field-control
-        ariaLabel="Filter by Lead State"
+        [ariaLabel]="filterLabel"
         [name]="board.id + '-lead-state-filter'"
         [fluid]="true"
         [compact]="true"
         [multiple]="true"
-        [options]="leadStateOptions"
+        [menuFitContent]="filterByTag"
+        [options]="activeFilterOptions"
         [selectedValues]="draftFilters.leadStates.length ? draftFilters.leadStates : ['All']"
         trailingIcon="keyboard_arrow_down"
         (selectedValuesChange)="updateLeadStates($event)"

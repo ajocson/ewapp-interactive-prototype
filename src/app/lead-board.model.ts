@@ -5,7 +5,7 @@ export interface LeadTag {
   tone: TagTone;
 }
 
-export type LeadState = 'Active' | 'Inactive' | 'Parked' | 'Dropped' | 'Reactivated';
+export type LeadState = 'Active' | 'Inactive' | 'Parked' | 'Dropped' | 'Reactivated' | 'Booked';
 export type LeadGender = 'Male' | 'Female';
 
 export type LeadActivityCategory = 'sales' | 'system';
@@ -17,6 +17,10 @@ export interface LeadActivityRecord {
   dateLabel: string;
   timeLabel: string;
   occurredAtTimestamp: number;
+  recordedDateLabel?: string;
+  recordedTimeLabel?: string;
+  scheduledDateLabel?: string;
+  scheduledTimeLabel?: string;
   notes?: string;
 }
 

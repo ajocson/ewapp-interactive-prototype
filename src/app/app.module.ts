@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
+import { ApplicationsComponent } from './applications/applications.component';
 import { LamComponentsModule } from './components/lam-components.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { DraftSiFlowComponent } from './draft-si-flow/draft-si-flow.component';
@@ -22,6 +23,7 @@ import { TagModule } from './shared/components/tag/tag.module';
 @NgModule({
   declarations: [
     AppComponent,
+    ApplicationsComponent,
     DashboardComponent,
     DraftSiFlowComponent,
     LeadDetailComponent,

@@ -34,6 +34,17 @@ describe('LeadActivityDrawerComponent', () => {
       'Draft SI Generated'
     ]);
     expect(fixture.nativeElement.textContent).toContain('Client asked for another appointment.');
+    expect(fixture.nativeElement.textContent).toContain('August 25, 2026');
+    expect(fixture.nativeElement.textContent).toContain('2:00-2:30 PM');
+    expect(fixture.nativeElement.textContent).toContain('Recorded on August 24, 2026 at 8:02 PM');
+
+    const note = fixture.nativeElement.querySelector('.activity-group__notes') as HTMLButtonElement;
+    expect(note.textContent).toContain('Client asked for another appointment.');
+    expect(note.getAttribute('aria-expanded')).toBe('false');
+    note.click();
+    fixture.detectChanges();
+    expect(note.classList).toContain('is-expanded');
+    expect(note.getAttribute('aria-expanded')).toBe('true');
   });
 
   it('offers only the supported drop reasons', () => {
@@ -181,7 +192,7 @@ function createLead(): LeadCardData {
     activities: [
       activity('contacted', 'sales', 'Contacted', 20),
       activity('created', 'sales', 'New Lead Created', 1),
-      activity('scheduled', 'sales', 'Appointment Scheduled', 5),
+      activity('scheduled', 'sales', 'Appointment Scheduled', 5, undefined, 'August 25, 2026', '2:00-2:30 PM'),
       activity('draft', 'system', 'Draft SI Generated', 40),
       activity('cancelled', 'sales', 'Appointment Canceled', 50, 'Client asked for another appointment.')
     ]
@@ -193,7 +204,9 @@ function activity(
   category: 'sales' | 'system',
   label: string,
   occurredAtTimestamp: number,
-  notes?: string
+  notes?: string,
+  scheduledDateLabel?: string,
+  scheduledTimeLabel?: string
 ) {
   return {
     id,
@@ -202,6 +215,9 @@ function activity(
     dateLabel: 'August 24, 2026',
     timeLabel: '8:02 PM',
     occurredAtTimestamp,
+    recordedDateLabel: 'August 24, 2026',
+    recordedTimeLabel: '8:02 PM',
+    ...(scheduledDateLabel && scheduledTimeLabel ? { scheduledDateLabel, scheduledTimeLabel } : {}),
     ...(notes ? { notes } : {})
   };
 }

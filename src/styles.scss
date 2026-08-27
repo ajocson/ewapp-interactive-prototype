@@ -274,6 +274,7 @@
   /* Semantic tokens. */
   --surface-page: var(--color-white);
   --surface-default: var(--color-white);
+  --surface-subtle: var(--color-grey-100);
   --surface-interactive-hover: var(--color-grey-50);
   --text-neutral-primary: var(--color-grey-700);
   --text-neutral-secondary: var(--color-grey-500);
@@ -627,6 +628,7 @@
 [data-theme='dark'] {
   --surface-page: #171b24;
   --surface-default: #212733;
+  --surface-subtle: #2b3446;
   --surface-interactive-hover: #2b3446;
   --field-bg-hover: var(--surface-interactive-hover);
   --text-neutral-primary: #f2f4f7;

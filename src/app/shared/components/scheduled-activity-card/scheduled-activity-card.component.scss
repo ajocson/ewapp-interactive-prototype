@@ -16,7 +16,7 @@
   display: flex;
   min-height: var(--scheduled-activity-card-body-min-height);
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: var(--scheduled-activity-card-content-gap);
   padding: var(--scheduled-activity-card-padding-y) var(--scheduled-activity-card-padding-x);
 }

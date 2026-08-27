@@ -32,10 +32,12 @@ export class SideNavigationComponent {
   }
 
   isActive(item: SideNavigationItem): boolean {
-    return item.label === 'LCAM Board' && this.navigation.activeDestination() === 'lcam-board';
+    return (item.label === 'LCAM Board' && this.navigation.activeDestination() === 'lcam-board')
+      || (item.label === 'Applications' && this.navigation.activeDestination() === 'applications');
   }
 
   selectItem(item: SideNavigationItem): void {
     if (item.label === 'LCAM Board') this.navigation.goToLcamBoard();
+    if (item.label === 'Applications') this.navigation.goToApplications();
   }
 }

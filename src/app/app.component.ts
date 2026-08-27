@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, View
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { ApplicationsComponent } from './applications/applications.component';
 import {
   LeadAppointmentCancelledEvent,
   LeadAppointmentCompletedEvent,
@@ -20,9 +21,10 @@ import { AppNavigationStateService } from './shared/services/app-navigation-stat
 @Component({
   selector: 'lam-root',
   template: `
-    <div class="app-dashboard-host" [attr.inert]="selectedLead ? '' : null" [attr.aria-hidden]="selectedLead ? true : null">
+    <div *ngIf="!showApplications" class="app-dashboard-host" [attr.inert]="selectedLead ? '' : null" [attr.aria-hidden]="selectedLead ? true : null">
       <lam-dashboard (leadOpened)="openLead($event)" />
     </div>
+    <lam-applications *ngIf="showApplications" />
     <lam-lead-activity-drawer
       *ngIf="selectedLead && !draftSiOpen && !proposalOpen"
       [lead]="selectedLead"
@@ -67,6 +69,10 @@ export class AppComponent {
   private pendingHighlightLeadId: string | null = null;
   private activityToastTimer?: ReturnType<typeof setTimeout>;
   private activityToastDismissTimer?: ReturnType<typeof setTimeout>;
+
+  get showApplications(): boolean {
+    return this.navigation.activeDestination() === 'applications';
+  }
 
   constructor() {
     this.navigation.lcamBoardRequested

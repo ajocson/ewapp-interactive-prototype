@@ -196,10 +196,14 @@ export class FieldControlComponent implements AfterViewInit, OnDestroy {
     const gutter = 8;
     const gap = 8;
     const controlRect = control.getBoundingClientRect();
-    const preferredWidth = this.fluid
-      ? controlRect.width
-      : this.menuFitContent
-        ? Math.ceil(menu.scrollWidth)
+    const optionContentWidth = Math.max(
+      menu.scrollWidth,
+      ...Array.from(menu.children).map((child) => child.scrollWidth)
+    );
+    const preferredWidth = this.menuFitContent
+      ? Math.ceil(optionContentWidth)
+      : this.fluid
+        ? controlRect.width
         : this.menuWidth;
     const width = Math.min(
       preferredWidth,

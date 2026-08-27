@@ -107,7 +107,7 @@ describe('AppComponent LCAM activity feedback', () => {
     const updated = dashboard.boards.find((board) => board.id === 'appointments')!.leads[0];
     expect(updated.id).toBe(lead.id);
     expect(updated.appointment).toBeUndefined();
-    expect(updated.tags).toEqual([{ label: 'Appointment Canceled', tone: 'success' }]);
+    expect(updated.tags).toEqual([{ label: 'Appointment Canceled', tone: 'danger' }]);
     expect(updated.activities.at(-1)?.label).toBe('Appointment Canceled');
     expect(fixture.nativeElement.querySelector('.activity-toast')?.textContent).toContain('Your appointment has been canceled.');
     vi.advanceTimersByTime(4000);

@@ -107,6 +107,22 @@ describe('LeadBoardComponent', () => {
     });
   });
 
+  it('can filter board cards by a supplied status-tag option', () => {
+    fixture.componentRef.setInput('filterLabel', 'Filter by Lead Status');
+    fixture.componentRef.setInput('filterByTag', true);
+    fixture.componentRef.setInput('filterOptions', [
+      { label: 'All', value: 'All' },
+      { label: 'SI Generated', value: 'SI Generated' }
+    ]);
+    fixture.detectChanges();
+
+    fixture.componentInstance.updateLeadStates(['SI Generated']);
+    fixture.componentInstance.applyFilters();
+
+    expect(fixture.componentInstance.visibleLeads).toHaveLength(2);
+    expect(fixture.componentInstance.filterLabel).toBe('Filter by Lead Status');
+  });
+
   it('fills the filter menu content width with the lead-state field', () => {
     (fixture.nativeElement.querySelector('.lead-board__filter-control button') as HTMLButtonElement).click();
     fixture.detectChanges();

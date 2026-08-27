@@ -275,8 +275,15 @@
               <span class="activity-group__marker material-symbols-rounded" aria-hidden="true">check_circle</span>
               <div class="activity-group__content">
                 <span class="activity-group__label">{{ activity.label }}</span>
-                <span class="activity-group__date"><span class="material-symbols-rounded" aria-hidden="true">calendar_month</span>{{ activity.dateLabel }}<span class="activity-group__divider" aria-hidden="true"></span><span class="material-symbols-rounded" aria-hidden="true">schedule</span>{{ activity.timeLabel }}</span>
-                <p *ngIf="activity.notes">{{ activity.notes }}</p>
+                <span *ngIf="activity.scheduledDateLabel && activity.scheduledTimeLabel" class="activity-group__scheduled" [attr.aria-label]="'Scheduled for ' + activity.scheduledDateLabel + ' at ' + activity.scheduledTimeLabel">
+                  <span class="material-symbols-rounded" aria-hidden="true">calendar_month</span>
+                  <span>{{ activity.scheduledDateLabel }}</span>
+                  <span class="activity-group__scheduled-divider" aria-hidden="true">|</span>
+                  <span class="material-symbols-rounded" aria-hidden="true">schedule</span>
+                  <span>{{ activity.scheduledTimeLabel }}</span>
+                </span>
+                <button *ngIf="activity.notes" type="button" class="activity-group__notes" [class.is-expanded]="isActivityNoteExpanded(activity.id)" [attr.aria-expanded]="isActivityNoteExpanded(activity.id)" [attr.aria-label]="isActivityNoteExpanded(activity.id) ? 'Collapse activity note' : 'Expand activity note'" (click)="toggleActivityNote(activity.id)">{{ activity.notes }}</button>
+                <span class="activity-group__recorded">Recorded on {{ activity.recordedDateLabel ?? activity.dateLabel }} at {{ activity.recordedTimeLabel ?? activity.timeLabel }}</span>
               </div>
             </li>
           </ol>
@@ -289,8 +296,15 @@
               <span class="activity-group__marker material-symbols-rounded" aria-hidden="true">check_circle</span>
               <div class="activity-group__content">
                 <span class="activity-group__label">{{ activity.label }}</span>
-                <span class="activity-group__date"><span class="material-symbols-rounded" aria-hidden="true">calendar_month</span>{{ activity.dateLabel }}<span class="activity-group__divider" aria-hidden="true"></span><span class="material-symbols-rounded" aria-hidden="true">schedule</span>{{ activity.timeLabel }}</span>
-                <p *ngIf="activity.notes">{{ activity.notes }}</p>
+                <span *ngIf="activity.scheduledDateLabel && activity.scheduledTimeLabel" class="activity-group__scheduled" [attr.aria-label]="'Scheduled for ' + activity.scheduledDateLabel + ' at ' + activity.scheduledTimeLabel">
+                  <span class="material-symbols-rounded" aria-hidden="true">calendar_month</span>
+                  <span>{{ activity.scheduledDateLabel }}</span>
+                  <span class="activity-group__scheduled-divider" aria-hidden="true">|</span>
+                  <span class="material-symbols-rounded" aria-hidden="true">schedule</span>
+                  <span>{{ activity.scheduledTimeLabel }}</span>
+                </span>
+                <button *ngIf="activity.notes" type="button" class="activity-group__notes" [class.is-expanded]="isActivityNoteExpanded(activity.id)" [attr.aria-expanded]="isActivityNoteExpanded(activity.id)" [attr.aria-label]="isActivityNoteExpanded(activity.id) ? 'Collapse activity note' : 'Expand activity note'" (click)="toggleActivityNote(activity.id)">{{ activity.notes }}</button>
+                <span class="activity-group__recorded">Recorded on {{ activity.recordedDateLabel ?? activity.dateLabel }} at {{ activity.recordedTimeLabel ?? activity.timeLabel }}</span>
               </div>
             </li>
           </ol>

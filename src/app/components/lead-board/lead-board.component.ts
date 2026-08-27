@@ -28,6 +28,10 @@ import {
 })
 export class LeadBoardComponent {
   @Input({ required: true }) board!: LeadBoardData;
+  @Input() count?: number;
+  @Input() filterLabel = 'Filter by Lead State';
+  @Input() filterOptions?: readonly TdxFieldControlOption[];
+  @Input() filterByTag = false;
   @Input() highlightedLeadId: string | null = null;
   @Output() leadSelected = new EventEmitter<LeadCardData>();
 
@@ -69,11 +73,13 @@ export class LeadBoardComponent {
     let leads = this.board.leads.filter((lead) => {
       const normalizedName = lead.name.toLocaleLowerCase();
       const matchesSearch = searchTerms.every((term) => normalizedName.includes(term));
-      const matchesLeadState =
+      const matchesFilter = this.filterByTag
+        ? !this.appliedFilters.leadStates.length || lead.tags.some(tag => this.appliedFilters.leadStates.some(value => value === tag.label))
+        :
         !this.appliedFilters.leadStates.length ||
         this.appliedFilters.leadStates.includes(lead.leadType as BoardLeadStateFilter);
 
-      return matchesSearch && matchesLeadState;
+      return matchesSearch && matchesFilter;
     });
 
     switch (this.appliedFilters.sort) {
@@ -98,6 +104,14 @@ export class LeadBoardComponent {
     }
 
     return leads;
+  }
+
+  get displayCount(): number {
+    return this.count ?? this.board.leads.length;
+  }
+
+  get activeFilterOptions(): readonly TdxFieldControlOption[] {
+    return this.filterOptions ?? this.leadStateOptions;
   }
 
   get hasAppliedFilters(): boolean {

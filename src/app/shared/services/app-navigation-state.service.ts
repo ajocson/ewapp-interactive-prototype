@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { Subject } from 'rxjs';
 
-export type AppNavigationDestination = 'lcam-board' | 'lead-flow';
+export type AppNavigationDestination = 'lcam-board' | 'lead-flow' | 'applications';
 
 @Injectable({ providedIn: 'root' })
 export class AppNavigationStateService {
@@ -26,5 +26,9 @@ export class AppNavigationStateService {
   goToLcamBoard(): void {
     this.activeDestination.set('lcam-board');
     this.lcamBoardRequests.next();
+  }
+
+  goToApplications(): void {
+    this.activeDestination.set('applications');
   }
 }

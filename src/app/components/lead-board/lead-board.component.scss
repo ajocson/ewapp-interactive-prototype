@@ -160,32 +160,6 @@
   background: var(--scrollbar-thumb);
 }
 
-.lead-board__cards--empty {
-  align-items: center;
-  justify-content: center;
-}
-
-.lead-board__empty-state {
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--board-empty-gap);
-  color: var(--text-neutral-primary);
-  text-align: center;
-}
-
-.lead-board__empty-state img {
-  width: var(--board-empty-icon-size);
-  height: var(--board-empty-icon-size);
-}
-
-.lead-board__empty-state p {
-  margin: var(--space-none);
-  font-size: var(--paragraph-sm-text-size);
-  line-height: var(--paragraph-sm-line-height);
-}
-
 .lead-board__filter-menu {
   box-sizing: border-box;
   position: absolute;

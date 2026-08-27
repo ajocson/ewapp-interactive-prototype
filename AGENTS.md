@@ -41,6 +41,7 @@ src/
     app.component.ts              Root orchestration of board, drawer, Draft SI, and proposal overlays
     app.module.ts                 Root NgModule and shared-module imports
     dashboard/                    LCAM page composition, sample data, page filters, responsive sidebar
+    applications/                 Applications pipeline page, board-scoped statuses, page filters, and samples
     components/                   App-shell and LCAM feature components
       global-header/
       side-navigation/
@@ -79,6 +80,7 @@ Each reusable component normally has a component class, HTML template, SCSS file
 ## Architecture and State Flow
 
 - `AppComponent` is the top-level coordinator. It always renders `DashboardComponent`, then conditionally overlays `LeadActivityDrawerComponent` or `DraftSiFlowComponent` based on local state.
+- `AppComponent` also conditionally renders `ApplicationsComponent` when the shared navigation destination is `applications`.
 - `AppNavigationStateService` is a root-provided service. It uses Angular signals for sidebar visibility and active destination, plus an RxJS `Subject` to request a return to the LCAM board.
 - `DashboardComponent` owns the in-memory board data, page filter state, activity records, appointment data, and all LCAM board mutations. It emits selected leads to `AppComponent`.
 - `AppComponent` translates typed drawer events into dashboard mutations. Successful activities keep the drawer open, return the active destination to LCAM Board, and show a centered top success message after an 800 ms delay; the message dismisses after four seconds. The updated lead ID is held until the user closes the drawer, at which point the card is highlighted in its destination/current board.
@@ -86,6 +88,7 @@ Each reusable component normally has a component class, HTML template, SCSS file
 - `LeadCardData` carries source/referrer/product metadata, gender, creation and last-activity timestamps, optional appointment details, and typed sales/system activity records. Each record carries an `occurredAtTimestamp`, a display date/time, and optional notes. Display titles are derived with `leadDisplayName()` (`Mr.` for male sample data and `Ms.` for female sample data).
 - `DashboardComponent` appends activity records as lifecycle mutations occur. `LeadActivityDrawerComponent` groups them by category and displays each group in chronological order (earliest to latest) using `occurredAtTimestamp`; appointment activities use the scheduled start–end range in their display time.
 - Page filters and board-level filters use separate pending/draft and applied state. Page filtering combines name, source, lead status, lead state, referrer, and sort; board filtering combines local search, lead state, and sort.
+- `ApplicationsComponent` owns three in-memory application boards and its page-level filter state. It reuses `LeadBoardComponent` with board-specific status options and shared search, field-control, radio, and button components.
 - `DraftSiFlowComponent` is a local finite-state flow (`1 | 2 | 3 | 4 | 'results'`). It nests `ProposalFlowComponent` after “Convert to Proposal.”
 - `ProposalFlowComponent` uses a string-union stage model for individual information, CSA sections, assessment, and risk profile. Its local state also drives the product-picker overlay, proposal draft, sales-illustration state, proposal-save confirmation/toast, and generated-proposal view. Parent record tabs derive their active state from this view state so Profile and Proposals cannot both appear active.
 - There is no Angular Router. Navigation is conditional rendering and component/service state.
@@ -152,9 +155,12 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 
 - Shared global header with a TDX-style Search control and responsive side navigation.
 - Five in-memory pipeline boards: Lead, Contacted, Appointments, Meetings, and Follow-Up.
+- Applications is available as a separate three-board pipeline: In Progress, Action Required, and Completed, with repeated local samples for each supported status.
 - Responsive fixed-minimum-width columns with independent vertical scrolling and horizontal board scrolling.
 - Lead cards with gender-derived title, formatted creation timestamp, stage tag, optional schedule tag, semantic lead state, aging, and post-activity highlight. Schedule tags are hidden while a lead is parked or dropped.
+- Lead cards display Lead ID and aging indicators; Contacted, Appointments, Meetings, and Follow-Up also show TAT aging with tooltip support.
 - Page search, source dropdown, checkbox-based lead status/state filters, referrer filter, sorting, and an active-filter indicator.
+- Applications adds page-level Lead ID/name search, source filtering, referrer suggestions, all-application-status filtering, sorting, and board-scoped status filters. Empty boards remain blank when no cards match; only the referrer suggestion popover reports `No results found`.
 - Per-board search plus lead-state checkbox and sort controls. Recently Created (using last activity when present) is the default, board width stays stable while searching, and no-result searches intentionally leave the board blank.
 - Card selection opens the lead activity drawer.
 - The drawer includes TDX overview/timeline tabs, lead metadata, stage-aware Draft SI/full-proposal labeling, stage actions, and Sales Activities/System Transactions. The progress indicator has three steps outside Follow-Up and adds a fourth Follow-up step only for leads in the Follow-Up board.
@@ -212,10 +218,10 @@ Verified on **2026-08-27**:
 
 - Branch: `main`.
 - Latest checked-in commit at inspection time: `b13b369` (`feat: expand LCAM lead lifecycle and update project context`).
-- Unit tests: **21 files, 100 tests passing** via `npm test -- --watch=false`.
+- Unit tests: **22 files, 105 tests passing** via `npm test -- --watch=false`.
 - Production build: succeeds via `npm run build`.
-- Current initial production bundle reported by Angular: approximately 496.93 kB raw / 98.82 kB estimated transfer (`main` 456.59 kB plus global styles 40.34 kB).
-- The worktree contains uncommitted changes focused on lead-card metadata and aging indicators, content-fitting field-control menus, referrer-filter empty state, and their related tests. Preserve and inspect the worktree before editing. Do not reset, discard, or overwrite unrelated changes.
+- Current initial production bundle reported by Angular: approximately 520.48 kB raw / 100.99 kB estimated transfer (`main` 480.08 kB plus global styles 40.40 kB).
+- The worktree contains uncommitted changes covering the Applications page, lead-card metadata and aging indicators, activity timeline metadata, content-fitting field-control menus, and related tests. Preserve and inspect the worktree before editing. Do not reset, discard, or overwrite unrelated changes.
 - The validated state includes the uncommitted working tree, not only `HEAD`; do not infer that these application changes are committed or ready to push.
 
 ## Known Issues and Limitations
@@ -223,11 +229,11 @@ Verified on **2026-08-27**:
 - Production build emits component-style budget warnings:
   - `draft-si-flow.component.scss`: about 12.61 kB vs. 8 kB warning budget.
   - `proposal-flow.component.scss`: about 14.38 kB vs. 8 kB warning budget.
-  - `lead-activity-drawer.component.scss`: about 8.22 kB vs. 8 kB warning budget.
+  - `lead-activity-drawer.component.scss`: about 8.82 kB vs. 8 kB warning budget.
 - No backend, authentication, API calls, persistence, or real customer data. Reloading resets all state.
 - No Angular Router; browser history/deep links are not implemented.
 - `LeadDetailComponent` exists and is tested but is not reachable from the root application flow.
-- Several visible controls remain prototype-only/no-op, including most navigation destinations, New Lead, sidebar Draft SI, global Search, Edit Lead Information, Unable to Set Appointment, Proceed to Application, Convert to Application, and some proposal actions.
+- Several visible controls remain prototype-only/no-op, including most navigation destinations, New Lead, sidebar Draft SI, global Search, Edit Lead Information, Unable to Set Appointment, Proceed to Application, Convert to Application, and some proposal actions. Applications navigation and its local filtering flow are implemented.
 - In the contacted LCAM drawer, “Generate Full Proposal” currently has no emitted action; only the new-lead “Generate Draft SI” branch is wired.
 - Activity records and appointment/lead mutations are entirely in memory and reset on reload. Initial timelines are synthesized from sample stage/state data rather than loaded from a durable event source.
 - The filter UI offers `Re-endorsed`, but `LeadState` and the sample data do not currently represent that state, so the option cannot match a lead.
@@ -252,7 +258,7 @@ There are no explicit `TODO`/`FIXME` markers in the inspected source. The follow
 - Derive sample summaries from current lead/form state where prototype fidelity requires it.
 - Support remaining SI pages/products if the intended flow includes them.
 - Reduce or formally adjust the three SCSS style-budget warnings.
-- Add E2E/visual/accessibility coverage for critical interactive flows.
+- Add E2E/visual/accessibility coverage for critical interactive flows, including the Applications page.
 
 These are not confirmed product requirements; verify against the current Figma nodes or an explicit user request before implementing.
 
