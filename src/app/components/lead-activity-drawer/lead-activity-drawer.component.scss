@@ -44,6 +44,30 @@
 
 .drawer-contact--contacted { gap: var(--space-xl); }
 
+.drawer-contact--follow-up ::ng-deep .tdx-stepper__label {
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+
+.drawer-contact app-stepper {
+  display: block;
+  margin-bottom: var(--space-md);
+}
+
+.drawer-contact--follow-up .drawer-meeting-actions {
+  gap: var(--space-lg);
+}
+
+.drawer-contact--follow-up .drawer-meeting-actions--scheduled {
+  gap: var(--space-xs);
+}
+
+.drawer-meeting-actions__appointment-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
+}
+
 .drawer-notes,
 .drawer-scheduler__fields label {
   display: flex;
@@ -79,6 +103,14 @@
 .drawer-contact__button,
 .drawer-action-button { width: 100%; }
 
+.drawer-contact > .drawer-notes + .drawer-contact__button {
+  margin-top: calc(var(--space-lg) - var(--space-xl));
+}
+
+.drawer-meeting-actions--scheduled > .drawer-notes + .drawer-contact__button {
+  margin-top: var(--space-md);
+}
+
 .drawer-appointments,
 .drawer-meeting-actions {
   display: flex;
@@ -108,6 +140,14 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(var(--space-none), 1fr));
   gap: var(--space-lg);
+}
+
+.drawer-scheduler__actions {
+  grid-template-columns: minmax(var(--space-none), 1fr) max-content;
+}
+
+.drawer-scheduler__actions .drawer-action-button:last-child {
+  width: auto;
 }
 
 .drawer-scheduler__title {
@@ -150,7 +190,7 @@
   line-height: var(--paragraph-sm-line-height);
 }
 
-.drawer-scheduler__actions { margin-top: var(--space-xs); }
+.drawer-scheduler__actions { margin-top: calc(var(--space-lg) - var(--space-xl)); }
 
 .drawer-appointment-action {
   align-items: stretch;
@@ -188,10 +228,19 @@
   gap: var(--space-lg);
 }
 
+.drawer-appointment-action--cancel footer {
+  grid-template-columns: minmax(var(--space-none), 1fr) max-content;
+}
+
+.drawer-appointment-action--cancel footer .drawer-action-button:last-child {
+  width: auto;
+}
+
 .drawer-follow-up {
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
+  border-bottom: var(--border-width-none);
 }
 
 .drawer-follow-up > header {

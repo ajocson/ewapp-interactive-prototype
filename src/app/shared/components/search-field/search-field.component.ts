@@ -15,8 +15,10 @@ export class SearchFieldComponent {
   @Input() ariaLabel = 'Search';
   @Input() name = 'search';
   @Input() size: TdxSearchFieldSize = 'medium';
+  @Input() compact = false;
   @Input() disabled = false;
   @Output() valueChange = new EventEmitter<string>();
+  @Output() focused = new EventEmitter<void>();
 
   updateValue(value: string): void {
     this.valueChange.emit(value);

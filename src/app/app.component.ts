@@ -8,7 +8,11 @@ import {
   LeadAppointmentScheduledEvent,
   LeadContactedEvent,
   LeadFollowUpRecordedEvent,
-  LeadStateChangedEvent
+  LeadFollowUpAppointmentCancelledEvent,
+  LeadFollowUpAppointmentCompletedEvent,
+  LeadFollowUpAppointmentScheduledEvent,
+  LeadStateChangedEvent,
+  LeadUpdateRecordedEvent
 } from './components/lead-activity-drawer/lead-activity-drawer.component';
 import { LeadCardData } from './lead-board.model';
 import { AppNavigationStateService } from './shared/services/app-navigation-state.service';
@@ -20,7 +24,7 @@ import { AppNavigationStateService } from './shared/services/app-navigation-stat
       <lam-dashboard (leadOpened)="openLead($event)" />
     </div>
     <lam-lead-activity-drawer
-      *ngIf="selectedLead && !draftSiOpen"
+      *ngIf="selectedLead && !draftSiOpen && !proposalOpen"
       [lead]="selectedLead"
       (closed)="closeLead()"
       (contacted)="markLeadAsContacted($event)"
@@ -29,6 +33,11 @@ import { AppNavigationStateService } from './shared/services/app-navigation-stat
       (appointmentCancelled)="cancelLeadAppointment($event)"
       (appointmentCompleted)="completeLeadAppointment($event)"
       (followUpRecorded)="recordLeadFollowUp($event)"
+      (followUpAppointmentScheduled)="scheduleFollowUpAppointment($event)"
+      (followUpAppointmentCancelled)="cancelFollowUpAppointment($event)"
+      (followUpAppointmentCompleted)="completeFollowUpAppointment($event)"
+      (updateRecorded)="recordLeadUpdate($event)"
+      (proposalRequested)="openProposal()"
       (leadStateChanged)="changeLeadState($event)"
       (draftSiRequested)="openDraftSi()"
     />
@@ -40,6 +49,7 @@ import { AppNavigationStateService } from './shared/services/app-navigation-stat
       [description]="activityToastMessage"
     />
     <lam-draft-si-flow *ngIf="selectedLead && draftSiOpen" [lead]="selectedLead" (closed)="closeLead()" />
+    <lam-proposal-flow *ngIf="selectedLead && proposalOpen" [lead]="selectedLead" (closed)="closeLead()" />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: false
@@ -51,8 +61,10 @@ export class AppComponent {
   private readonly navigation = inject(AppNavigationStateService);
   selectedLead: LeadCardData | null = null;
   draftSiOpen = false;
+  proposalOpen = false;
   activityRecorded = false;
   activityToastMessage = 'Your activity has been recorded.';
+  private pendingHighlightLeadId: string | null = null;
   private activityToastTimer?: ReturnType<typeof setTimeout>;
   private activityToastDismissTimer?: ReturnType<typeof setTimeout>;
 
@@ -70,6 +82,7 @@ export class AppComponent {
     this.clearActivityToast();
     this.selectedLead = lead;
     this.draftSiOpen = false;
+    this.proposalOpen = false;
     this.changeDetectorRef.markForCheck();
   }
 
@@ -79,46 +92,81 @@ export class AppComponent {
     this.changeDetectorRef.markForCheck();
   }
 
+  openProposal(): void {
+    this.draftSiOpen = false;
+    this.proposalOpen = true;
+    this.navigation.showLeadFlow();
+    this.changeDetectorRef.markForCheck();
+  }
+
   markLeadAsContacted(event: LeadContactedEvent): void {
     const contactedLead = this.dashboard?.markLeadAsContacted(event.lead.id, event.notes);
     if (!contactedLead) return;
 
-    this.finishBoardActivity('Your activity has been recorded.');
+    this.finishBoardActivity(contactedLead, 'Your activity has been recorded.');
   }
 
   scheduleLeadAppointment(event: LeadAppointmentScheduledEvent): void {
     const scheduledLead = this.dashboard?.scheduleLeadAppointment(event.lead.id, event.appointment);
     if (!scheduledLead) return;
 
-    this.finishBoardActivity('Appointment has been scheduled.');
+    this.finishBoardActivity(scheduledLead, 'Appointment has been scheduled.');
   }
 
   rescheduleLeadAppointment(event: LeadAppointmentScheduledEvent): void {
     const rescheduledLead = this.dashboard?.rescheduleLeadAppointment(event.lead.id, event.appointment);
     if (!rescheduledLead) return;
 
-    this.finishBoardActivity('Appointment has been rescheduled.');
+    this.finishBoardActivity(rescheduledLead, 'Appointment has been rescheduled.');
   }
 
   cancelLeadAppointment(event: LeadAppointmentCancelledEvent): void {
     const cancelledLead = this.dashboard?.cancelLeadAppointment(event.lead.id, event.notes);
     if (!cancelledLead) return;
 
-    this.finishBoardActivity('Your appointment has been canceled.');
+    this.finishBoardActivity(cancelledLead, 'Your appointment has been canceled.');
   }
 
   completeLeadAppointment(event: LeadAppointmentCompletedEvent): void {
     const meetingLead = this.dashboard?.completeLeadAppointment(event.lead.id, event.notes);
     if (!meetingLead) return;
 
-    this.finishBoardActivity('Your activity has been recorded.');
+    this.finishBoardActivity(meetingLead, 'Your activity has been recorded.');
   }
 
   recordLeadFollowUp(event: LeadFollowUpRecordedEvent): void {
     const followUpLead = this.dashboard?.recordLeadFollowUp(event.lead.id, event.notes);
     if (!followUpLead) return;
 
-    this.finishBoardActivity('Lead marked for follow-up.');
+    this.finishBoardActivity(followUpLead, 'Lead marked for follow-up.');
+  }
+
+  scheduleFollowUpAppointment(event: LeadFollowUpAppointmentScheduledEvent): void {
+    const updatedLead = this.dashboard?.scheduleFollowUpAppointment(event.lead.id, event.appointment);
+    if (!updatedLead) return;
+
+    this.finishBoardActivity(updatedLead, 'Follow-up appointment has been scheduled.');
+  }
+
+  cancelFollowUpAppointment(event: LeadFollowUpAppointmentCancelledEvent): void {
+    const updatedLead = this.dashboard?.cancelFollowUpAppointment(event.lead.id, event.notes);
+    if (!updatedLead) return;
+
+    this.finishBoardActivity(updatedLead, 'Follow-up appointment has been canceled.');
+  }
+
+  completeFollowUpAppointment(event: LeadFollowUpAppointmentCompletedEvent): void {
+    const updatedLead = this.dashboard?.completeFollowUpAppointment(event.lead.id, event.notes);
+    if (!updatedLead) return;
+
+    this.finishBoardActivity(updatedLead, 'Your activity has been recorded.');
+  }
+
+  recordLeadUpdate(event: LeadUpdateRecordedEvent): void {
+    const updatedLead = this.dashboard?.recordLeadUpdate(event.lead.id, event.notes);
+    if (!updatedLead) return;
+
+    this.finishBoardActivity(updatedLead, 'Follow-up update has been recorded.');
   }
 
   changeLeadState(event: LeadStateChangedEvent): void {
@@ -130,14 +178,14 @@ export class AppComponent {
       : event.state === 'Dropped'
         ? 'Lead has been dropped.'
         : 'Lead reactivated successfully.';
-    this.finishBoardActivity(message);
+    this.finishBoardActivity(updatedLead, message);
   }
 
-  private finishBoardActivity(message: string): void {
+  private finishBoardActivity(updatedLead: LeadCardData, message: string): void {
     this.clearActivityToast();
 
-    this.selectedLead = null;
-    this.draftSiOpen = false;
+    this.selectedLead = updatedLead;
+    this.pendingHighlightLeadId = updatedLead.id;
     this.activityToastMessage = message;
     this.navigation.activeDestination.set('lcam-board');
     this.activityToastTimer = setTimeout(() => {
@@ -154,9 +202,13 @@ export class AppComponent {
   }
 
   closeLead(): void {
+    if (this.pendingHighlightLeadId) {
+      this.dashboard?.highlightLeadCard(this.pendingHighlightLeadId);
+      this.pendingHighlightLeadId = null;
+    }
     this.selectedLead = null;
     this.draftSiOpen = false;
-    this.clearActivityToast();
+    this.proposalOpen = false;
     this.navigation.activeDestination.set('lcam-board');
     this.changeDetectorRef.markForCheck();
   }

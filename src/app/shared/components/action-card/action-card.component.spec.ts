@@ -20,5 +20,11 @@ describe('ActionCardComponent', () => {
     (fixture.nativeElement.querySelector('button') as HTMLButtonElement).click();
     expect(activated).toHaveBeenCalledOnce();
   });
-});
 
+  it('supports the cyan information icon treatment', () => {
+    fixture.componentRef.setInput('tone', 'info');
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement.querySelector('button') as HTMLElement).classList).toContain('action-card--info');
+  });
+});

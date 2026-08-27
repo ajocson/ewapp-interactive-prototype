@@ -2,7 +2,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AppModule } from '../../app.module';
 import { LeadCardData } from '../../lead-board.model';
-import { LeadActivityDrawerComponent } from './lead-activity-drawer.component';
+import {
+  LeadActivityDrawerComponent,
+  LeadFollowUpAppointmentCancelledEvent,
+  LeadFollowUpAppointmentCompletedEvent,
+  LeadFollowUpAppointmentScheduledEvent,
+  LeadUpdateRecordedEvent
+} from './lead-activity-drawer.component';
 
 describe('LeadActivityDrawerComponent', () => {
   let fixture: ComponentFixture<LeadActivityDrawerComponent>;
@@ -14,16 +20,140 @@ describe('LeadActivityDrawerComponent', () => {
     fixture.detectChanges();
   });
 
-  it('preserves the recorded oldest-to-newest journey for every activity group', () => {
+  it('lists every activity chronologically within its group and displays saved notes', () => {
+    fixture.componentInstance.activeTab = 'timeline';
+    fixture.detectChanges();
+
     expect(fixture.componentInstance.salesActivities.map((activity) => activity.label)).toEqual([
-      'Contacted',
+      'New Lead Created',
       'Appointment Scheduled',
+      'Contacted',
       'Appointment Canceled'
     ]);
     expect(fixture.componentInstance.systemActivities.map((activity) => activity.label)).toEqual([
-      'New Lead',
       'Draft SI Generated'
     ]);
+    expect(fixture.nativeElement.textContent).toContain('Client asked for another appointment.');
+  });
+
+  it('offers only the supported drop reasons', () => {
+    expect(fixture.componentInstance.dropReasonOptions.map((option) => option.value)).toEqual([
+      'No money',
+      'No time',
+      'Already has insurance',
+      'Uncontactable',
+      'Not interested'
+    ]);
+    expect(fixture.componentInstance.dropReasonOptions.some((option) => option.value === 'Others')).toBe(false);
+  });
+
+  it('allows reactivation for parked leads but not dropped leads', () => {
+    fixture.componentRef.setInput('lead', { ...createLead(), leadType: 'Parked' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.drawer-state-summary')?.textContent).toContain('Reactivate Lead');
+
+    fixture.componentRef.setInput('lead', { ...createLead(), leadType: 'Dropped' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.drawer-state-summary')?.textContent).not.toContain('Reactivate Lead');
+
+    fixture.componentInstance.reactivateLead();
+    expect(fixture.componentInstance.stateConfirmation).toBeNull();
+  });
+
+  it('uses the requested stage-specific proposal and presentation labels', () => {
+    for (const status of ['Appointment Scheduled', 'Meeting', 'Follow-up']) {
+      fixture.componentRef.setInput('lead', {
+        ...createLead(),
+        tags: [{ label: status, tone: 'success' }]
+      });
+      fixture.detectChanges();
+      expect(fixture.componentInstance.primaryActionLabel).toBe('Generate/View Full Proposal');
+    }
+
+    fixture.componentRef.setInput('lead', createLead());
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Presentation Completed');
+  });
+
+  it('shows Follow-up only when the lead is in the Follow-up board', () => {
+    expect(fixture.componentInstance.activitySteps.map((step) => step.label)).toEqual([
+      'Contacted', 'Appointment', 'Meeting'
+    ]);
+
+    fixture.componentRef.setInput('lead', {
+      ...createLead(),
+      tags: [{ label: 'Follow-up', tone: 'success' }]
+    });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.activitySteps.map((step) => step.label)).toEqual([
+      'Contacted', 'Appointment', 'Meeting', 'Follow-up'
+    ]);
+  });
+
+  it('shows the Follow-up stage and its scheduled appointment state', () => {
+    fixture.componentRef.setInput('lead', {
+      ...createLead(),
+      tags: [{ label: 'Follow-up', tone: 'success' }]
+    });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.activitySteps.map((step) => step.label)).toEqual([
+      'Contacted', 'Appointment', 'Meeting', 'Follow-up'
+    ]);
+    expect(fixture.componentInstance.currentStepIndex).toBe(3);
+    expect((fixture.nativeElement.querySelector('.drawer-contact') as HTMLElement).classList).toContain('drawer-contact--follow-up');
+    expect(fixture.nativeElement.textContent).toContain('Record your follow-up appointment result.');
+    expect(fixture.nativeElement.textContent).toContain('Follow-up Appointment Scheduled');
+    expect(fixture.nativeElement.textContent).toContain('Notes (Optional)');
+    expect(fixture.nativeElement.textContent).toContain('Presentation Completed');
+    expect(fixture.nativeElement.querySelector('.drawer-meeting-actions .section-message--info')).toBeTruthy();
+    expect(fixture.nativeElement.textContent).not.toContain('Mark as Contacted');
+  });
+
+  it('opens the follow-up scheduler, records updates, and requests the proposal flow', () => {
+    const scheduled: LeadFollowUpAppointmentScheduledEvent[] = [];
+    const cancelled: LeadFollowUpAppointmentCancelledEvent[] = [];
+    const completed: LeadFollowUpAppointmentCompletedEvent[] = [];
+    const updates: LeadUpdateRecordedEvent[] = [];
+    let proposalRequested = false;
+    fixture.componentRef.setInput('lead', {
+      ...createLead(),
+      tags: [{ label: 'Follow-up', tone: 'success' }]
+    });
+    fixture.componentInstance.followUpAppointmentScheduled.subscribe((event) => scheduled.push(event));
+    fixture.componentInstance.followUpAppointmentCancelled.subscribe((event) => cancelled.push(event));
+    fixture.componentInstance.followUpAppointmentCompleted.subscribe((event) => completed.push(event));
+    fixture.componentInstance.updateRecorded.subscribe((event) => updates.push(event));
+    fixture.componentInstance.proposalRequested.subscribe(() => proposalRequested = true);
+    fixture.detectChanges();
+
+    fixture.componentInstance.openFollowUpScheduler();
+    expect(fixture.componentInstance.schedulerTitle).toBe('Schedule Follow-up Appointment');
+    fixture.componentInstance.scheduleAppointment();
+    expect(scheduled).toHaveLength(1);
+
+    fixture.componentRef.setInput('lead', {
+      ...createLead(),
+      tags: [{ label: 'Follow-up', tone: 'success' }],
+      appointment: createLead().appointment
+    });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Follow-up Appointment Scheduled');
+    fixture.componentInstance.openCancelAppointment();
+    fixture.componentInstance.confirmCancelAppointment();
+    expect(cancelled).toHaveLength(1);
+
+    fixture.componentInstance.completeFollowUpAppointment();
+    expect(completed).toEqual([{ lead: fixture.componentInstance.lead, notes: '' }]);
+
+    fixture.componentInstance.openUpdateForm();
+    fixture.componentInstance.followUpNotes = 'Client asked for another comparison.';
+    fixture.componentInstance.saveFollowUp();
+    expect(updates).toEqual([{ lead: fixture.componentInstance.lead, notes: 'Client asked for another comparison.' }]);
+
+    fixture.componentInstance.proceedToApplication();
+    expect(proposalRequested).toBe(true);
   });
 });
 
@@ -39,13 +169,20 @@ function createLead(): LeadCardData {
     source: 'LMS (ETB)',
     referrer: 'Maxwell Anderson',
     productInterested: 'Dream Builder',
-    tags: [{ label: 'Appointment Set', tone: 'success' }],
+    tags: [{ label: 'Appointment Scheduled', tone: 'success' }],
+    appointment: {
+      date: '2026-02-02',
+      dateLabel: 'February 02, 2026',
+      startMinutes: 14 * 60,
+      endMinutes: 14 * 60 + 30,
+      timeLabel: '2:00-2:30 PM'
+    },
     activities: [
       activity('contacted', 'sales', 'Contacted', 20),
-      activity('created', 'system', 'New Lead', 10),
+      activity('created', 'sales', 'New Lead Created', 1),
       activity('scheduled', 'sales', 'Appointment Scheduled', 5),
       activity('draft', 'system', 'Draft SI Generated', 40),
-      activity('cancelled', 'sales', 'Appointment Canceled', 50)
+      activity('cancelled', 'sales', 'Appointment Canceled', 50, 'Client asked for another appointment.')
     ]
   };
 }
@@ -54,7 +191,8 @@ function activity(
   id: string,
   category: 'sales' | 'system',
   label: string,
-  occurredAtTimestamp: number
+  occurredAtTimestamp: number,
+  notes?: string
 ) {
   return {
     id,
@@ -62,6 +200,7 @@ function activity(
     label,
     dateLabel: 'August 24, 2026',
     timeLabel: '8:02 PM',
-    occurredAtTimestamp
+    occurredAtTimestamp,
+    ...(notes ? { notes } : {})
   };
 }

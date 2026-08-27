@@ -12,12 +12,28 @@
       </header>
 
       <nav class="profile-tabs" aria-label="Lead record sections">
-        <button type="button" [class.is-active]="stage === 'individual-form' || stage === 'individual-summary'" (click)="goTo('individual-summary')">Info</button>
-        <button type="button" [class.is-active]="stage !== 'individual-form' && stage !== 'individual-summary'" [disabled]="stage === 'individual-form' || stage === 'individual-summary'" (click)="goTo('csa-information')">Profile</button>
-        <button type="button" disabled>Proposals</button><button type="button" disabled>Applications</button><button type="button">Policies</button>
+        <button type="button" [class.is-active]="!proposalDraftOpen && !proposalCreated && (stage === 'individual-form' || stage === 'individual-summary')" (click)="goTo('individual-summary')">Info</button>
+        <button type="button" [class.is-active]="!proposalDraftOpen && !proposalCreated && stage !== 'individual-form' && stage !== 'individual-summary'" [disabled]="stage === 'individual-form' || stage === 'individual-summary'" (click)="goTo('csa-information')">Profile</button>
+        <button type="button" [class.is-active]="proposalDraftOpen || proposalCreated" [disabled]="!proposalDraftOpen && !proposalCreated">Proposals</button><button type="button" disabled>Applications</button><button type="button">Policies</button>
       </nav>
 
       <div class="proposal-content">
+        <article class="proposal-card generated-proposal" *ngIf="proposalCreated">
+          <header class="generated-proposal__header"><div><h2>{{ selectedProduct }}</h2><small>90565</small></div><button type="button" class="summary-more" aria-label="More proposal actions"><span class="material-symbols-rounded" aria-hidden="true">more_vert</span></button></header>
+          <nav class="generated-proposal__tabs" aria-label="Proposal sections"><button type="button" class="is-active">Info</button><button type="button">Benefits</button><button type="button">Riders</button></nav>
+          <section class="generated-proposal__section"><h3>Proposal Information</h3><dl><div><dt>Effective Date</dt><dd>August 6, 2026</dd></div><div><dt>Valid Until</dt><dd>September 5, 2026</dd></div></dl></section>
+          <section class="generated-proposal__section"><h3>Proposed Owner</h3><dl><div><dt>Proposed Owner Name</dt><dd>Mr. {{ lead.name }}</dd></div><div><dt>Birthdate</dt><dd>January 1, 1989</dd></div><div><dt>Age</dt><dd>37</dd></div><div><dt>Gender</dt><dd>Male</dd></div></dl></section>
+          <section class="generated-proposal__section"><h3>Proposed Insured</h3><dl><div><dt>Proposed Insured Name</dt><dd>Mr. {{ lead.name }}</dd></div><div><dt>Birthdate</dt><dd>January 1, 1989</dd></div><div><dt>Age</dt><dd>37</dd></div><div><dt>Gender</dt><dd>Male</dd></div></dl></section>
+          <section class="generated-proposal__si"><h3>Sales Illustration</h3><button type="button"><span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span>Sales Illustration_{{ selectedProduct }}_810000106051<span class="material-symbols-rounded" aria-hidden="true">keyboard_arrow_right</span></button><button type="button" class="generated-proposal__download">Download Sales Illustration</button></section>
+          <footer><app-button label="Convert to Application" rightIcon="chevron_right" [variant]="TdxButtonVariant.Primary" [size]="TdxButtonSize.Medium" /></footer>
+        </article>
+        <article class="proposal-card proposal-draft" *ngIf="proposalDraftOpen">
+          <header class="generated-proposal__header"><div><h2>{{ selectedProduct }}</h2><small>90565</small></div><button type="button" class="summary-more" aria-label="More proposal actions"><span class="material-symbols-rounded" aria-hidden="true">more_vert</span></button></header>
+          <nav class="generated-proposal__tabs" aria-label="Proposal sections"><button type="button" [class.is-active]="proposalTab === 'info'" (click)="proposalTab = 'info'">Info</button><button type="button" [class.is-active]="proposalTab === 'benefits'" (click)="proposalTab = 'benefits'">Benefits</button><button type="button" disabled>Riders</button></nav>
+          <section class="proposal-draft__content" *ngIf="proposalTab === 'info'"><h3>Proposal Information</h3><label>Proposal Date<input value="08/06/2026" aria-label="Proposal date"></label><label>Valid Until<input value="09/05/2026" disabled aria-label="Valid until"></label><h3>Lead Information</h3><p>Mr. {{ lead.name }}</p><h3>Insured Information</h3><p>Same as Lead Information</p></section>
+          <section class="proposal-draft__content" *ngIf="proposalTab === 'benefits'"><h3>Benefits</h3><label>Basic Life Coverage<input value="₱ 1,000,000"></label><label>Premium Payment Term<input value="10 years"></label></section>
+          <footer class="proposal-draft__actions"><app-button [label]="salesIllustrationGenerated ? 'Sales Illustration Generated' : 'Generate Sales Illustration'" [variant]="TdxButtonVariant.Primary" [emphasis]="TdxButtonEmphasis.Outline" [size]="TdxButtonSize.Medium" (clicked)="generateSalesIllustration()" /><app-button label="Save Proposal" rightIcon="chevron_right" [variant]="TdxButtonVariant.Primary" [size]="TdxButtonSize.Medium" (clicked)="requestSaveProposal()" /></footer>
+        </article>
         <article class="proposal-card individual-card" *ngIf="stage === 'individual-form'">
           <h2>Individual Information</h2>
           <form class="individual-form">
@@ -44,7 +60,7 @@
           <footer class="summary-actions"><div><button type="button" class="proposal-button proposal-button--primary" (click)="requestAddProfile()">Continue and Add Profile (CSA)</button><button type="button" class="proposal-button proposal-button--outline">Generate Draft Sales Illustration <small>New</small></button></div><button type="button" class="quick-quotes-link">or view all generated Quick Quotes</button></footer>
         </article>
 
-        <article class="proposal-card csa-card" *ngIf="stage !== 'individual-form' && stage !== 'individual-summary'">
+        <article class="proposal-card csa-card" *ngIf="!proposalDraftOpen && !proposalCreated && stage !== 'individual-form' && stage !== 'individual-summary'">
           <h2><span>Client Suitability Assessment<small *ngIf="stage === 'risk-profile'">August 6, 2026</small></span><button *ngIf="stage === 'risk-profile'" type="button" class="summary-more" aria-label="More CSA actions"><span class="material-symbols-rounded" aria-hidden="true">more_vert</span></button></h2>
           <nav class="csa-tabs" aria-label="Client suitability assessment steps"><button type="button" [class.is-active]="stage === 'csa-information'" (click)="goTo('csa-information')">Information</button><button type="button" [class.is-active]="stage === 'life-needs'" (click)="goTo('life-needs')">Life Needs &amp; Priorities</button><button type="button" [class.is-active]="stage === 'calculation'" (click)="goTo('calculation')">Calculation of Needs</button><button type="button" [class.is-active]="stage === 'assessment' || stage === 'risk-profile'" (click)="goTo('assessment')">General Assessment</button></nav>
 
@@ -64,13 +80,24 @@
 
           <section class="assessment" *ngIf="stage === 'assessment'"><h3>Risk Profile Assessment</h3><fieldset><legend>How long will you keep your money invested?</legend><button type="button" class="answer is-selected">A. &lt; 1 yr <span>✓</span></button><button type="button" class="answer">D. 7 to 9 years</button><button type="button" class="answer">B. 1 to 3 years</button><button type="button" class="answer">E. At least 10 years</button><button type="button" class="answer">C. 4 to 6 years</button></fieldset><fieldset><legend>What is your goal in investing?</legend><button type="button" class="answer answer--wide is-selected">A. Preservation of capital in exchange for very low returns that may not keep pace with inflation <span>✓</span></button><button type="button" class="answer answer--wide">B. Modest fluctuations in the value of capital in exchange for modest income and growth</button></fieldset><div class="assessment-actions"><button type="button" class="proposal-button proposal-button--outline">Back</button><button type="button" class="proposal-button proposal-button--primary" (click)="requestRiskProfile()">Calculate Risk Profile</button></div></section>
 
-          <section class="risk-profile" *ngIf="stage === 'risk-profile'"><h3>Risk Profile</h3><div class="risk-profile__result"><strong>Your current risk profile:</strong><mark>Conservative</mark><ul><li>Preserve Capital</li><li>Product Option: Traditional Life Insurance</li></ul></div><footer><button type="button" class="create-proposal-button">Create Proposal <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button></footer></section>
+          <section class="risk-profile" *ngIf="stage === 'risk-profile'"><h3>Risk Profile</h3><div class="risk-profile__result"><strong>Your current risk profile:</strong><mark>Conservative</mark><ul><li>Preserve Capital</li><li>Product Option: Traditional Life Insurance</li></ul></div><footer><button type="button" class="create-proposal-button" (click)="openProductPicker()">Create Proposal <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button></footer></section>
         </article>
       </div>
     </main>
   </div>
 
   <div class="confirmation-overlay" *ngIf="confirmation" role="presentation"><section class="confirmation-dialog" role="alertdialog" aria-modal="true" [attr.aria-labelledby]="confirmation === 'add-profile' ? 'add-profile-title' : 'save-csa-title'"><h2 *ngIf="confirmation === 'add-profile'" id="add-profile-title">Add Profile (CSA)</h2><h2 *ngIf="confirmation === 'save-csa'" id="save-csa-title">Save Client Suitability Assessment</h2><p *ngIf="confirmation === 'add-profile'">Lead information cannot be edited once you add profile. Kindly ensure that all the provided details are accurate and correct before proceeding.</p><p *ngIf="confirmation === 'save-csa'">Kindly ensure that all the provided information is accurate and correct before saving CSA.</p><footer><button type="button" class="proposal-button proposal-button--neutral-outline" (click)="confirmation = null">Cancel</button><button type="button" class="proposal-button proposal-button--primary" (click)="proceedConfirmation()">Proceed</button></footer></section></div>
+  <div class="confirmation-overlay" *ngIf="proposalSaveConfirmation" role="presentation"><section class="confirmation-dialog" role="alertdialog" aria-modal="true" aria-labelledby="save-proposal-title"><h2 id="save-proposal-title">Save Proposal</h2><p>Kindly ensure that all the provided proposal information is accurate before proceeding.</p><footer><button type="button" class="proposal-button proposal-button--neutral-outline" (click)="proposalSaveConfirmation = false">Cancel</button><button type="button" class="proposal-button proposal-button--primary" (click)="confirmSaveProposal()">Proceed</button></footer></section></div>
+  <div class="activity-toast" *ngIf="proposalToastMessage"><app-section-message appearance="success" [description]="proposalToastMessage" /></div>
+
+  <div class="confirmation-overlay product-picker-overlay" *ngIf="productPickerOpen" (click)="productPickerOpen = false" role="presentation">
+    <section class="product-picker" role="dialog" aria-modal="true" aria-labelledby="product-picker-title" (click)="$event.stopPropagation()">
+      <header><h2 id="product-picker-title">Choose Product</h2><p>Select the insurance plan that best suits your needs. Limit your selection to one plan only.</p></header>
+      <nav aria-label="Product category"><button type="button" [class.is-active]="productCategory === 'all'" (click)="productCategory = 'all'">All Products</button><button type="button" [class.is-active]="productCategory === 'traditional'" (click)="productCategory = 'traditional'">Traditional</button><button type="button" [class.is-active]="productCategory === 'variable'" (click)="productCategory = 'variable'">Variable Unit Link</button></nav>
+      <div class="product-picker__grid"><button *ngFor="let product of ['Dream Builder', 'Future Assure', 'Future Assure Max (Peso)', 'Future Assure Max (US Dollar)', 'Future Assure Regular Pay', 'Life Essentials', 'Sure Start']" type="button" [class.is-selected]="selectedProduct === product" (click)="selectProduct(product)"><span class="material-symbols-rounded" aria-hidden="true">shield</span><span>{{ product }}</span><span *ngIf="selectedProduct === product" class="material-symbols-rounded" aria-hidden="true">check_circle</span></button></div>
+      <footer><button type="button" class="proposal-button proposal-button--neutral-outline" (click)="productPickerOpen = false">Cancel</button><button type="button" class="proposal-button proposal-button--primary" [disabled]="!selectedProduct" (click)="createProposal()">Continue</button></footer>
+    </section>
+  </div>
 
   <div class="drawer-overlay" *ngIf="drawerOpen" (click)="drawerOpen = false" aria-hidden="true"></div>
   <aside id="lead-activity-drawer" class="lead-drawer" *ngIf="drawerOpen" role="dialog" aria-modal="true" aria-labelledby="drawer-title">

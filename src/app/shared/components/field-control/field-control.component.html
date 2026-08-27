@@ -1,4 +1,5 @@
 <div
+  #controlRoot
   class="tdx-field-control"
   [class.tdx-field-control--disabled]="disabled"
   [class.tdx-field-control--open]="isOpen"
@@ -6,8 +7,6 @@
   [class.tdx-field-control--fluid]="fluid"
   [style.width.px]="fluid ? null : width"
 >
-  <span *ngIf="leadingIcon" class="material-symbols-rounded" aria-hidden="true">{{ leadingIcon }}</span>
-
   <button
     *ngIf="options.length; else actionControl"
     type="button"
@@ -18,24 +17,30 @@
     [attr.aria-expanded]="isOpen"
     (click)="toggleOptions($event)"
   >
-    {{ displayValue }}
+    <span *ngIf="leadingIcon" class="material-symbols-rounded" aria-hidden="true">{{ leadingIcon }}</span>
+    <span class="tdx-field-control__value">{{ displayValue }}</span>
+    <span *ngIf="trailingIcon" class="material-symbols-rounded tdx-field-control__trailing" aria-hidden="true">{{ trailingIcon }}</span>
   </button>
 
   <ng-template #actionControl>
     <button type="button" class="tdx-field-control__trigger" [disabled]="disabled" [attr.aria-label]="ariaLabel || label" (click)="activate($event)">
-      {{ label }}
+      <span *ngIf="leadingIcon" class="material-symbols-rounded" aria-hidden="true">{{ leadingIcon }}</span>
+      <span class="tdx-field-control__value">{{ label }}</span>
+      <span *ngIf="trailingIcon" class="material-symbols-rounded tdx-field-control__trailing" aria-hidden="true">{{ trailingIcon }}</span>
     </button>
   </ng-template>
 
-  <span *ngIf="trailingIcon" class="material-symbols-rounded tdx-field-control__trailing" aria-hidden="true">{{ trailingIcon }}</span>
-
   <div
+    #optionsMenu
     *ngIf="options.length && isOpen"
     class="tdx-field-control__menu"
     [class.tdx-field-control__menu--checkboxes]="multiple"
     role="listbox"
     [attr.aria-multiselectable]="multiple || null"
-    [style.width.px]="fluid ? null : menuWidth"
+    [style.left.px]="menuPosition?.left"
+    [style.top.px]="menuPosition?.top"
+    [style.width.px]="menuPosition?.width ?? (fluid ? null : menuWidth)"
+    [style.max-height.px]="menuPosition?.maxHeight"
     [attr.aria-label]="ariaLabel || label"
     (click)="$event.stopPropagation()"
   >
@@ -54,5 +59,21 @@
         >{{ option.label }}</button>
       </ng-template>
     </ng-container>
+    <footer *ngIf="multiple && showMenuActions" class="tdx-field-control__menu-actions">
+      <app-button
+        label="Reset"
+        [variant]="buttonVariant.Subtle"
+        [size]="buttonSize.Small"
+        [disabled]="resetDisabled"
+        (clicked)="requestReset($event)"
+      />
+      <app-button
+        label="Apply"
+        [variant]="buttonVariant.Primary"
+        [size]="buttonSize.Small"
+        [disabled]="applyDisabled"
+        (clicked)="requestApply($event)"
+      />
+    </footer>
   </div>
 </div>

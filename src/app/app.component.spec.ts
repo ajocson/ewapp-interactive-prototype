@@ -16,7 +16,7 @@ describe('AppComponent LCAM activity feedback', () => {
     fixture.detectChanges();
   });
 
-  it('closes the drawer, announces success after the design delay, and highlights the moved contacted lead', () => {
+  it('keeps the drawer open after recording and highlights the moved lead only when it closes', () => {
     vi.useFakeTimers();
     const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;
     const lead = dashboard.boards.find((board) => board.id === 'lead')?.leads[0];
@@ -29,14 +29,18 @@ describe('AppComponent LCAM activity feedback', () => {
     fixture.componentInstance.markLeadAsContacted({ lead: lead!, notes: '' });
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('lam-lead-activity-drawer')).toBeNull();
+    expect(fixture.nativeElement.querySelector('lam-lead-activity-drawer')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.activity-toast')).toBeNull();
     expect(dashboard.filteredBoards.find((board) => board.id === 'contacted')?.leads[0].id).toBe(lead!.id);
-    expect(dashboard.highlightedLeadId).toBe(lead!.id);
-    expect(fixture.nativeElement.querySelector('.lead-card--highlighted')?.textContent).toContain(lead!.name);
+    expect(dashboard.highlightedLeadId).toBeNull();
     vi.advanceTimersByTime(800);
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.activity-toast')?.textContent).toContain('Your activity has been recorded.');
+    fixture.componentInstance.closeLead();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('lam-lead-activity-drawer')).toBeNull();
+    expect(dashboard.highlightedLeadId).toBe(lead!.id);
+    expect(fixture.nativeElement.querySelector('.lead-card--highlighted')?.textContent).toContain(lead!.name);
     vi.advanceTimersByTime(4000);
     vi.useRealTimers();
   });
@@ -103,14 +107,14 @@ describe('AppComponent LCAM activity feedback', () => {
     const updated = dashboard.boards.find((board) => board.id === 'appointments')!.leads[0];
     expect(updated.id).toBe(lead.id);
     expect(updated.appointment).toBeUndefined();
-    expect(updated.tags).toEqual([{ label: 'Appointment Set', tone: 'success' }]);
+    expect(updated.tags).toEqual([{ label: 'Appointment Canceled', tone: 'success' }]);
     expect(updated.activities.at(-1)?.label).toBe('Appointment Canceled');
     expect(fixture.nativeElement.querySelector('.activity-toast')?.textContent).toContain('Your appointment has been canceled.');
     vi.advanceTimersByTime(4000);
     vi.useRealTimers();
   });
 
-  it('closes the drawer and confirms when a meeting is marked for follow-up', () => {
+  it('keeps the drawer open and confirms when a meeting is marked for follow-up', () => {
     vi.useFakeTimers();
     const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;
     const lead = dashboard.boards.find((board) => board.id === 'meetings')?.leads[0];
@@ -121,7 +125,7 @@ describe('AppComponent LCAM activity feedback', () => {
     fixture.componentInstance.recordLeadFollowUp({ lead: lead!, notes: 'Call next week.' });
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('lam-lead-activity-drawer')).toBeNull();
+    expect(fixture.nativeElement.querySelector('lam-lead-activity-drawer')).toBeTruthy();
     expect(dashboard.filteredBoards.find((board) => board.id === 'follow-up')?.leads[0].id).toBe(lead!.id);
     vi.advanceTimersByTime(800);
     fixture.detectChanges();
@@ -130,7 +134,19 @@ describe('AppComponent LCAM activity feedback', () => {
     vi.useRealTimers();
   });
 
-  it('closes the drawer and confirms when a lead is parked or dropped', () => {
+  it('opens the proposal flow from a follow-up lead', () => {
+    const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;
+    const lead = dashboard.boards.find((board) => board.id === 'follow-up')!.leads[0];
+
+    fixture.componentInstance.openLead(lead);
+    fixture.componentInstance.openProposal();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('lam-lead-activity-drawer')).toBeNull();
+    expect(fixture.nativeElement.querySelector('lam-proposal-flow')).toBeTruthy();
+  });
+
+  it('keeps the drawer open and confirms when a lead is parked or dropped', () => {
     vi.useFakeTimers();
     const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;
     const lead = dashboard.boards.find((board) => board.id === 'lead')!.leads[0];
@@ -139,7 +155,7 @@ describe('AppComponent LCAM activity feedback', () => {
     fixture.componentInstance.changeLeadState({ lead, state: 'Parked', details: 'Pause requested.' });
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('lam-lead-activity-drawer')).toBeNull();
+    expect(fixture.nativeElement.querySelector('lam-lead-activity-drawer')).toBeTruthy();
     expect(dashboard.boards.find((board) => board.id === 'lead')!.leads[0].leadType).toBe('Parked');
     vi.advanceTimersByTime(800);
     fixture.detectChanges();
@@ -179,12 +195,12 @@ describe('AppComponent LCAM activity feedback', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.lead-state-modal')).toBeNull();
     expect(dashboard.boards.find((board) => board.id === 'lead')!.leads[0].leadType).toBe('Parked');
-    expect(dashboard.highlightedLeadId).toBe(lead.id);
+    expect(dashboard.highlightedLeadId).toBeNull();
     vi.advanceTimersByTime(4800);
     vi.useRealTimers();
   });
 
-  it('requires an explanation when Others is selected as the drop reason', () => {
+  it('requires a supported drop reason before continuing', () => {
     const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;
     const lead = dashboard.boards.find((board) => board.id === 'lead')!.leads.find((candidate) => candidate.leadType === 'Inactive')!;
 
@@ -192,19 +208,18 @@ describe('AppComponent LCAM activity feedback', () => {
     fixture.detectChanges();
     const drawer = fixture.debugElement.query(By.directive(LeadActivityDrawerComponent)).componentInstance as LeadActivityDrawerComponent;
     drawer.openLeadAction('drop');
-    drawer.dropReasonChanged('Others');
     fixture.detectChanges();
 
     expect(drawer.isDropActionDisabled).toBe(true);
-    expect(fixture.nativeElement.querySelector('.drawer-drop-other textarea')?.getAttribute('placeholder')).toBe('Add reason for dropping');
-    drawer.dropOtherReason = 'Customer is relocating.';
+    expect(drawer.dropReasonOptions.some((option) => option.value === 'Others')).toBe(false);
+    drawer.dropReasonChanged('Not interested');
     expect(drawer.isDropActionDisabled).toBe(false);
   });
 
-  it('requires confirmation before reactivation and uses the exact success toast', () => {
+  it('requires confirmation before reactivating a parked lead and uses the exact success toast', () => {
     vi.useFakeTimers();
     const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;
-    const lead = dashboard.boards.find((board) => board.id === 'meetings')!.leads.find((candidate) => candidate.leadType === 'Dropped')!;
+    const lead = dashboard.boards.find((board) => board.id === 'appointments')!.leads.find((candidate) => candidate.leadType === 'Parked')!;
 
     fixture.componentInstance.openLead(lead);
     fixture.detectChanges();
@@ -213,19 +228,19 @@ describe('AppComponent LCAM activity feedback', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.lead-state-modal')?.textContent).toContain('Reactivate Lead?');
-    expect(dashboard.boards.find((board) => board.id === 'meetings')!.leads.find((candidate) => candidate.id === lead.id)?.leadType).toBe('Dropped');
+    expect(dashboard.boards.find((board) => board.id === 'appointments')!.leads.find((candidate) => candidate.id === lead.id)?.leadType).toBe('Parked');
 
     drawer.confirmStateChange();
     vi.advanceTimersByTime(800);
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.activity-toast')?.textContent).toContain('Lead reactivated successfully.');
-    expect(dashboard.boards.find((board) => board.id === 'meetings')!.leads[0].leadType).toBe('Reactivated');
-    expect(dashboard.highlightedLeadId).toBe(lead.id);
+    expect(dashboard.boards.find((board) => board.id === 'appointments')!.leads[0].leadType).toBe('Reactivated');
+    expect(dashboard.highlightedLeadId).toBeNull();
     vi.advanceTimersByTime(4000);
     vi.useRealTimers();
   });
 
-  it('renders the Figma paused-state drawer and reactivates parked and dropped leads', () => {
+  it('renders paused-state drawers and only offers reactivation for parked leads', () => {
     vi.useFakeTimers();
     const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;
     const pausedLeads = [
@@ -240,20 +255,26 @@ describe('AppComponent LCAM activity feedback', () => {
       const summary = fixture.nativeElement.querySelector('.drawer-state-summary') as HTMLElement;
       expect(summary).toBeTruthy();
       expect(summary.textContent).toContain(lead.leadType === 'Parked' ? 'Lead Parked' : 'Lead Dropped');
-      expect(summary.textContent).toContain('Reactivate Lead');
+      if (lead.leadType === 'Parked') {
+        expect(summary.textContent).toContain('Reactivate Lead');
+      } else {
+        expect(summary.textContent).not.toContain('Reactivate Lead');
+      }
       expect((summary.querySelector('img') as HTMLImageElement).getAttribute('src')).toContain(
         lead.leadType === 'Parked' ? 'lead-parked.svg' : 'lead-dropped.svg'
       );
       expect(fixture.nativeElement.querySelector('.drawer-contact')).toBeNull();
       expect(fixture.nativeElement.querySelector('.drawer-lead-actions')).toBeNull();
 
-      fixture.componentInstance.changeLeadState({ lead, state: 'Reactivated', details: '' });
-      vi.advanceTimersByTime(800);
-      fixture.detectChanges();
+      if (lead.leadType === 'Parked') {
+        fixture.componentInstance.changeLeadState({ lead, state: 'Reactivated', details: '' });
+        vi.advanceTimersByTime(800);
+        fixture.detectChanges();
 
-      expect(dashboard.boards.flatMap((board) => board.leads).find((candidate) => candidate.id === lead.id)?.leadType).toBe('Reactivated');
-      expect(fixture.nativeElement.querySelector('.activity-toast')?.textContent).toContain('Lead reactivated successfully.');
-      vi.advanceTimersByTime(4000);
+        expect(dashboard.boards.flatMap((board) => board.leads).find((candidate) => candidate.id === lead.id)?.leadType).toBe('Reactivated');
+        expect(fixture.nativeElement.querySelector('.activity-toast')?.textContent).toContain('Lead reactivated successfully.');
+        vi.advanceTimersByTime(4000);
+      }
     }
 
     vi.useRealTimers();

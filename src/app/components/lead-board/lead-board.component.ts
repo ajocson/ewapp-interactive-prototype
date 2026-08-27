@@ -50,6 +50,10 @@ export class LeadBoardComponent {
     { value: 'name-asc', label: 'Name A–Z' },
     { value: 'name-desc', label: 'Name Z–A' }
   ];
+  readonly appointmentSortOptions: readonly { value: Exclude<BoardSortOption, null>; label: string }[] = [
+    { value: 'appointment-upcoming', label: 'Appointment – Upcoming First' },
+    { value: 'appointment-latest', label: 'Appointment – Latest First' }
+  ];
 
   isSearchOpen = false;
   isFilterOpen = false;
@@ -85,6 +89,12 @@ export class LeadBoardComponent {
       case 'name-desc':
         leads = [...leads].sort((first, second) => second.name.localeCompare(first.name));
         break;
+      case 'appointment-upcoming':
+        leads = [...leads].sort((first, second) => this.compareAppointments(first, second, 1));
+        break;
+      case 'appointment-latest':
+        leads = [...leads].sort((first, second) => this.compareAppointments(first, second, -1));
+        break;
     }
 
     return leads;
@@ -92,6 +102,12 @@ export class LeadBoardComponent {
 
   get hasAppliedFilters(): boolean {
     return this.hasFilters(this.appliedFilters);
+  }
+
+  get availableSortOptions(): readonly { value: Exclude<BoardSortOption, null>; label: string }[] {
+    return this.board.id === 'appointments'
+      ? [...this.sortOptions, ...this.appointmentSortOptions]
+      : this.sortOptions;
   }
 
   get hasDraftFilters(): boolean {
@@ -184,6 +200,21 @@ export class LeadBoardComponent {
 
   private activityTimestamp(lead: LeadCardData): number {
     return lead.lastActivityTimestamp ?? lead.createdAtTimestamp;
+  }
+
+  private compareAppointments(first: LeadCardData, second: LeadCardData, direction: 1 | -1): number {
+    const firstTimestamp = this.appointmentTimestamp(first);
+    const secondTimestamp = this.appointmentTimestamp(second);
+    if (firstTimestamp === null && secondTimestamp === null) return 0;
+    if (firstTimestamp === null) return 1;
+    if (secondTimestamp === null) return -1;
+    return (firstTimestamp - secondTimestamp) * direction;
+  }
+
+  private appointmentTimestamp(lead: LeadCardData): number | null {
+    if (!lead.appointment) return null;
+    const date = new Date(`${lead.appointment.date}T00:00:00`).getTime();
+    return Number.isNaN(date) ? null : date + lead.appointment.startMinutes * 60_000;
   }
 
   private filtersMatch(first: LeadBoardFilters, second: LeadBoardFilters): boolean {

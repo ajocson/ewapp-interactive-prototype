@@ -1,7 +1,14 @@
 import { LeadState } from '../../lead-board.model';
 
 export type BoardLeadStateFilter = LeadState | 'Re-endorsed';
-export type BoardSortOption = 'recent' | 'oldest' | 'name-asc' | 'name-desc' | null;
+export type BoardSortOption =
+  | 'recent'
+  | 'oldest'
+  | 'name-asc'
+  | 'name-desc'
+  | 'appointment-upcoming'
+  | 'appointment-latest'
+  | null;
 
 export interface LeadBoardFilters {
   leadStates: readonly BoardLeadStateFilter[];

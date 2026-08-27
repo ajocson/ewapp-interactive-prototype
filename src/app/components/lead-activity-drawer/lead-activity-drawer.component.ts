@@ -7,6 +7,13 @@ import { TdxTagEmphasis, TdxTagVariant } from '../../shared/components/tag/tag.m
 import { StepperStep } from '../../shared/components/stepper/stepper.model';
 import { TdxFieldControlOption } from '../../shared/components/field-control/field-control.component';
 
+const APPOINTMENT_STATUS_TAGS = new Set([
+  'Appointment Set',
+  'Appointment Scheduled',
+  'Appointment Rescheduled',
+  'Appointment Canceled'
+]);
+
 export interface LeadContactedEvent {
   lead: LeadCardData;
   notes: string;
@@ -28,6 +35,26 @@ export interface LeadAppointmentCompletedEvent {
 }
 
 export interface LeadFollowUpRecordedEvent {
+  lead: LeadCardData;
+  notes: string;
+}
+
+export interface LeadFollowUpAppointmentScheduledEvent {
+  lead: LeadCardData;
+  appointment: LeadAppointment;
+}
+
+export interface LeadFollowUpAppointmentCancelledEvent {
+  lead: LeadCardData;
+  notes: string;
+}
+
+export interface LeadFollowUpAppointmentCompletedEvent {
+  lead: LeadCardData;
+  notes: string;
+}
+
+export interface LeadUpdateRecordedEvent {
   lead: LeadCardData;
   notes: string;
 }
@@ -62,6 +89,11 @@ export class LeadActivityDrawerComponent implements OnChanges {
   @Output() appointmentCancelled = new EventEmitter<LeadAppointmentCancelledEvent>();
   @Output() appointmentCompleted = new EventEmitter<LeadAppointmentCompletedEvent>();
   @Output() followUpRecorded = new EventEmitter<LeadFollowUpRecordedEvent>();
+  @Output() followUpAppointmentScheduled = new EventEmitter<LeadFollowUpAppointmentScheduledEvent>();
+  @Output() followUpAppointmentCancelled = new EventEmitter<LeadFollowUpAppointmentCancelledEvent>();
+  @Output() followUpAppointmentCompleted = new EventEmitter<LeadFollowUpAppointmentCompletedEvent>();
+  @Output() updateRecorded = new EventEmitter<LeadUpdateRecordedEvent>();
+  @Output() proposalRequested = new EventEmitter<void>();
   @Output() leadStateChanged = new EventEmitter<LeadStateChangedEvent>();
 
   readonly buttonVariant = TdxButtonVariant;
@@ -78,6 +110,7 @@ export class LeadActivityDrawerComponent implements OnChanges {
   rescheduling = false;
   cancellingAppointment = false;
   followUpRecording = false;
+  schedulerMode: 'appointment' | 'follow-up' = 'appointment';
   actionMode: 'park' | 'drop' | null = null;
   stateConfirmation: 'park' | 'drop' | 'reactivate' | null = null;
   activityNotes = '';
@@ -85,11 +118,10 @@ export class LeadActivityDrawerComponent implements OnChanges {
   appointmentNotes = '';
   parkNotes = '';
   dropReason = '';
-  dropOtherReason = '';
   selectedDate = '';
   selectedStartMinutes: number | null = null;
   selectedEndMinutes: number | null = null;
-  readonly activitySteps: StepperStep[] = [
+  private readonly baseActivitySteps: StepperStep[] = [
     { label: 'Contacted', number: 1 },
     { label: 'Appointment', number: 2 },
     { label: 'Meeting', number: 3 }
@@ -99,20 +131,29 @@ export class LeadActivityDrawerComponent implements OnChanges {
     { label: 'No time', value: 'No time' },
     { label: 'Already has insurance', value: 'Already has insurance' },
     { label: 'Uncontactable', value: 'Uncontactable' },
-    { label: 'Not interested', value: 'Not interested' },
-    { label: 'Others', value: 'Others' }
+    { label: 'Not interested', value: 'Not interested' }
   ];
 
   get schedulerTitle(): string {
+    if (this.schedulerMode === 'follow-up') {
+      return this.rescheduling ? 'Reschedule Follow-up Appointment' : 'Schedule Follow-up Appointment';
+    }
     return this.rescheduling ? 'Reschedule Appointment' : 'Schedule Appointment';
   }
 
+  get activitySteps(): StepperStep[] {
+    return this.isFollowUp
+      ? [...this.baseActivitySteps, { label: 'Follow-up', number: 4 }]
+      : this.baseActivitySteps;
+  }
+
   get schedulerNotesPlaceholder(): string {
+    if (this.schedulerMode === 'follow-up') return 'Add notes about the follow-up appointment';
     return this.rescheduling ? 'Add notes or important details' : 'Add notes about the appointment';
   }
 
   get isDropActionDisabled(): boolean {
-    return !this.dropReason || (this.dropReason === 'Others' && !this.dropOtherReason.trim());
+    return !this.dropReason;
   }
 
   get displayName(): string {
@@ -132,11 +173,37 @@ export class LeadActivityDrawerComponent implements OnChanges {
   }
 
   get isAppointmentSet(): boolean {
-    return this.statusTag === 'Appointment Set';
+    return APPOINTMENT_STATUS_TAGS.has(this.statusTag);
   }
 
   get isMeeting(): boolean {
     return this.statusTag === 'Meeting';
+  }
+
+  get isFollowUp(): boolean {
+    return this.statusTag === 'Follow-up';
+  }
+
+  get hasFollowUpAppointment(): boolean {
+    return this.isFollowUp && Boolean(this.lead.appointment);
+  }
+
+  get cancelAppointmentTitle(): string {
+    return this.hasFollowUpAppointment ? 'Cancel Follow-up Appointment' : 'Cancel Appointment';
+  }
+
+  get cancelAppointmentNotesPlaceholder(): string {
+    return this.hasFollowUpAppointment
+      ? 'Add notes about the follow-up appointment'
+      : 'Add notes about your conversation';
+  }
+
+  get primaryActionLabel(): string {
+    if (this.isAppointmentSet || this.isMeeting || this.isFollowUp) {
+      return 'Generate/View Full Proposal';
+    }
+
+    return this.isContacted ? 'Generate Full Proposal' : 'Generate Draft SI';
   }
 
   get isLeadPaused(): boolean {
@@ -170,7 +237,7 @@ export class LeadActivityDrawerComponent implements OnChanges {
       return 'This lead will be parked and remain in its current stage. You can reactivate it anytime to continue.';
     }
     if (this.stateConfirmation === 'drop') {
-      return 'This lead will be marked as dropped and remain in its current stage. You can reactivate it anytime to continue.';
+      return 'This lead will be marked as dropped and remain in its current stage for reference.';
     }
     return 'This lead will become active again, allowing you to continue the sales journey from where you left off.';
   }
@@ -182,6 +249,7 @@ export class LeadActivityDrawerComponent implements OnChanges {
   }
 
   get currentStepIndex(): number {
+    if (this.isFollowUp) return 3;
     if (this.isMeeting) return 2;
     if (this.isAppointmentSet || this.isContacted) return 1;
     return 0;
@@ -218,6 +286,7 @@ export class LeadActivityDrawerComponent implements OnChanges {
     this.rescheduling = false;
     this.cancellingAppointment = false;
     this.followUpRecording = false;
+    this.schedulerMode = 'appointment';
     this.actionMode = null;
     this.stateConfirmation = null;
     this.activityNotes = '';
@@ -225,7 +294,6 @@ export class LeadActivityDrawerComponent implements OnChanges {
     this.appointmentNotes = this.lead.appointment?.notes ?? '';
     this.parkNotes = '';
     this.dropReason = '';
-    this.dropOtherReason = '';
     this.selectedDate = this.lead.appointment?.date ?? '';
     this.selectedStartMinutes = this.lead.appointment?.startMinutes ?? null;
     this.selectedEndMinutes = this.lead.appointment?.endMinutes ?? null;
@@ -244,17 +312,28 @@ export class LeadActivityDrawerComponent implements OnChanges {
   }
 
   openScheduler(): void {
-    this.openAppointmentScheduler(false);
+    this.openAppointmentScheduler(false, 'appointment');
   }
 
   openRescheduler(): void {
-    this.openAppointmentScheduler(true);
+    this.openAppointmentScheduler(true, 'appointment');
   }
 
-  private openAppointmentScheduler(rescheduling: boolean): void {
+  openFollowUpScheduler(): void {
+    if (!this.isFollowUp) return;
+    this.openAppointmentScheduler(false, 'follow-up');
+  }
+
+  openFollowUpRescheduler(): void {
+    if (!this.hasFollowUpAppointment) return;
+    this.openAppointmentScheduler(true, 'follow-up');
+  }
+
+  private openAppointmentScheduler(rescheduling: boolean, schedulerMode: 'appointment' | 'follow-up'): void {
     const now = new Date();
     this.scheduling = true;
     this.rescheduling = rescheduling;
+    this.schedulerMode = schedulerMode;
     this.cancellingAppointment = false;
     this.selectedDate = this.lead.appointment?.date ?? this.toIsoDate(now);
     this.selectedStartMinutes = this.lead.appointment?.startMinutes ?? this.firstAvailableStart(now);
@@ -265,6 +344,7 @@ export class LeadActivityDrawerComponent implements OnChanges {
   cancelScheduler(): void {
     this.scheduling = false;
     this.rescheduling = false;
+    this.schedulerMode = 'appointment';
   }
 
   dateChanged(): void {
@@ -297,6 +377,11 @@ export class LeadActivityDrawerComponent implements OnChanges {
       }
     };
 
+    if (this.schedulerMode === 'follow-up') {
+      this.followUpAppointmentScheduled.emit(event);
+      return;
+    }
+
     if (this.rescheduling) {
       this.appointmentRescheduled.emit(event);
       return;
@@ -318,6 +403,10 @@ export class LeadActivityDrawerComponent implements OnChanges {
   }
 
   confirmCancelAppointment(): void {
+    if (this.hasFollowUpAppointment) {
+      this.followUpAppointmentCancelled.emit({ lead: this.lead, notes: this.appointmentNotes.trim() });
+      return;
+    }
     if (!this.isAppointmentSet || !this.lead.appointment) return;
     this.appointmentCancelled.emit({ lead: this.lead, notes: this.appointmentNotes.trim() });
   }
@@ -333,14 +422,32 @@ export class LeadActivityDrawerComponent implements OnChanges {
     this.followUpNotes = '';
   }
 
+  openUpdateForm(): void {
+    if (!this.isFollowUp) return;
+    this.followUpRecording = true;
+    this.followUpNotes = '';
+  }
+
   cancelFollowUpForm(): void {
     this.followUpRecording = false;
     this.followUpNotes = '';
   }
 
   saveFollowUp(): void {
-    if (!this.isMeeting) return;
-    this.followUpRecorded.emit({ lead: this.lead, notes: this.followUpNotes });
+    if (this.isFollowUp) {
+      this.updateRecorded.emit({ lead: this.lead, notes: this.followUpNotes });
+      return;
+    }
+    if (this.isMeeting) this.followUpRecorded.emit({ lead: this.lead, notes: this.followUpNotes });
+  }
+
+  completeFollowUpAppointment(): void {
+    if (!this.hasFollowUpAppointment) return;
+    this.followUpAppointmentCompleted.emit({ lead: this.lead, notes: this.followUpNotes.trim() });
+  }
+
+  proceedToApplication(): void {
+    if (this.isFollowUp) this.proposalRequested.emit();
   }
 
   openLeadAction(mode: 'park' | 'drop'): void {
@@ -352,7 +459,6 @@ export class LeadActivityDrawerComponent implements OnChanges {
     this.actionMode = mode;
     this.parkNotes = '';
     this.dropReason = '';
-    this.dropOtherReason = '';
   }
 
   cancelLeadAction(): void {
@@ -360,12 +466,10 @@ export class LeadActivityDrawerComponent implements OnChanges {
     this.stateConfirmation = null;
     this.parkNotes = '';
     this.dropReason = '';
-    this.dropOtherReason = '';
   }
 
   dropReasonChanged(value: string): void {
     this.dropReason = value;
-    if (value !== 'Others') this.dropOtherReason = '';
     this.changeDetectorRef.markForCheck();
   }
 
@@ -398,18 +502,14 @@ export class LeadActivityDrawerComponent implements OnChanges {
     this.leadStateChanged.emit({
       lead: this.lead,
       state: confirmation === 'park' ? 'Parked' : 'Dropped',
-      details: confirmation === 'park'
-        ? this.parkNotes.trim()
-        : this.dropReason === 'Others'
-          ? this.dropOtherReason.trim()
-          : this.dropReason
+      details: confirmation === 'park' ? this.parkNotes.trim() : this.dropReason
     });
     this.stateConfirmation = null;
     this.changeDetectorRef.markForCheck();
   }
 
   reactivateLead(): void {
-    if (!this.isLeadPaused) return;
+    if (this.lead.leadType !== 'Parked') return;
     this.stateConfirmation = 'reactivate';
     this.changeDetectorRef.markForCheck();
   }
@@ -419,7 +519,9 @@ export class LeadActivityDrawerComponent implements OnChanges {
   }
 
   private activitiesFor(category: LeadActivityRecord['category']): readonly LeadActivityRecord[] {
-    return this.lead.activities.filter((activity) => activity.category === category);
+    return [...this.lead.activities]
+      .filter((activity) => activity.category === category)
+      .sort((first, second) => first.occurredAtTimestamp - second.occurredAtTimestamp);
   }
 
   private buildTimeOptions(startMinutes: number, endMinutes: number): readonly TimeOption[] {

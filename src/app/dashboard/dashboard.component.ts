@@ -36,13 +36,16 @@ const DESKTOP_SIDEBAR_QUERY = '(min-width: 1024px)';
 export class DashboardComponent implements OnDestroy {
   @Output() leadOpened = new EventEmitter<LeadCardData>();
   searchTerm = '';
-  selectedSource = 'All Sources';
+  pendingSources: readonly string[] = ['All'];
+  appliedSources: readonly string[] = ['All'];
   selectedLead: LeadCardData | null = null;
   isDesktopViewport = false;
   filterMenuOpen = false;
   pendingLeadStatuses: readonly string[] = ['All'];
   pendingLeadStates: readonly string[] = ['All'];
   pendingReferrer = 'All';
+  referrerSearchTerm = '';
+  referrerSuggestionsOpen = false;
   pendingSort = 'recent';
   appliedLeadStatuses: readonly string[] = ['All'];
   appliedLeadStates: readonly string[] = ['All'];
@@ -52,17 +55,26 @@ export class DashboardComponent implements OnDestroy {
 
   readonly buttonVariant = TdxButtonVariant;
   readonly buttonSize = TdxButtonSize;
-  readonly sourceOptions = ['All Sources', 'ESRA (NTB)', 'LMS (ETB)', 'EasyWay', 'Facebook ESTA', 'Horizon Platform', 'Priority Banking (PB)', 'CBG', 'CLC', 'Self-Generated Leads', 'Existing Leads Campaign', 'EWA Social Media', 'Leads from store', 'Non-EWA Online Publications Posts', 'Online Advertisements', 'Physical Advertisements', 'EWA Marketing Events'];
-  readonly sourceControlOptions: readonly TdxFieldControlOption[] = this.sourceOptions.map((source) => ({
-    label: source,
-    value: source
-  }));
-  readonly leadStatusOptions = ['All', 'Application Start', 'Application Submitted', 'Appointment Set', 'Approved', 'Conditionally Accepted', 'Contacted', 'Follow Up', 'Meeting', 'Needs More Info', 'New Lead', 'Policy Released', 'Postponed', 'UW Ongoing', 'Unapproved', 'Withdrawn'];
+  readonly sourceOptions = ['ESRA (NTB)', 'LMS (ETB)', 'EasyWay', 'Facebook ESTA', 'Horizon Platform', 'Priority Banking (PB)', 'CBG', 'CLC', 'Self-Generated Leads', 'Existing Leads Campaign', 'EWA Social Media', 'Leads from store', 'Non-EWA Online Publications Posts', 'Online Advertisements', 'Physical Advertisements', 'EWA Marketing Events'];
+  readonly sourceControlOptions: readonly TdxFieldControlOption[] = [
+    { label: 'All Sources', value: 'All' },
+    ...this.sourceOptions.map((source) => ({ label: source, value: source }))
+  ];
+  readonly leadStatusOptions = [
+    'All',
+    'Application Start',
+    'Appointment Scheduled',
+    'Appointment Rescheduled',
+    'Appointment Canceled',
+    'Contacted',
+    'Follow Up',
+    'Meeting',
+    'New Lead'
+  ];
   readonly leadStateOptions = ['All', 'Active', 'Dropped', 'Inactive', 'Parked', 'Re-endorsed', 'Reactivated'];
-  readonly referrerOptions = ['All', 'Maxwell Anderson', 'Olivia Martinez', 'James Anderson', 'Sophia Williams', 'Ethan Johnson', 'Isabella Brown', 'Liam Thompson', 'Emma Davis', 'Noah Garcia', 'Ava Robinson', 'Lucas Mitchell'];
+  readonly referrerOptions = ['Maxwell Anderson', 'Olivia Martinez', 'James Anderson', 'Sophia Williams', 'Ethan Johnson', 'Isabella Brown', 'Liam Thompson', 'Emma Davis', 'Noah Garcia', 'Ava Robinson', 'Lucas Mitchell'];
   readonly leadStatusControlOptions: readonly TdxFieldControlOption[] = this.leadStatusOptions.map((status) => ({ label: status, value: status }));
   readonly leadStateControlOptions: readonly TdxFieldControlOption[] = this.leadStateOptions.map((state) => ({ label: state, value: state }));
-  readonly referrerControlOptions: readonly TdxFieldControlOption[] = this.referrerOptions.map((referrer) => ({ label: referrer, value: referrer }));
   readonly boards: readonly LeadBoardData[] = this.createBoards();
   readonly sortOptions = [
     { label: 'Recently Created', value: 'recent' },
@@ -73,6 +85,7 @@ export class DashboardComponent implements OnDestroy {
 
   private readonly desktopMediaQuery: MediaQueryList | null;
   private highlightTimer?: ReturnType<typeof setTimeout>;
+  private activitySequence = 0;
 
   constructor(
     @Inject(DOCUMENT) document: Document,
@@ -99,6 +112,7 @@ export class DashboardComponent implements OnDestroy {
   @HostListener('document:keydown.escape')
   closeSidebarWithEscape(): void {
     this.filterMenuOpen = false;
+    this.referrerSuggestionsOpen = false;
 
     if (!this.isDesktopViewport && this.navigation.isSidebarOpen()) {
       this.navigation.setSidebarOpen(false);
@@ -108,6 +122,7 @@ export class DashboardComponent implements OnDestroy {
   @HostListener('document:click')
   closeFilterMenu(): void {
     this.filterMenuOpen = false;
+    this.referrerSuggestionsOpen = false;
   }
 
   get filterDirty(): boolean {
@@ -136,6 +151,8 @@ export class DashboardComponent implements OnDestroy {
       this.pendingLeadStatuses = [...this.appliedLeadStatuses];
       this.pendingLeadStates = [...this.appliedLeadStates];
       this.pendingReferrer = this.appliedReferrer;
+      this.referrerSearchTerm = this.appliedReferrer === 'All' ? '' : this.appliedReferrer;
+      this.referrerSuggestionsOpen = false;
       this.pendingSort = this.appliedSort;
     }
 
@@ -146,6 +163,8 @@ export class DashboardComponent implements OnDestroy {
     this.pendingLeadStatuses = ['All'];
     this.pendingLeadStates = ['All'];
     this.pendingReferrer = 'All';
+    this.referrerSearchTerm = '';
+    this.referrerSuggestionsOpen = false;
     this.pendingSort = 'recent';
   }
 
@@ -155,6 +174,50 @@ export class DashboardComponent implements OnDestroy {
     this.appliedReferrer = this.pendingReferrer;
     this.appliedSort = this.pendingSort;
     this.filterMenuOpen = false;
+    this.referrerSuggestionsOpen = false;
+    this.changeDetectorRef.markForCheck();
+  }
+
+  get filteredReferrerOptions(): readonly string[] {
+    const query = this.referrerSearchTerm.trim().toLocaleLowerCase();
+    if (!query) return [];
+    return this.referrerOptions.filter((referrer) => referrer.toLocaleLowerCase().includes(query));
+  }
+
+  updateReferrerSearch(value: string): void {
+    this.referrerSearchTerm = value;
+    this.pendingReferrer = 'All';
+    this.referrerSuggestionsOpen = Boolean(value.trim());
+  }
+
+  openReferrerSuggestions(): void {
+    this.referrerSuggestionsOpen = Boolean(this.referrerSearchTerm.trim());
+  }
+
+  selectReferrer(referrer: string): void {
+    this.pendingReferrer = referrer;
+    this.referrerSearchTerm = referrer;
+    this.referrerSuggestionsOpen = false;
+  }
+
+  get sourceSelectionDirty(): boolean {
+    return !this.valuesMatch(this.pendingSources, this.appliedSources);
+  }
+
+  get sourceSelectionHasValues(): boolean {
+    return !this.pendingSources.includes('All');
+  }
+
+  handleSourceMenuOpen(isOpen: boolean): void {
+    if (isOpen || this.sourceSelectionDirty) this.pendingSources = [...this.appliedSources];
+  }
+
+  resetPendingSources(): void {
+    this.pendingSources = ['All'];
+  }
+
+  applySources(): void {
+    this.appliedSources = [...this.pendingSources];
     this.changeDetectorRef.markForCheck();
   }
 
@@ -165,7 +228,7 @@ export class DashboardComponent implements OnDestroy {
       ...board,
       leads: board.leads.filter((lead) => {
         const matchesName = !query || lead.name.toLocaleLowerCase().includes(query);
-        const matchesSource = this.selectedSource === 'All Sources' || lead.source === this.selectedSource;
+        const matchesSource = this.appliedSources.includes('All') || this.appliedSources.includes(lead.source);
         const selectedStatuses = this.appliedLeadStatuses.map((status) => this.normalizeStatus(status));
         const matchesStatus = this.appliedLeadStatuses.includes('All')
           || lead.tags.some((tag) => selectedStatuses.includes(this.normalizeStatus(tag.label)));
@@ -208,7 +271,6 @@ export class DashboardComponent implements OnDestroy {
     leadBoard.leads = leadBoard.leads.filter((candidate) => candidate.id !== leadId);
     contactedBoard.leads = [contactedLead, ...contactedBoard.leads];
     this.selectedLead = contactedLead;
-    this.highlightLead(contactedLead.id);
     this.changeDetectorRef.markForCheck();
     return contactedLead;
   }
@@ -226,16 +288,24 @@ export class DashboardComponent implements OnDestroy {
       lastActivityTimestamp: Date.now(),
       appointment,
       tags: [
-        { label: 'Appointment Set', tone: 'success' },
+        { label: 'Appointment Scheduled', tone: 'success' },
         { label: `${this.shortAppointmentDate(appointment.date)} · ${appointment.timeLabel}`, tone: 'info' }
       ],
-      activities: [...lead.activities, this.createActivity('sales', 'Appointment Scheduled', new Date(), appointment.notes)]
+      activities: [
+        ...lead.activities,
+        this.createActivity(
+          'sales',
+          'Appointment Scheduled',
+          this.dateFromAppointment(appointment),
+          appointment.notes,
+          appointment.timeLabel
+        )
+      ]
     };
 
     contactedBoard.leads = contactedBoard.leads.filter((candidate) => candidate.id !== leadId);
     appointmentsBoard.leads = [scheduledLead, ...appointmentsBoard.leads];
     this.selectedLead = scheduledLead;
-    this.highlightLead(scheduledLead.id);
     this.changeDetectorRef.markForCheck();
     return scheduledLead;
   }
@@ -253,15 +323,23 @@ export class DashboardComponent implements OnDestroy {
       lastActivityTimestamp: activityDate.getTime(),
       appointment,
       tags: [
-        { label: 'Appointment Set', tone: 'success' },
+        { label: 'Appointment Rescheduled', tone: 'success' },
         { label: `${this.shortAppointmentDate(appointment.date)} · ${appointment.timeLabel}`, tone: 'info' }
       ],
-      activities: [...lead.activities, this.createActivity('sales', 'Appointment Rescheduled', activityDate, appointment.notes)]
+      activities: [
+        ...lead.activities,
+        this.createActivity(
+          'sales',
+          'Appointment Rescheduled',
+          this.dateFromAppointment(appointment),
+          appointment.notes,
+          appointment.timeLabel
+        )
+      ]
     };
 
     appointmentsBoard.leads = [rescheduledLead, ...appointmentsBoard.leads.filter((candidate) => candidate.id !== leadId)];
     this.selectedLead = rescheduledLead;
-    this.highlightLead(rescheduledLead.id);
     this.changeDetectorRef.markForCheck();
     return rescheduledLead;
   }
@@ -278,13 +356,12 @@ export class DashboardComponent implements OnDestroy {
       ...leadWithoutAppointment,
       leadType: 'Active',
       lastActivityTimestamp: activityDate.getTime(),
-      tags: [{ label: 'Appointment Set', tone: 'success' }],
+      tags: [{ label: 'Appointment Canceled', tone: 'success' }],
       activities: [...lead.activities, this.createActivity('sales', 'Appointment Canceled', activityDate, notes)]
     };
 
     appointmentsBoard.leads = [cancelledLead, ...appointmentsBoard.leads.filter((candidate) => candidate.id !== leadId)];
     this.selectedLead = cancelledLead;
-    this.highlightLead(cancelledLead.id);
     this.changeDetectorRef.markForCheck();
     return cancelledLead;
   }
@@ -301,13 +378,12 @@ export class DashboardComponent implements OnDestroy {
       leadType: 'Active',
       lastActivityTimestamp: Date.now(),
       tags: [{ label: 'Meeting', tone: 'success' }],
-      activities: [...lead.activities, this.createActivity('sales', 'Appointment Completed', new Date(), notes)]
+      activities: [...lead.activities, this.createActivity('sales', 'Meeting (Proposal Presented)', new Date(), notes)]
     };
 
     appointmentsBoard.leads = appointmentsBoard.leads.filter((candidate) => candidate.id !== leadId);
     meetingsBoard.leads = [meetingLead, ...meetingsBoard.leads];
     this.selectedLead = meetingLead;
-    this.highlightLead(meetingLead.id);
     this.changeDetectorRef.markForCheck();
     return meetingLead;
   }
@@ -324,15 +400,104 @@ export class DashboardComponent implements OnDestroy {
       leadType: 'Active',
       lastActivityTimestamp: Date.now(),
       tags: [{ label: 'Follow-up', tone: 'success' }],
-      activities: [...lead.activities, this.createActivity('sales', 'Follow Up Created', new Date(), notes)]
+      activities: [...lead.activities, this.createActivity('sales', 'Follow up created', new Date(), notes)]
     };
 
     meetingsBoard.leads = meetingsBoard.leads.filter((candidate) => candidate.id !== leadId);
     followUpBoard.leads = [followUpLead, ...followUpBoard.leads];
     this.selectedLead = followUpLead;
-    this.highlightLead(followUpLead.id);
     this.changeDetectorRef.markForCheck();
     return followUpLead;
+  }
+
+  scheduleFollowUpAppointment(leadId: string, appointment: LeadAppointment): LeadCardData | null {
+    const followUpBoard = this.boards.find((board) => board.id === 'follow-up');
+    const lead = followUpBoard?.leads.find((candidate) => candidate.id === leadId);
+    if (!followUpBoard || !lead) return null;
+
+    const activityDate = new Date();
+    const updatedLead: LeadCardData = {
+      ...lead,
+      lastActivityTimestamp: activityDate.getTime(),
+      appointment,
+      tags: [
+        { label: 'Follow-up', tone: 'success' },
+        { label: `${this.shortAppointmentDate(appointment.date)} · ${appointment.timeLabel}`, tone: 'info' }
+      ],
+      activities: [
+        ...lead.activities,
+        this.createActivity(
+          'sales',
+          'Appointment Scheduled',
+          this.dateFromAppointment(appointment),
+          appointment.notes,
+          appointment.timeLabel
+        )
+      ]
+    };
+
+    followUpBoard.leads = [updatedLead, ...followUpBoard.leads.filter((candidate) => candidate.id !== leadId)];
+    this.selectedLead = updatedLead;
+    this.changeDetectorRef.markForCheck();
+    return updatedLead;
+  }
+
+  cancelFollowUpAppointment(leadId: string, notes = ''): LeadCardData | null {
+    const followUpBoard = this.boards.find((board) => board.id === 'follow-up');
+    const lead = followUpBoard?.leads.find((candidate) => candidate.id === leadId);
+    if (!followUpBoard || !lead || !lead.appointment) return null;
+
+    const activityDate = new Date();
+    const { appointment: _cancelledAppointment, ...leadWithoutAppointment } = lead;
+    const updatedLead: LeadCardData = {
+      ...leadWithoutAppointment,
+      lastActivityTimestamp: activityDate.getTime(),
+      tags: [{ label: 'Follow-up', tone: 'success' }],
+      activities: [...lead.activities, this.createActivity('sales', 'Appointment Canceled', activityDate, notes)]
+    };
+
+    followUpBoard.leads = [updatedLead, ...followUpBoard.leads.filter((candidate) => candidate.id !== leadId)];
+    this.selectedLead = updatedLead;
+    this.changeDetectorRef.markForCheck();
+    return updatedLead;
+  }
+
+  completeFollowUpAppointment(leadId: string, notes = ''): LeadCardData | null {
+    const followUpBoard = this.boards.find((board) => board.id === 'follow-up');
+    const lead = followUpBoard?.leads.find((candidate) => candidate.id === leadId);
+    if (!followUpBoard || !lead || !lead.appointment) return null;
+
+    const activityDate = new Date();
+    const { appointment: _completedAppointment, ...leadWithoutAppointment } = lead;
+    const updatedLead: LeadCardData = {
+      ...leadWithoutAppointment,
+      lastActivityTimestamp: activityDate.getTime(),
+      tags: [{ label: 'Follow-up', tone: 'success' }],
+      activities: [...lead.activities, this.createActivity('sales', 'Follow up updated', activityDate, notes)]
+    };
+
+    followUpBoard.leads = [updatedLead, ...followUpBoard.leads.filter((candidate) => candidate.id !== leadId)];
+    this.selectedLead = updatedLead;
+    this.changeDetectorRef.markForCheck();
+    return updatedLead;
+  }
+
+  recordLeadUpdate(leadId: string, notes = ''): LeadCardData | null {
+    const followUpBoard = this.boards.find((board) => board.id === 'follow-up');
+    const lead = followUpBoard?.leads.find((candidate) => candidate.id === leadId);
+    if (!followUpBoard || !lead) return null;
+
+    const activityDate = new Date();
+    const updatedLead: LeadCardData = {
+      ...lead,
+      lastActivityTimestamp: activityDate.getTime(),
+      activities: [...lead.activities, this.createActivity('sales', 'Follow up updated', activityDate, notes)]
+    };
+
+    followUpBoard.leads = [updatedLead, ...followUpBoard.leads.filter((candidate) => candidate.id !== leadId)];
+    this.selectedLead = updatedLead;
+    this.changeDetectorRef.markForCheck();
+    return updatedLead;
   }
 
   changeLeadState(leadId: string, state: Extract<LeadState, 'Reactivated' | 'Parked' | 'Dropped'>, details = ''): LeadCardData | null {
@@ -350,7 +515,7 @@ export class DashboardComponent implements OnDestroy {
         ...lead.activities,
         this.createActivity(
           'sales',
-          state === 'Parked' ? 'Lead Parked' : state === 'Dropped' ? 'Lead Dropped' : 'Lead Reactivated',
+          state === 'Parked' ? 'Parked Lead' : state === 'Dropped' ? 'Dropped Lead' : 'Reactivated Lead',
           activityDate,
           details
         )
@@ -359,7 +524,6 @@ export class DashboardComponent implements OnDestroy {
 
     board.leads = [updatedLead, ...board.leads.filter((candidate) => candidate.id !== leadId)];
     this.selectedLead = updatedLead;
-    this.highlightLead(updatedLead.id);
     this.changeDetectorRef.markForCheck();
     return updatedLead;
   }
@@ -367,6 +531,7 @@ export class DashboardComponent implements OnDestroy {
   private highlightLead(leadId: string): void {
     if (this.highlightTimer) clearTimeout(this.highlightTimer);
     this.highlightedLeadId = leadId;
+    this.changeDetectorRef.markForCheck();
     this.highlightTimer = setTimeout(() => {
       this.highlightedLeadId = null;
       this.highlightTimer = undefined;
@@ -374,10 +539,14 @@ export class DashboardComponent implements OnDestroy {
     }, 3000);
   }
 
+  highlightLeadCard(leadId: string): void {
+    this.highlightLead(leadId);
+  }
+
   private createBoards(): readonly LeadBoardData[] {
     const newLead: LeadTag = { label: 'New Lead', tone: 'primary' };
     const contacted: LeadTag = { label: 'Contacted', tone: 'success' };
-    const appointmentSet: LeadTag = { label: 'Appointment Set', tone: 'success' };
+    const appointmentScheduled: LeadTag = { label: 'Appointment Scheduled', tone: 'success' };
     const meeting: LeadTag = { label: 'Meeting', tone: 'success' };
     const followUp: LeadTag = { label: 'Follow-up', tone: 'success' };
     const appointment: LeadTag = { label: 'Feb 2, 2026 · 2:00-3:00 PM', tone: 'info' };
@@ -388,7 +557,7 @@ export class DashboardComponent implements OnDestroy {
       endMinutes: 15 * 60,
       timeLabel: '2:00-3:00 PM'
     };
-    const referrers = this.referrerOptions.slice(1);
+    const referrers = this.referrerOptions;
     const createdOn = (day: number, hour: number, minute = 0): Date =>
       new Date(2026, 1, day, hour, minute);
     const lead = (
@@ -402,22 +571,26 @@ export class DashboardComponent implements OnDestroy {
       productInterested = 'Dream Builder',
       referrer = referrers[id.split('').reduce((total, character) => total + character.charCodeAt(0), 0) % referrers.length],
       appointmentDetails?: LeadAppointment
-    ): LeadCardData => ({
-      id,
-      name,
-      gender,
-      createdAt: this.formatCreatedAt(createdAt),
-      createdAtTimestamp: createdAt.getTime(),
-      lastActivityTimestamp: createdAt.getTime(),
-      leadType: typeof state === 'boolean' ? (state ? 'Active' : 'Inactive') : state,
-      aging: '1d',
-      source,
-      referrer,
-      productInterested,
-      tags,
-      appointment: appointmentDetails,
-      activities: this.initialActivities(tags[0]?.label ?? 'New Lead', createdAt, appointmentDetails)
-    });
+    ): LeadCardData => {
+      const leadType = typeof state === 'boolean' ? (state ? 'Active' : 'Inactive') : state;
+
+      return {
+        id,
+        name,
+        gender,
+        createdAt: this.formatCreatedAt(createdAt),
+        createdAtTimestamp: createdAt.getTime(),
+        lastActivityTimestamp: createdAt.getTime(),
+        leadType,
+        aging: '1d',
+        source,
+        referrer,
+        productInterested,
+        tags,
+        appointment: appointmentDetails,
+        activities: this.initialActivities(tags[0]?.label ?? 'New Lead', createdAt, leadType, appointmentDetails)
+      };
+    };
 
     return [
       {
@@ -450,14 +623,14 @@ export class DashboardComponent implements OnDestroy {
             'Female',
             true,
             'LMS (ETB)',
-            [appointmentSet, appointment],
+            [appointmentScheduled, appointment],
             createdOn(5, 14),
             'Dream Builder',
             'Maxwell Anderson',
             sampleAppointment
           ),
-          lead('appointment-parked', 'Olivia Mae Navarro', 'Female', 'Parked', 'Branch', [appointmentSet], new Date(2026, 0, 31, 14, 30)),
-          lead('appointment-dropped', 'Ethan Gabriel Ramos', 'Male', 'Dropped', 'Event', [appointmentSet], new Date(2026, 0, 30, 11))
+          lead('appointment-parked', 'Olivia Mae Navarro', 'Female', 'Parked', 'Branch', [appointmentScheduled], new Date(2026, 0, 31, 14, 30)),
+          lead('appointment-dropped', 'Ethan Gabriel Ramos', 'Male', 'Dropped', 'Event', [appointmentScheduled], new Date(2026, 0, 30, 11))
         ]
       },
       {
@@ -502,29 +675,89 @@ export class DashboardComponent implements OnDestroy {
     return status.toLocaleLowerCase().replaceAll('-', ' ').replaceAll(/\s+/g, ' ').trim();
   }
 
-  private initialActivities(status: string, createdAt: Date, appointment?: LeadAppointment): readonly LeadActivityRecord[] {
-    const activities: LeadActivityRecord[] = [this.createActivity('system', 'New Lead', createdAt)];
+  private initialActivities(
+    status: string,
+    createdAt: Date,
+    leadState: LeadState,
+    appointment?: LeadAppointment
+  ): readonly LeadActivityRecord[] {
+    const isAppointmentStatus = [
+      'Appointment Set',
+      'Appointment Scheduled',
+      'Appointment Rescheduled',
+      'Appointment Canceled'
+    ].includes(status);
 
-    if (status === 'Contacted' || status === 'Appointment Set' || status === 'Meeting') {
-      activities.push(this.createActivity('sales', 'Contacted', createdAt));
+    const hasReachedMeeting = status === 'Meeting' || status === 'Follow-up';
+    const hasReachedAppointment = isAppointmentStatus || hasReachedMeeting;
+    const hasReachedFollowUp = status === 'Follow-up';
+    const activityDate = (daysAfterCreation: number, hour: number, minute = 0): Date => {
+      const result = new Date(createdAt);
+      result.setDate(result.getDate() + daysAfterCreation);
+      result.setHours(hour, minute, 0, 0);
+      return result;
+    };
+    const activities: LeadActivityRecord[] = [
+      this.createActivity('sales', 'New Lead Created', activityDate(0, 8, 30))
+    ];
+
+    if (status === 'Contacted' || isAppointmentStatus || hasReachedMeeting) {
+      activities.push(
+        this.createActivity(
+          'sales',
+          'Contacted',
+          activityDate(0, 9),
+          'Successfully connected with the client. Discussed their insurance needs.'
+        )
+      );
     }
-    if ((status === 'Appointment Set' || status === 'Meeting') && appointment) {
-      activities.push(this.createActivity('sales', 'Appointment Scheduled', this.dateFromAppointment(appointment)));
+    if (hasReachedAppointment) {
+      activities.push(
+        this.createActivity('sales', 'Appointment Scheduled', activityDate(1, 14), '', appointment?.timeLabel ?? '2:00-3:00 PM')
+      );
     }
-    if (status === 'Meeting') {
-      activities.push(this.createActivity('sales', 'Appointment Completed', createdAt));
+    if (hasReachedAppointment) {
+      activities.push(
+        this.createActivity('system', 'Draft SI Generated', activityDate(0, 9)),
+        this.createActivity('system', 'CSA Created', activityDate(0, 15, 30)),
+        this.createActivity('system', 'Proposal Created', activityDate(1, 9)),
+        this.createActivity('system', 'SI Generated', activityDate(1, 9, 30))
+      );
+    }
+    if (hasReachedMeeting) {
+      activities.push(
+        this.createActivity('sales', 'Meeting (Proposal Presented)', activityDate(1, 15, 30))
+      );
+    }
+    if (hasReachedFollowUp) {
+      activities.push(this.createActivity('sales', 'Follow up created', activityDate(2, 10)));
+    }
+    if (leadState === 'Parked') {
+      activities.push(this.createActivity('sales', 'Parked Lead', hasReachedMeeting ? activityDate(1, 16) : hasReachedAppointment ? activityDate(1, 15) : activityDate(0, 10)));
+    }
+    if (leadState === 'Dropped') {
+      activities.push(this.createActivity('sales', 'Dropped Lead', hasReachedMeeting ? activityDate(1, 16) : hasReachedAppointment ? activityDate(1, 15) : activityDate(0, 10)));
+    }
+    if (leadState === 'Reactivated') {
+      activities.push(this.createActivity('sales', 'Reactivated Lead', activityDate(2, 10)));
     }
 
     return activities;
   }
 
-  private createActivity(category: LeadActivityCategory, label: string, value: Date, notes = ''): LeadActivityRecord {
+  private createActivity(
+    category: LeadActivityCategory,
+    label: string,
+    value: Date,
+    notes = '',
+    timeLabel = value.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+  ): LeadActivityRecord {
     return {
-      id: `${label.toLocaleLowerCase().replaceAll(/[^a-z0-9]+/g, '-')}-${value.getTime()}`,
+      id: `${label.toLocaleLowerCase().replaceAll(/[^a-z0-9]+/g, '-')}-${value.getTime()}-${this.activitySequence++}`,
       category,
       label,
-      dateLabel: value.toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' }),
-      timeLabel: value.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+      dateLabel: value.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      timeLabel,
       occurredAtTimestamp: value.getTime(),
       ...(notes.trim() ? { notes: notes.trim() } : {})
     };

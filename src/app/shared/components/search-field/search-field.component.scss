@@ -9,3 +9,6 @@
 .tdx-search-field__clear:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring-color); outline-offset: var(--focus-ring-offset); }
 .tdx-search-field__clear .material-symbols-rounded { font-size: var(--search-field-clear-icon-size); font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
 .tdx-search-field--disabled { opacity: var(--search-field-disabled-opacity); }
+.tdx-search-field--compact { height: var(--field-height-compact); gap: var(--field-content-gap); padding: var(--field-padding); border-width: var(--field-border-width); border-color: var(--field-border-default); border-radius: var(--field-radius); }
+.tdx-search-field--compact .tdx-search-field__leading-icon { font-size: var(--field-icon-size); }
+.tdx-search-field--compact input { font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }

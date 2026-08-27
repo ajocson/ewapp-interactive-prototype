@@ -41,6 +41,28 @@ describe('ProposalFlowComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Create Proposal');
   });
 
+  it('uses the Figma product-selection flow before showing a proposal', () => {
+    const component = fixture.componentInstance;
+
+    component.goTo('risk-profile');
+    component.openProductPicker();
+    expect(component.productPickerOpen).toBe(true);
+    expect(component.proposalCreated).toBe(false);
+
+    component.selectProduct('Dream Builder');
+    component.createProposal();
+    fixture.detectChanges();
+
+    expect(component.productPickerOpen).toBe(false);
+    expect(component.proposalDraftOpen).toBe(true);
+    component.generateSalesIllustration();
+    component.requestSaveProposal();
+    component.confirmSaveProposal();
+    fixture.detectChanges();
+    expect(component.proposalCreated).toBe(true);
+    expect(component.proposalToastMessage).toBe('Proposal saved successfully.');
+  });
+
   it('confirms before adding a profile', () => {
     const component = fixture.componentInstance;
 

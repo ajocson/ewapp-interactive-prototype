@@ -10,7 +10,7 @@ import { TdxTagEmphasis, TdxTagVariant } from '../tag/tag.model';
   standalone: false
 })
 export class ScheduledActivityCardComponent {
-  @Input() title = 'Appointment Set';
+  @Input() title = 'Appointment Scheduled';
   @Input({ required: true }) date = '';
   @Input({ required: true }) time = '';
   @Input() status = 'Upcoming';

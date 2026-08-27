@@ -14,15 +14,25 @@
 
     <section class="priorities" aria-label="Lead priorities">
       <div class="filters" role="search">
-        <app-search-field class="filters__search" name="lead-search" placeholder="Search by lead name" ariaLabel="Search by lead name" [(value)]="searchTerm" />
+        <app-search-field class="filters__search" name="lead-search" placeholder="Search by lead name or ID" ariaLabel="Search by lead name or ID" [(value)]="searchTerm" />
         <tdx-field-control
           name="lead-source"
           ariaLabel="Source of lead"
-          [value]="selectedSource"
+          [selectedValues]="pendingSources"
           [options]="sourceControlOptions"
           trailingIcon="keyboard_arrow_down"
           [width]="112"
-          (valueChange)="selectedSource = $event"
+          [menuWidth]="250"
+          [multiple]="true"
+          allValue="All"
+          allLabel="All Sources"
+          [showMenuActions]="true"
+          [resetDisabled]="!sourceSelectionHasValues"
+          [applyDisabled]="!sourceSelectionDirty"
+          (openChange)="handleSourceMenuOpen($event)"
+          (selectedValuesChange)="pendingSources = $event"
+          (resetRequested)="resetPendingSources()"
+          (applyRequested)="applySources()"
         />
         <div
           class="filters__filter"
@@ -63,18 +73,33 @@
                 (selectedValuesChange)="pendingLeadStatuses = $event"
               />
             </div>
-            <div class="page-filter__field">
+            <div class="page-filter__field page-filter__field--referrer">
               <span>Referrer</span>
-              <tdx-field-control
-                ariaLabel="Filter by Referrer"
-                [value]="pendingReferrer"
-                [options]="referrerControlOptions"
-                trailingIcon="keyboard_arrow_down"
-                [width]="144"
-                [menuWidth]="204"
-                [compact]="true"
-                (valueChange)="pendingReferrer = $event"
-              />
+              <div class="page-filter__referrer">
+                <app-search-field
+                  name="referrer-search"
+                  placeholder="Search referrer"
+                  ariaLabel="Search referrer"
+                  [compact]="true"
+                  [value]="referrerSearchTerm"
+                  (focused)="openReferrerSuggestions()"
+                  (valueChange)="updateReferrerSearch($event)"
+                />
+                <div
+                  *ngIf="referrerSuggestionsOpen && filteredReferrerOptions.length"
+                  class="page-filter__referrer-options"
+                  role="listbox"
+                  aria-label="Referrer suggestions"
+                >
+                  <button
+                    *ngFor="let referrer of filteredReferrerOptions"
+                    type="button"
+                    role="option"
+                    [attr.aria-selected]="pendingReferrer === referrer"
+                    (click)="selectReferrer(referrer); $event.stopPropagation()"
+                  >{{ referrer }}</button>
+                </div>
+              </div>
             </div>
             <fieldset>
               <legend>Sort by</legend>

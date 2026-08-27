@@ -4,6 +4,7 @@
 .action-card:active { border-color: var(--action-card-border-pressed); background: var(--action-card-bg-pressed); box-shadow: var(--action-card-shadow-pressed); }
 .action-card:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring-color); outline-offset: var(--focus-ring-offset); }
 .action-card__icon { display: grid; width: var(--action-card-icon-box); height: var(--action-card-icon-box); flex: none; place-items: center; border-radius: var(--radius-md); background: var(--action-card-brand-icon-bg); color: var(--action-card-brand-icon); font-size: var(--button-medium-icon-size); }
+.action-card--info .action-card__icon { background: var(--action-card-info-icon-bg); color: var(--action-card-info-icon); }
 .action-card--success .action-card__icon { background: var(--action-card-success-icon-bg); color: var(--action-card-success-icon); }
 .action-card--danger .action-card__icon { background: var(--action-card-danger-icon-bg); color: var(--action-card-danger-icon); }
 .action-card--neutral .action-card__icon { background: var(--action-card-neutral-icon-bg); color: var(--action-card-neutral-icon); }

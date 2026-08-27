@@ -19,7 +19,7 @@
 
   <div class="drawer-scroll">
     <ng-container *ngIf="activeTab === 'overview'">
-      <section class="drawer-lead-info" [class.drawer-lead-info--action-open]="actionMode || cancellingAppointment">
+      <section class="drawer-lead-info" [class.drawer-lead-info--action-open]="actionMode">
         <dl class="drawer-details">
           <div><dt>Birthdate</dt><dd>January 05, 1989</dd></div>
           <div><dt>Gender</dt><dd>{{ lead.gender }}</dd></div>
@@ -37,7 +37,7 @@
         <div *ngIf="!isLeadPaused" class="drawer-lead-actions">
           <app-button
             class="drawer-full-button"
-            [label]="isContacted || isAppointmentSet || isMeeting ? 'Generate Full Proposal' : 'Generate Draft SI'"
+            [label]="primaryActionLabel"
             [variant]="buttonVariant.Primary"
             [emphasis]="buttonEmphasis.Outline"
             [size]="buttonSize.Small"
@@ -74,11 +74,6 @@
               (valueChange)="dropReasonChanged($event)"
             />
           </label>
-
-          <label *ngIf="dropReason === 'Others'" class="drawer-notes drawer-drop-other">
-            <span>Others</span>
-            <textarea rows="3" [(ngModel)]="dropOtherReason" placeholder="Add reason for dropping"></textarea>
-          </label>
         </div>
 
         <footer>
@@ -93,7 +88,7 @@
           <h3 id="paused-lead-title">{{ pausedStateTitle }}</h3>
           <p>{{ pausedStateDescription }}</p>
         </div>
-        <app-button class="drawer-state-summary__button" label="Reactivate Lead" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="reactivateLead()" />
+        <app-button *ngIf="lead.leadType === 'Parked'" class="drawer-state-summary__button" label="Reactivate Lead" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="reactivateLead()" />
       </section>
 
       <ng-container *ngIf="!actionMode && !isLeadPaused">
@@ -138,30 +133,34 @@
         <section *ngIf="cancellingAppointment; else activityFlow" class="drawer-appointment-action drawer-appointment-action--cancel" aria-labelledby="cancel-appointment-title">
           <div class="drawer-appointment-action__content">
             <span class="drawer-appointment-action__icon material-symbols-rounded" aria-hidden="true">delete</span>
-            <h3 id="cancel-appointment-title">Cancel Appointment</h3>
+            <h3 id="cancel-appointment-title">{{ cancelAppointmentTitle }}</h3>
           </div>
 
           <label class="drawer-notes">
             <span>Notes (Optional)</span>
-            <textarea rows="3" [(ngModel)]="appointmentNotes" placeholder="Add notes about your conversation"></textarea>
+            <textarea rows="3" [(ngModel)]="appointmentNotes" [placeholder]="cancelAppointmentNotesPlaceholder"></textarea>
           </label>
 
           <footer>
             <app-button class="drawer-action-button" label="Cancel" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="closeCancelAppointment()" />
-            <app-button class="drawer-action-button" label="Cancel Appointment" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="confirmCancelAppointment()" />
+            <app-button class="drawer-action-button" [label]="cancelAppointmentTitle" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="confirmCancelAppointment()" />
           </footer>
         </section>
       </ng-template>
 
       <ng-template #activityFlow>
-        <section class="drawer-contact" [class.drawer-contact--contacted]="isContacted || isAppointmentSet || isMeeting">
+        <section
+          class="drawer-contact"
+          [class.drawer-contact--contacted]="isContacted || isAppointmentSet || isMeeting"
+          [class.drawer-contact--follow-up]="isFollowUp"
+        >
           <header *ngIf="!followUpRecording">
             <h3>Before you continue</h3>
             <p>Complete the remaining steps before starting the application.</p>
           </header>
           <app-stepper *ngIf="!followUpRecording" [steps]="activitySteps" [currentIndex]="currentStepIndex" orientation="horizontal" />
 
-          <ng-container *ngIf="!isContacted && !isAppointmentSet && !isMeeting">
+          <ng-container *ngIf="!isContacted && !isAppointmentSet && !isMeeting && !isFollowUp">
             <label class="drawer-notes">
               <span>Notes (Optional)</span>
               <textarea rows="4" [(ngModel)]="activityNotes" placeholder="Add notes about your conversation"></textarea>
@@ -190,7 +189,7 @@
               <span>Notes (Optional)</span>
               <textarea rows="4" [(ngModel)]="activityNotes" placeholder="Add notes about your conversation"></textarea>
             </label>
-            <app-button class="drawer-contact__button" label="Appointment Completed" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="completeAppointment()" />
+            <app-button class="drawer-contact__button" label="Presentation Completed" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="completeAppointment()" />
           </ng-container>
 
           <ng-container *ngIf="isAppointmentSet && !lead.appointment">
@@ -209,14 +208,45 @@
             </div>
           </ng-container>
 
-          <section *ngIf="isMeeting && followUpRecording" class="drawer-follow-up" aria-labelledby="follow-up-title">
+          <ng-container *ngIf="hasFollowUpAppointment && !followUpRecording">
+            <div class="drawer-meeting-actions drawer-meeting-actions--scheduled">
+              <div class="drawer-meeting-actions__appointment-summary">
+                <app-section-message
+                  appearance="info"
+                  description="Record your follow-up appointment result."
+                />
+                <app-scheduled-activity-card
+                  title="Follow-up Appointment Scheduled"
+                  [date]="lead.appointment!.dateLabel"
+                  [time]="lead.appointment!.timeLabel"
+                  (reschedule)="openFollowUpRescheduler()"
+                  (cancelAppointment)="openCancelAppointment()"
+                />
+              </div>
+              <label class="drawer-notes">
+                <span>Notes (Optional)</span>
+                <textarea rows="4" [(ngModel)]="followUpNotes" placeholder="Add notes about your conversation"></textarea>
+              </label>
+              <app-button class="drawer-contact__button" label="Presentation Completed" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="completeFollowUpAppointment()" />
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="isFollowUp && !lead.appointment && !followUpRecording">
+            <div class="drawer-meeting-actions">
+              <lam-action-card title="Proceed to Application" description="Start the client’s application process." icon="contract_edit" tone="info" (activated)="proceedToApplication()" />
+              <lam-action-card title="Schedule Follow-up Appointment" description="Set a date and time for your follow-up with the client." icon="calendar_month" tone="success" (activated)="openFollowUpScheduler()" />
+              <lam-action-card title="Record Updates" description="Record what happened during the follow-up." icon="chat_add_on" tone="brand" (activated)="openUpdateForm()" />
+            </div>
+          </ng-container>
+
+          <section *ngIf="(isMeeting || isFollowUp) && followUpRecording" class="drawer-follow-up" aria-labelledby="follow-up-title">
             <header>
-              <span class="drawer-follow-up__icon material-symbols-rounded" aria-hidden="true">chat_add_on</span>
-              <h3 id="follow-up-title">For Follow-up</h3>
+              <span class="drawer-follow-up__icon material-symbols-rounded" aria-hidden="true">{{ isFollowUp ? 'edit_note' : 'chat_add_on' }}</span>
+              <h3 id="follow-up-title">{{ isFollowUp ? 'Record Updates' : 'For Follow-up' }}</h3>
             </header>
             <label class="drawer-notes">
               <span>Notes (Optional)</span>
-              <textarea rows="4" [(ngModel)]="followUpNotes" placeholder="Add notes or important details"></textarea>
+              <textarea rows="4" [(ngModel)]="followUpNotes" [placeholder]="isFollowUp ? 'Add notes about your follow-up' : 'Add notes or important details'"></textarea>
             </label>
             <footer>
               <app-button class="drawer-action-button" label="Cancel" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="cancelFollowUpForm()" />

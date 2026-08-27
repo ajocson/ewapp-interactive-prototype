@@ -21,6 +21,15 @@ export class ProposalFlowComponent {
 
   stage: ProposalStage = 'individual-form';
   drawerOpen = false;
+  productPickerOpen = false;
+  proposalDraftOpen = false;
+  proposalCreated = false;
+  selectedProduct = '';
+  productCategory = 'all';
+  proposalTab: 'info' | 'benefits' = 'info';
+  salesIllustrationGenerated = false;
+  proposalSaveConfirmation = false;
+  proposalToastMessage = '';
   confirmation: 'add-profile' | 'save-csa' | null = null;
   selectedDrawerAction = '';
   drawerTab = 'overview';
@@ -67,6 +76,39 @@ export class ProposalFlowComponent {
 
   goTo(stage: ProposalStage): void {
     this.stage = stage;
+  }
+
+  openProductPicker(): void {
+    this.productPickerOpen = true;
+    this.selectedProduct = '';
+    this.productCategory = 'all';
+  }
+
+  selectProduct(product: string): void {
+    this.selectedProduct = product;
+  }
+
+  createProposal(): void {
+    if (!this.selectedProduct) return;
+    this.productPickerOpen = false;
+    this.proposalDraftOpen = true;
+    this.proposalCreated = false;
+  }
+
+  generateSalesIllustration(): void {
+    this.salesIllustrationGenerated = true;
+  }
+
+  requestSaveProposal(): void {
+    this.proposalSaveConfirmation = true;
+  }
+
+  confirmSaveProposal(): void {
+    this.proposalSaveConfirmation = false;
+    this.proposalDraftOpen = false;
+    this.proposalCreated = true;
+    this.proposalToastMessage = 'Proposal saved successfully.';
+    window.setTimeout(() => this.proposalToastMessage = '', 4000);
   }
 
   openDrawer(): void {

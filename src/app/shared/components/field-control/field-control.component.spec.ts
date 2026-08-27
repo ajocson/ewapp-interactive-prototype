@@ -34,13 +34,16 @@ describe('FieldControlComponent', () => {
 
   it('emits activation for an action control', () => {
     let activated = false;
+    let announcedOpening = false;
     fixture.componentRef.setInput('label', 'Filter');
     fixture.componentInstance.activated.subscribe(() => activated = true);
+    fixture.nativeElement.addEventListener('tdx-field-control-open', () => announcedOpening = true);
     fixture.detectChanges();
 
     (fixture.nativeElement.querySelector('button') as HTMLButtonElement).click();
 
     expect(activated).toBe(true);
+    expect(announcedOpening).toBe(true);
   });
 
   it('supports the compact design-system size and a controlled menu width', () => {
@@ -88,5 +91,74 @@ describe('FieldControlComponent', () => {
 
     expect(values).toEqual([['Parked']]);
     expect(fixture.componentInstance.isOpen).toBe(true);
+  });
+
+  it('closes when another field control opens', () => {
+    fixture.componentRef.setInput('options', [{ label: 'All', value: 'All' }]);
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('.tdx-field-control__trigger') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    fixture.nativeElement.dispatchEvent(new Event('tdx-field-control-open', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.isOpen).toBe(false);
+  });
+
+  it('closes when an outside click is captured before a container stops propagation', () => {
+    fixture.componentRef.setInput('options', [{ label: 'All', value: 'All' }]);
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('.tdx-field-control__trigger') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    fixture.nativeElement.dispatchEvent(new Event('click', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.isOpen).toBe(false);
+  });
+
+  it('makes leading and trailing icons part of the full clickable trigger', () => {
+    fixture.componentRef.setInput('leadingIcon', 'filter_alt');
+    fixture.componentRef.setInput('trailingIcon', 'keyboard_arrow_down');
+    fixture.componentRef.setInput('options', [{ label: 'All', value: 'All' }]);
+    fixture.detectChanges();
+
+    const trigger = fixture.nativeElement.querySelector('.tdx-field-control__trigger') as HTMLButtonElement;
+    const icons = trigger.querySelectorAll('.material-symbols-rounded');
+
+    expect(icons.length).toBe(2);
+    (icons[1] as HTMLElement).click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.isOpen).toBe(true);
+  });
+
+  it('supports staged multi-select values with Reset and Apply menu actions', () => {
+    const resets: boolean[] = [];
+    const applies: boolean[] = [];
+    fixture.componentRef.setInput('multiple', true);
+    fixture.componentRef.setInput('allLabel', 'All Sources');
+    fixture.componentRef.setInput('selectedValues', ['EasyWay', 'Digital']);
+    fixture.componentRef.setInput('showMenuActions', true);
+    fixture.componentRef.setInput('options', [
+      { label: 'All Sources', value: 'All' },
+      { label: 'EasyWay', value: 'EasyWay' },
+      { label: 'Digital', value: 'Digital' }
+    ]);
+    fixture.componentInstance.resetRequested.subscribe(() => resets.push(true));
+    fixture.componentInstance.applyRequested.subscribe(() => applies.push(true));
+    fixture.detectChanges();
+
+    const trigger = fixture.nativeElement.querySelector('.tdx-field-control__trigger') as HTMLButtonElement;
+    expect(trigger.textContent).toContain('2 selected');
+    trigger.click();
+    fixture.detectChanges();
+
+    const actions = fixture.nativeElement.querySelectorAll('.tdx-field-control__menu-actions button') as NodeListOf<HTMLButtonElement>;
+    actions[0].click();
+    actions[1].click();
+
+    expect(resets).toEqual([true]);
+    expect(applies).toEqual([true]);
+    expect(fixture.componentInstance.isOpen).toBe(false);
   });
 });

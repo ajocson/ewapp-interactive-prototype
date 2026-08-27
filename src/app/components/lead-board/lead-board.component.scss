@@ -20,6 +20,11 @@
   background: var(--board-bg);
 }
 
+.lead-board--filter-open {
+  z-index: var(--layer-popover);
+  overflow: visible;
+}
+
 .lead-board__header {
   display: flex;
   min-width: var(--space-none);
@@ -189,6 +194,7 @@
   right: var(--board-filter-menu-right);
   display: flex;
   width: var(--board-filter-menu-width);
+  max-width: calc(100vw - (var(--space-md) * 2));
   flex-direction: column;
   gap: var(--board-filter-menu-gap);
   padding: var(--board-filter-menu-padding);
@@ -242,6 +248,7 @@
   cursor: pointer;
   font-size: var(--paragraph-sm-text-size);
   line-height: var(--paragraph-sm-line-height);
+  white-space: nowrap;
 }
 
 .lead-board__radio input {

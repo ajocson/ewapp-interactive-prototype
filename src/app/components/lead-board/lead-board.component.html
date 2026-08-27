@@ -1,4 +1,8 @@
-<section class="lead-board" [attr.aria-labelledby]="board.id + '-title'">
+<section
+  class="lead-board"
+  [class.lead-board--filter-open]="isFilterOpen"
+  [attr.aria-labelledby]="board.id + '-title'"
+>
   <header class="lead-board__header">
     <span *ngIf="!isSearchOpen" class="lead-board__heading">
       <h2 [id]="board.id + '-title'">{{ board.title }}</h2>
@@ -72,8 +76,7 @@
       <app-field-control
         ariaLabel="Filter by Lead State"
         [name]="board.id + '-lead-state-filter'"
-        [width]="159"
-        [menuWidth]="204"
+        [fluid]="true"
         [compact]="true"
         [multiple]="true"
         [options]="leadStateOptions"
@@ -85,7 +88,7 @@
 
     <fieldset>
       <legend>Sort by</legend>
-      <label *ngFor="let option of sortOptions" class="lead-board__radio">
+      <label *ngFor="let option of availableSortOptions" class="lead-board__radio">
         <input
           type="radio"
           [name]="board.id + '-sort-filter'"

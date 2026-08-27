@@ -94,6 +94,17 @@ describe('LeadBoardComponent', () => {
     });
   });
 
+  it('fills the filter menu content width with the lead-state field', () => {
+    (fixture.nativeElement.querySelector('.lead-board__filter-control button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    const field = fixture.nativeElement.querySelector(
+      '.lead-board__state-filter .tdx-field-control'
+    ) as HTMLElement;
+
+    expect(field.classList).toContain('tdx-field-control--fluid');
+  });
+
   it('defaults to Recently Created without marking the filter as active', () => {
     const component = fixture.componentInstance;
 
@@ -128,6 +139,63 @@ describe('LeadBoardComponent', () => {
       'John Mark Doe',
       'David Robert Brown'
     ]);
+  });
+
+  it('offers appointment-specific sorting only on the Appointments board', () => {
+    const component = fixture.componentInstance;
+    expect(component.availableSortOptions.map((option) => option.value)).not.toContain('appointment-upcoming');
+
+    const appointmentBoard: LeadBoardData = {
+      ...board,
+      id: 'appointments',
+      title: 'Appointments',
+      leads: [
+        {
+          ...board.leads[0],
+          id: 'earlier',
+          appointment: {
+            date: '2026-08-24',
+            dateLabel: 'August 24, 2026',
+            startMinutes: 9 * 60,
+            endMinutes: 9 * 60 + 30,
+            timeLabel: '9:00-9:30 AM'
+          }
+        },
+        {
+          ...board.leads[1],
+          id: 'later',
+          appointment: {
+            date: '2026-08-25',
+            dateLabel: 'August 25, 2026',
+            startMinutes: 15 * 60,
+            endMinutes: 15 * 60 + 30,
+            timeLabel: '3:00-3:30 PM'
+          }
+        },
+        {
+          ...board.leads[0],
+          id: 'unscheduled',
+          name: 'Unscheduled Lead',
+          appointment: undefined
+        }
+      ]
+    };
+    fixture.componentRef.setInput('board', appointmentBoard);
+
+    expect(component.availableSortOptions.map((option) => option.label)).toEqual([
+      'Recently Created',
+      'Oldest Created',
+      'Name A–Z',
+      'Name Z–A',
+      'Appointment – Upcoming First',
+      'Appointment – Latest First'
+    ]);
+
+    component.appliedFilters = { leadStates: [], sort: 'appointment-upcoming' };
+    expect(component.visibleLeads.map((lead) => lead.id)).toEqual(['earlier', 'later', 'unscheduled']);
+
+    component.appliedFilters = { leadStates: [], sort: 'appointment-latest' };
+    expect(component.visibleLeads.map((lead) => lead.id)).toEqual(['later', 'earlier', 'unscheduled']);
   });
 
   it('applies board filters and marks the filter control as active', () => {

@@ -72,13 +72,13 @@ describe('LeadCardComponent', () => {
       ...fixture.componentInstance.lead,
       leadType: 'Parked',
       tags: [
-        { label: 'Appointment Set', tone: 'success' },
+        { label: 'Appointment Scheduled', tone: 'success' },
         { label: 'Aug 24, 2026 · 3:00-3:30 PM', tone: 'info' }
       ]
     });
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.lead-card__tags').textContent).toContain('Appointment Set');
+    expect(fixture.nativeElement.querySelector('.lead-card__tags').textContent).toContain('Appointment Scheduled');
     expect(fixture.nativeElement.querySelector('.lead-card__tags').textContent).not.toContain('Aug 24, 2026');
   });
 });
