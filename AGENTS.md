@@ -90,7 +90,7 @@ Each reusable component normally has a component class, HTML template, SCSS file
 - Page filters and board-level filters use separate pending/draft and applied state. Page filtering combines name, source, lead status, lead state, referrer, and sort; board filtering combines local search, lead state, and sort.
 - `ApplicationsComponent` owns three in-memory application boards and its page-level filter state. It reuses `LeadBoardComponent` with board-specific status options and shared search, field-control, radio, and button components.
 - `DraftSiFlowComponent` is a local finite-state flow (`1 | 2 | 3 | 4 | 'results'`). It nests `ProposalFlowComponent` after “Convert to Proposal.”
-- `ProposalFlowComponent` uses a string-union stage model for individual information, CSA sections, assessment, and risk profile. Its local state also drives the product-picker overlay, proposal draft, sales-illustration state, proposal-save confirmation/toast, and generated-proposal view. Parent record tabs derive their active state from this view state so Profile and Proposals cannot both appear active.
+- `ProposalFlowComponent` uses a string-union stage model for individual information, CSA sections, assessment, and risk profile. Its local state also drives the product-picker overlay, proposal draft, proposal-save confirmation/toast, saved-proposal view, and generated-sales-illustration viewer. Parent record tabs derive their active state from this view state so Profile and Proposals cannot both appear active.
 - There is no Angular Router. Navigation is conditional rendering and component/service state.
 - Most components use `ChangeDetectionStrategy.OnPush`. Preserve immutable input updates or call `markForCheck()` after imperative state changes where required.
 - Data contracts use TypeScript interfaces and union/enum models rather than untyped objects.
@@ -125,7 +125,7 @@ The code identifies its UI foundation as **TDX Design System V2**. For LCAM boar
 - Body text uses Lato; heading typography uses Montserrat Bold. Material icons use the bundled Material Symbols Rounded font.
 - Existing spacing follows the `--space-*` scale; radii use `--radius-*`; layer ordering uses `--layer-*`.
 - A partial dark-theme semantic override exists under `[data-theme='dark']`. New reusable components should use semantic tokens so they remain theme-ready.
-- Global overlay/drawer chrome is intentionally in `src/styles.scss` because it is shared across application layers. The namespaced product-picker and generated-proposal presentation styles also live there to share that layer and stay within the enforced component-style budget; keep those rules token-based.
+- Global overlay/drawer chrome is intentionally in `src/styles.scss` because it is shared across application layers. The namespaced product-picker, proposal draft, saved proposal, and generated-sales-illustration viewer styles also live there to share that layer and stay within the enforced component-style budget. The three proposal panels are an approved, narrowly scoped Figma-parity exception and use bespoke values; do not extend that exception to LCAM, applications, shared controls, or unrelated proposal states.
 
 ### Reusable components
 
@@ -185,7 +185,8 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - Prefilled individual-information edit and summary states.
 - Add Profile and Save CSA confirmation dialogs.
 - CSA stages for information, needs ranking display, calculation fields, assessment, and risk-profile result.
-- Risk Profile can open a product-picker overlay. A selected product opens a local proposal draft with Info and Benefits tabs; the user can mark a sales illustration generated, save through confirmation, receive a success toast, and view a generated-proposal summary with a medium Convert to Application button.
+- Risk Profile can open a product-picker overlay. A selected product opens the local Dream Builder proposal draft: the Figma-matched Info tab includes proposal, lead, and insured information, while Benefits includes premium-calculation fields. Save Proposal is enabled, confirms before saving, then shows the Figma-matched saved-proposal summary and a success toast that auto-hides after four seconds.
+- The saved-proposal summary exposes Generate Sales Illustration. That action opens a dedicated viewer with Back to Proposal, a download link, and the local `assets/si-page-1.png` Dream Builder sample rendered at the source document width; returning restores the summary.
 - The product picker presents seven local sample products, permits exactly one selection, and uses the secondary/magenta selection treatment. Its category tabs currently change only the active visual state; they do not filter the product grid.
 - Record Activity side drawer with shared TDX tab, tag, button, stepper, section-message, and action-card components.
 - Responsive layouts for narrower viewports.
@@ -211,23 +212,25 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - Drawer entrance uses right-to-left motion; the overlay uses the shared 50% black modal token. Reduced-motion users get no drawer animation.
 - Draft SI sample values are intentionally prefilled for prototype walkthroughs.
 - The prototype currently uses local assets rather than remote runtime dependencies.
+- Proposal save-toast timers are cleared before replacement and on component destruction. Preserve `markForCheck()` after the timeout because the proposal flow uses `OnPush` change detection.
+- The Figma-specific proposal panels are local walkthrough states, not a durable proposal or sales-illustration integration. Keep their transitions explicit: draft → save confirmation → saved proposal → generated-SI viewer → saved proposal.
 
 ## Current Project State
 
-Verified on **2026-08-27**:
+Verified on **2026-08-28**:
 
 - Branch: `main`.
-- Latest checked-in commit at inspection time: `32f88df` (`Update lead management flow`).
-- Unit tests: **22 files, 105 tests passing** via `npm test -- --watch=false`.
+- Latest checked-in commit at inspection time: `52df767` (`Update lead management flow`).
+- Focused proposal-flow tests: **1 file, 9 tests passing** via `npm test -- --watch=false --include='src/app/proposal-flow/proposal-flow.component.spec.ts'`.
 - Production build: succeeds via `npm run build`.
-- Current initial production bundle reported by Angular: approximately 520.48 kB raw / 100.99 kB estimated transfer (`main` 480.08 kB plus global styles 40.40 kB).
-- The worktree was clean at inspection time, and the validated state matches `HEAD`; preserve any new user changes that appear before future edits.
+- Current initial production bundle reported by Angular: approximately 531.42 kB raw / 102.62 kB estimated transfer (`main` 484.57 kB plus global styles 46.86 kB).
+- The worktree contains uncommitted proposal-flow and global-style changes plus `UPDATES_Aug-28-2026_12-06PM.md`. Preserve and inspect the worktree before editing; do not reset, discard, or overwrite unrelated changes.
 
 ## Known Issues and Limitations
 
 - Production build emits component-style budget warnings:
   - `draft-si-flow.component.scss`: about 12.61 kB vs. 8 kB warning budget.
-  - `proposal-flow.component.scss`: about 14.38 kB vs. 8 kB warning budget.
+  - `proposal-flow.component.scss`: about 14.54 kB vs. 8 kB warning budget.
   - `lead-activity-drawer.component.scss`: about 8.82 kB vs. 8 kB warning budget.
 - No backend, authentication, API calls, persistence, or real customer data. Reloading resets all state.
 - No Angular Router; browser history/deep links are not implemented.
@@ -239,8 +242,8 @@ Verified on **2026-08-27**:
 - Board and form data are hard-coded in component classes/templates. Some proposal and SI summary values are also fixed rather than derived from the selected lead/form state.
 - Draft SI results display and download only `si-page-1.png`; `si-page-2.png` exists but is unused.
 - Draft SI product selection still enables only Dream Builder. The proposal product picker is separate and permits selection of all seven hard-coded products, but its category tabs do not yet filter that list.
-- Proposal-draft and generated-proposal content is local and partial: Benefits/Riders and Convert to Application do not yet implement a complete downstream proposal/application workflow.
-- Shared-component adoption is incomplete in bespoke Draft SI/proposal forms; the per-board sort list still uses native radio inputs rather than the shared radio component.
+- Proposal-draft and saved-proposal content is local and partial: Rider interactions, generated-SI data, and Convert to Application do not implement a complete downstream proposal/application workflow. The existing viewer uses the fixed local `si-page-1.png` asset.
+- Shared-component adoption is intentionally incomplete in the Figma-specific proposal draft, saved-proposal, and generated-SI viewer panels; the per-board sort list also still uses native radio inputs rather than the shared radio component.
 - No lint command, automated accessibility audit, visual regression suite, or browser E2E suite is configured.
 - Dark-theme tokens are partial and no UI theme switch is implemented.
 
@@ -251,11 +254,11 @@ There are no explicit `TODO`/`FIXME` markers in the inspected source. The follow
 - Wire contacted-drawer “Generate Full Proposal” if the intended destination is confirmed.
 - Implement the Unable to Set Appointment path and determine its board/timeline effect.
 - Wire or intentionally remove global Search, Edit Lead Information, Proceed to Application, Convert to Application, New Lead, sidebar Draft SI, and other remaining presentation-only controls.
-- Complete the product-picker category filtering and the intended proposal Info/Benefits/Riders interactions if those are required beyond the current local walkthrough.
+- Complete product-picker category filtering plus the intended Rider and downstream proposal/application interactions if those are required beyond the current local walkthrough.
 - Reconcile the `Re-endorsed` filter option with the `LeadState` model or remove it if that state is not required.
 - Decide whether `LeadDetailComponent` should be connected or retired.
 - Derive sample summaries from current lead/form state where prototype fidelity requires it.
-- Support remaining SI pages/products if the intended flow includes them.
+- Support remaining SI pages/products and derive proposal/SI content from current form data if the intended flow includes them.
 - Reduce or formally adjust the three SCSS style-budget warnings.
 - Add E2E/visual/accessibility coverage for critical interactive flows, including the Applications page.
 

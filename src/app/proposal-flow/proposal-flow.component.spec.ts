@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { vi } from 'vitest';
 
 import { AppModule } from '../app.module';
 import { ProposalFlowComponent } from './proposal-flow.component';
@@ -55,12 +56,48 @@ describe('ProposalFlowComponent', () => {
 
     expect(component.productPickerOpen).toBe(false);
     expect(component.proposalDraftOpen).toBe(true);
-    component.generateSalesIllustration();
+    expect(fixture.nativeElement.textContent).toContain('Lead Information');
+    expect(fixture.nativeElement.textContent).toContain('Insured Information');
+    expect((fixture.nativeElement.querySelector('.proposal-draft__save') as HTMLButtonElement).disabled).toBe(false);
+    (fixture.nativeElement.querySelectorAll('.proposal-draft__tabs button')[1] as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Premium Calculation');
+    expect(fixture.nativeElement.textContent).toContain('Minimum basic sum insured: ₱250,000');
     component.requestSaveProposal();
     component.confirmSaveProposal();
     fixture.detectChanges();
     expect(component.proposalCreated).toBe(true);
     expect(component.proposalToastMessage).toBe('Proposal saved successfully.');
+  });
+
+  it('automatically hides the proposal-save toast after four seconds', () => {
+    vi.useFakeTimers();
+    const component = fixture.componentInstance;
+
+    component.confirmSaveProposal();
+    expect(component.proposalToastMessage).toBe('Proposal saved successfully.');
+
+    vi.advanceTimersByTime(4000);
+    expect(component.proposalToastMessage).toBe('');
+    vi.useRealTimers();
+  });
+
+  it('opens the generated sales-illustration viewer and returns to the saved proposal', () => {
+    const component = fixture.componentInstance;
+
+    component.generateSalesIllustration();
+    fixture.changeDetectorRef.markForCheck();
+    fixture.detectChanges();
+
+    expect(component.salesIllustrationGenerated).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('Back to Proposal');
+    expect(fixture.nativeElement.querySelector('.sales-illustration-viewer__document img')).not.toBeNull();
+
+    component.backToProposal();
+    fixture.changeDetectorRef.markForCheck();
+    fixture.detectChanges();
+
+    expect(component.salesIllustrationGenerated).toBe(false);
   });
 
   it('confirms before adding a profile', () => {

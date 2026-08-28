@@ -1,4 +1,12 @@
-<section class="proposal-shell" role="dialog" aria-modal="true" aria-labelledby="proposal-lead-title">
+<section class="proposal-shell" [class.proposal-shell--si-viewer]="salesIllustrationGenerated" role="dialog" aria-modal="true" [attr.aria-labelledby]="salesIllustrationGenerated ? null : 'proposal-lead-title'" [attr.aria-label]="salesIllustrationGenerated ? 'Generated sales illustration' : null">
+  <ng-container *ngIf="salesIllustrationGenerated; else proposalWorkspace">
+    <header class="sales-illustration-viewer__header">
+      <button type="button" class="sales-illustration-viewer__back" (click)="backToProposal()"><span class="material-symbols-rounded" aria-hidden="true">keyboard_arrow_left</span><span>Back to Proposal</span></button>
+      <a class="sales-illustration-viewer__download" href="assets/si-page-1.png" download="Sales Illustration_Dream Builder_810000106051.png" aria-label="Download sales illustration"><span class="material-symbols-rounded" aria-hidden="true">download_for_offline</span></a>
+    </header>
+    <main class="sales-illustration-viewer__document" aria-label="Generated sales illustration"><img src="assets/si-page-1.png" alt="Dream Builder generated sales illustration"></main>
+  </ng-container>
+  <ng-template #proposalWorkspace>
   <lam-global-header />
   <div class="proposal-body">
     <lam-side-navigation *ngIf="navigation.isSidebarOpen()" class="proposal-sidebar" />
@@ -22,17 +30,43 @@
           <header class="generated-proposal__header"><div><h2>{{ selectedProduct }}</h2><small>90565</small></div><button type="button" class="summary-more" aria-label="More proposal actions"><span class="material-symbols-rounded" aria-hidden="true">more_vert</span></button></header>
           <nav class="generated-proposal__tabs" aria-label="Proposal sections"><button type="button" class="is-active">Info</button><button type="button">Benefits</button><button type="button">Riders</button></nav>
           <section class="generated-proposal__section"><h3>Proposal Information</h3><dl><div><dt>Effective Date</dt><dd>August 6, 2026</dd></div><div><dt>Valid Until</dt><dd>September 5, 2026</dd></div></dl></section>
-          <section class="generated-proposal__section"><h3>Proposed Owner</h3><dl><div><dt>Proposed Owner Name</dt><dd>Mr. {{ lead.name }}</dd></div><div><dt>Birthdate</dt><dd>January 1, 1989</dd></div><div><dt>Age</dt><dd>37</dd></div><div><dt>Gender</dt><dd>Male</dd></div></dl></section>
-          <section class="generated-proposal__section"><h3>Proposed Insured</h3><dl><div><dt>Proposed Insured Name</dt><dd>Mr. {{ lead.name }}</dd></div><div><dt>Birthdate</dt><dd>January 1, 1989</dd></div><div><dt>Age</dt><dd>37</dd></div><div><dt>Gender</dt><dd>Male</dd></div></dl></section>
-          <section class="generated-proposal__si"><h3>Sales Illustration</h3><button type="button"><span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span>Sales Illustration_{{ selectedProduct }}_810000106051<span class="material-symbols-rounded" aria-hidden="true">keyboard_arrow_right</span></button><button type="button" class="generated-proposal__download">Download Sales Illustration</button></section>
-          <footer><app-button label="Convert to Application" rightIcon="chevron_right" [variant]="TdxButtonVariant.Primary" [size]="TdxButtonSize.Medium" /></footer>
+          <section class="generated-proposal__section"><h3>Proposed Owner</h3><dl><div class="generated-proposal__name"><dt>Proposed Owner Name</dt><dd>Mr. {{ lead.name }}</dd></div><div><dt>Birthdate</dt><dd>January 1, 1989</dd></div><div><dt>Age</dt><dd>37</dd></div><div><dt>Gender</dt><dd>Male</dd></div></dl></section>
+          <section class="generated-proposal__section"><h3>Proposed Insured</h3><dl><div class="generated-proposal__name"><dt>Proposed Insured Name</dt><dd>Mr. {{ lead.name }}</dd></div><div><dt>Birthdate</dt><dd>January 1, 1989</dd></div><div><dt>Age</dt><dd>37</dd></div><div><dt>Gender</dt><dd>Male</dd></div></dl></section>
+          <footer><button type="button" class="generated-proposal__generate" (click)="generateSalesIllustration()">Generate Sales Illustration<span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button></footer>
         </article>
         <article class="proposal-card proposal-draft" *ngIf="proposalDraftOpen">
-          <header class="generated-proposal__header"><div><h2>{{ selectedProduct }}</h2><small>90565</small></div><button type="button" class="summary-more" aria-label="More proposal actions"><span class="material-symbols-rounded" aria-hidden="true">more_vert</span></button></header>
-          <nav class="generated-proposal__tabs" aria-label="Proposal sections"><button type="button" [class.is-active]="proposalTab === 'info'" (click)="proposalTab = 'info'">Info</button><button type="button" [class.is-active]="proposalTab === 'benefits'" (click)="proposalTab = 'benefits'">Benefits</button><button type="button" disabled>Riders</button></nav>
-          <section class="proposal-draft__content" *ngIf="proposalTab === 'info'"><h3>Proposal Information</h3><label>Proposal Date<input value="08/06/2026" aria-label="Proposal date"></label><label>Valid Until<input value="09/05/2026" disabled aria-label="Valid until"></label><h3>Lead Information</h3><p>Mr. {{ lead.name }}</p><h3>Insured Information</h3><p>Same as Lead Information</p></section>
-          <section class="proposal-draft__content" *ngIf="proposalTab === 'benefits'"><h3>Benefits</h3><label>Basic Life Coverage<input value="₱ 1,000,000"></label><label>Premium Payment Term<input value="10 years"></label></section>
-          <footer class="proposal-draft__actions"><app-button [label]="salesIllustrationGenerated ? 'Sales Illustration Generated' : 'Generate Sales Illustration'" [variant]="TdxButtonVariant.Primary" [emphasis]="TdxButtonEmphasis.Outline" [size]="TdxButtonSize.Medium" (clicked)="generateSalesIllustration()" /><app-button label="Save Proposal" rightIcon="chevron_right" [variant]="TdxButtonVariant.Primary" [size]="TdxButtonSize.Medium" (clicked)="requestSaveProposal()" /></footer>
+          <header class="proposal-draft__header"><h2>{{ selectedProduct }}</h2></header>
+          <nav class="proposal-draft__tabs" aria-label="Proposal sections"><button type="button" [class.is-active]="proposalTab === 'info'" (click)="proposalTab = 'info'">Info</button><button type="button" [class.is-active]="proposalTab === 'benefits'" (click)="proposalTab = 'benefits'">Benefits</button><button type="button" disabled>Riders</button></nav>
+          <section class="proposal-draft__info" *ngIf="proposalTab === 'info'">
+            <section class="proposal-draft__section">
+              <h3>Proposal Information</h3>
+              <label>Proposal Date<span class="proposal-draft__date-input"><input [(ngModel)]="proposalDate" name="proposalDate" placeholder="MM/DD/YYYY" aria-label="Proposal date"><span class="material-symbols-rounded" aria-hidden="true">calendar_month</span></span></label>
+              <label>Valid Until<input value="" disabled aria-label="Valid until"></label>
+            </section>
+            <section class="proposal-draft__section">
+              <h3>Lead Information</h3>
+              <dl class="proposal-draft__details"><div><dt>Name</dt><dd>Mr. {{ lead.name }}</dd></div><div class="proposal-draft__details-row"><div><dt>Birthdate</dt><dd>January 1, 1989</dd></div><div><dt>Age</dt><dd>37</dd></div></div><div><dt>Gender</dt><dd>Male</dd></div><div><dt>Occupation</dt><dd>Business Professional</dd></div></dl>
+            </section>
+            <section class="proposal-draft__section">
+              <h3>Insured Information</h3>
+              <label class="proposal-draft__checkbox"><input type="checkbox" [(ngModel)]="sameAsLeadInformation" name="sameAsLeadInformation"> Same as Lead Information</label>
+              <div class="proposal-draft__insured-fields" [class.is-disabled]="sameAsLeadInformation">
+                <label>Name<input [value]="sameAsLeadInformation ? 'Mr. ' + lead.name : ''" [disabled]="sameAsLeadInformation" aria-label="Insured name"></label>
+                <div class="proposal-draft__split-fields"><label>Birthdate<span class="proposal-draft__date-input"><input placeholder="MM/DD/YYYY" [disabled]="sameAsLeadInformation" aria-label="Insured birthdate"><span class="material-symbols-rounded" aria-hidden="true">calendar_month</span></span></label><label>Age<input [disabled]="sameAsLeadInformation" aria-label="Insured age"></label></div>
+                <label>Gender<select [disabled]="sameAsLeadInformation" aria-label="Insured gender"><option>Male</option><option>Female</option></select></label>
+                <label>Occupation<input placeholder="Type to search from list" [disabled]="sameAsLeadInformation" aria-label="Insured occupation"></label>
+              </div>
+            </section>
+          </section>
+          <section class="proposal-draft__benefits" *ngIf="proposalTab === 'benefits'">
+            <h3>Premium Calculation</h3>
+            <label>Payment Period<select aria-label="Payment period"><option>5 Pay</option><option>10 Pay</option></select></label>
+            <label>Payment Frequency<select aria-label="Payment frequency"><option>Annual</option><option>Monthly</option></select><small>Monthly premium should have a minimum base plan of at least ₱ 3,000</small></label>
+            <label>Basic Sum Insured<span class="proposal-draft__currency-input"><span aria-hidden="true">₱</span><input aria-label="Basic sum insured"></span><small>Minimum basic sum insured: ₱250,000</small></label>
+            <label>Annual Premium<span class="proposal-draft__currency-input"><span aria-hidden="true">₱</span><input aria-label="Annual premium" disabled></span><small>Auto calculated based on the Basic Sum Insured value.</small></label>
+            <label>Discount Type<select aria-label="Discount type" disabled><option>No Discount</option></select></label>
+          </section>
+          <footer class="proposal-draft__actions"><button type="button" class="proposal-draft__save" (click)="requestSaveProposal()">Save Proposal <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button></footer>
         </article>
         <article class="proposal-card individual-card" *ngIf="stage === 'individual-form'">
           <h2>Individual Information</h2>
@@ -105,4 +139,5 @@
     <app-tab-group [tabs]="drawerTabs" [activeId]="drawerTab" ariaLabel="Lead activity sections" (activeIdChange)="drawerTab = $event" />
     <div class="drawer-scroll"><section class="drawer-lead-info"><dl class="drawer-details"><div><dt>Birthdate</dt><dd>January 05, 1989</dd></div><div><dt>Gender</dt><dd>Male</dd></div><div><dt>Email</dt><dd>client@email.com</dd></div><div><dt>Mobile Number</dt><dd>+63 9226789012</dd></div><div><dt>Referrer Name</dt><dd>Maxwell Anderson</dd></div><div><dt>Referrer ID</dt><dd>100234</dd></div><div><dt>Source of Lead</dt><dd>Leads from store</dd></div><div><dt>EWB Client Financial Segmentation</dt><dd>Mid</dd></div><div><dt>Store/Branch Assignment</dt><dd>595 THE FORT - BGC CORPORATE CENTER</dd></div><div><dt>Store/Branch ID</dt><dd>RBG0380</dd></div></dl><div class="drawer-lead-actions"><app-button class="drawer-full-button" label="Generate Full Proposal" [variant]="TdxButtonVariant.Primary" [emphasis]="TdxButtonEmphasis.Outline" [size]="TdxButtonSize.Small" (clicked)="drawerOpen = false; requestAddProfile()" /><app-button class="drawer-edit" label="Edit Lead Information" [variant]="TdxButtonVariant.Primary" [emphasis]="TdxButtonEmphasis.Transparent" [size]="TdxButtonSize.Small" /></div></section><section class="drawer-next"><h3>Before you continue</h3><p>Complete the remaining steps before starting the application.</p><app-stepper class="drawer-stepper" [steps]="activitySteps" [currentIndex]="1" orientation="horizontal" /><app-section-message description="Schedule an appointment or indicate if you’re unable to set one." appearance="info" /><h4>Appointments</h4><lam-action-card title="Schedule Appointment" description="Set a date and time for your client appointment." icon="calendar_month" tone="success" (activated)="chooseDrawerAction('scheduled')" /><lam-action-card title="Unable to Set Appointment" description="An appointment could not be scheduled with the client." icon="event_busy" tone="danger" (activated)="chooseDrawerAction('unable')" /></section></div>
   </aside>
+  </ng-template>
 </section>

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, Input, OnDestroy, Output } from '@angular/core';
 
 import { LeadCardData } from '../lead-board.model';
 import { TdxButtonEmphasis, TdxButtonSize, TdxButtonVariant } from '../shared/components/button/button.model';
@@ -15,7 +15,7 @@ import { AppNavigationStateService } from '../shared/services/app-navigation-sta
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: false
 })
-export class ProposalFlowComponent {
+export class ProposalFlowComponent implements OnDestroy {
   @Input({ required: true }) lead!: LeadCardData;
   @Output() closed = new EventEmitter<void>();
 
@@ -27,12 +27,15 @@ export class ProposalFlowComponent {
   selectedProduct = '';
   productCategory = 'all';
   proposalTab: 'info' | 'benefits' = 'info';
+  proposalDate = '';
+  sameAsLeadInformation = true;
   salesIllustrationGenerated = false;
   proposalSaveConfirmation = false;
   proposalToastMessage = '';
   confirmation: 'add-profile' | 'save-csa' | null = null;
   selectedDrawerAction = '';
   drawerTab = 'overview';
+  private proposalToastTimeout?: number;
 
   readonly TdxButtonVariant = TdxButtonVariant;
   readonly TdxButtonEmphasis = TdxButtonEmphasis;
@@ -65,7 +68,11 @@ export class ProposalFlowComponent {
 
   readonly needs = ['Health and Wellness', "Children's Education", 'Income Protection', 'Medium to Long-Term Savings', 'Retirement', 'Estate Planning'];
 
-  constructor(readonly navigation: AppNavigationStateService) {}
+  constructor(readonly navigation: AppNavigationStateService, private readonly changeDetectorRef: ChangeDetectorRef) {}
+
+  ngOnDestroy(): void {
+    if (this.proposalToastTimeout !== undefined) window.clearTimeout(this.proposalToastTimeout);
+  }
 
   @HostListener('document:keydown.escape')
   handleEscape(): void {
@@ -99,6 +106,10 @@ export class ProposalFlowComponent {
     this.salesIllustrationGenerated = true;
   }
 
+  backToProposal(): void {
+    this.salesIllustrationGenerated = false;
+  }
+
   requestSaveProposal(): void {
     this.proposalSaveConfirmation = true;
   }
@@ -107,8 +118,14 @@ export class ProposalFlowComponent {
     this.proposalSaveConfirmation = false;
     this.proposalDraftOpen = false;
     this.proposalCreated = true;
+    this.salesIllustrationGenerated = false;
     this.proposalToastMessage = 'Proposal saved successfully.';
-    window.setTimeout(() => this.proposalToastMessage = '', 4000);
+    if (this.proposalToastTimeout !== undefined) window.clearTimeout(this.proposalToastTimeout);
+    this.proposalToastTimeout = window.setTimeout(() => {
+      this.proposalToastMessage = '';
+      this.proposalToastTimeout = undefined;
+      this.changeDetectorRef.markForCheck();
+    }, 4000);
   }
 
   openDrawer(): void {
