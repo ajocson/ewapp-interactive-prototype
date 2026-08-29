@@ -87,6 +87,7 @@
 }
 
 .lead-card__metadata {
+  position: relative;
   width: 100%;
   justify-content: space-between;
   color: var(--lead-card-text-secondary);
@@ -106,38 +107,8 @@
   display: flex;
   align-items: center;
   gap: var(--lead-card-metadata-gap);
-  position: relative;
+  position: static;
   white-space: nowrap;
-}
-
-.lead-card__tooltip {
-  position: absolute;
-  z-index: var(--layer-tooltip);
-  top: calc(100% + var(--space-xs));
-  right: 0;
-  display: none;
-  max-width: 240px;
-  padding: var(--tooltip-padding-y) var(--tooltip-padding-x);
-  border-radius: var(--tooltip-radius);
-  background: var(--tooltip-bg);
-  color: var(--tooltip-text);
-  font-size: var(--caption-text-size);
-  line-height: var(--caption-line-height);
-  white-space: normal;
-}
-
-.lead-card__aging--overall .lead-card__tooltip {
-  width: 102px;
-  text-align: end;
-}
-
-.lead-card__aging--tat .lead-card__tooltip {
-  width: 155px;
-  text-align: center;
-}
-
-.lead-card__aging:hover .lead-card__tooltip {
-  display: block;
 }
 
 .lead-card__metadata .material-symbols-rounded {

@@ -49,6 +49,18 @@
   white-space: nowrap;
 }
 
+.drawer-contact--unable > *:not(.drawer-unable-appointment) {
+  display: none;
+}
+
+.drawer-contact--unable {
+  gap: var(--space-xl);
+  padding: var(--space-2xl) var(--space-2xl) var(--space-5xl);
+  border-bottom: var(--border-width-none);
+}
+
+.drawer-actions--hidden { display: none; }
+
 .drawer-contact app-stepper {
   display: block;
   margin-bottom: var(--space-md);
@@ -229,11 +241,7 @@
 }
 
 .drawer-appointment-action--cancel footer {
-  grid-template-columns: minmax(var(--space-none), 1fr) max-content;
-}
-
-.drawer-appointment-action--cancel footer .drawer-action-button:last-child {
-  width: auto;
+  grid-template-columns: repeat(2, minmax(var(--space-none), 1fr));
 }
 
 .drawer-follow-up {
@@ -392,6 +400,58 @@
 
 .drawer-empty .material-symbols-rounded { font-size: var(--space-4xl); }
 .drawer-empty p { margin: var(--space-md) var(--space-none) var(--space-none); font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
+
+.drawer-unable-appointment {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  width: 100%;
+  padding: var(--space-none);
+  border-bottom: var(--border-width-none);
+}
+
+.drawer-unable-appointment__heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  min-height: var(--space-4xl);
+}
+
+.drawer-unable-appointment__heading h3 {
+  margin: 0;
+  color: var(--text-neutral-primary);
+  font-size: var(--paragraph-md-text-size);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--paragraph-md-line-height);
+}
+
+.drawer-unable-appointment__icon {
+  display: grid;
+  width: var(--space-4xl);
+  height: var(--space-4xl);
+  place-items: center;
+  border-radius: var(--radius-md);
+  background: var(--surface-subtle);
+  color: var(--icon-neutral-primary);
+  font-size: var(--paragraph-md-text-size);
+  font-variation-settings: 'FILL' 0;
+}
+
+.drawer-unable-appointment .drawer-notes {
+  gap: var(--space-xs);
+}
+
+.drawer-unable-appointment .drawer-notes textarea {
+  height: calc(var(--space-6xl) * 2 + var(--space-xs));
+}
+
+.drawer-unable-appointment footer {
+  display: flex;
+  width: 100%;
+  gap: var(--space-lg);
+}
+
+.drawer-unable-appointment footer .drawer-action-button { flex: 1; }
 
 @media (max-width: 480px) {
   .drawer-scheduler__fields { grid-template-columns: 1fr; }

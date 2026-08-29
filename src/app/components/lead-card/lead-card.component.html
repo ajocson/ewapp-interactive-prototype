@@ -20,19 +20,21 @@
       <span
         class="lead-card__aging lead-card__aging--overall"
         aria-label="Overall aging: {{ lead.aging }}. Total days since Lead Generation."
+        (mouseenter)="showAgingTooltip($event, 'Total days since Lead Generation.')"
+        (mouseleave)="hideAgingTooltip()"
       >
         <span class="material-symbols-rounded" aria-hidden="true">schedule</span>
         <span aria-hidden="true">{{ lead.aging }}</span>
-        <span class="lead-card__tooltip" aria-hidden="true">Total days since Lead Generation.</span>
       </span>
       <span
         *ngIf="showTatAging && lead.tatAging"
         class="lead-card__aging lead-card__aging--tat"
         aria-label="TAT aging: {{ lead.tatAging }}. Days elapsed in the 90-day Active Lead cycle."
+        (mouseenter)="showAgingTooltip($event, 'Days elapsed in the 90-day Active Lead cycle.')"
+        (mouseleave)="hideAgingTooltip()"
       >
         <span class="material-symbols-rounded" aria-hidden="true">flag_2</span>
         <span aria-hidden="true">{{ lead.tatAging }}</span>
-        <span class="lead-card__tooltip" aria-hidden="true">Days elapsed in the 90-day Active Lead cycle.</span>
       </span>
     </span>
   </span>

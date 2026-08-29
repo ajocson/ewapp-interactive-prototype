@@ -14,7 +14,8 @@ import {
   LeadFollowUpAppointmentCompletedEvent,
   LeadFollowUpAppointmentScheduledEvent,
   LeadStateChangedEvent,
-  LeadUpdateRecordedEvent
+  LeadUpdateRecordedEvent,
+  LeadUnableToSetAppointmentEvent
 } from './components/lead-activity-drawer/lead-activity-drawer.component';
 import { LeadCardData } from './lead-board.model';
 import { AppNavigationStateService } from './shared/services/app-navigation-state.service';
@@ -41,6 +42,7 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
       (appointmentRescheduled)="rescheduleLeadAppointment($event)"
       (appointmentCancelled)="cancelLeadAppointment($event)"
       (appointmentCompleted)="completeLeadAppointment($event)"
+      (unableToSetAppointment)="recordUnableToSetAppointment($event)"
       (followUpRecorded)="recordLeadFollowUp($event)"
       (followUpAppointmentScheduled)="scheduleFollowUpAppointment($event)"
       (followUpAppointmentCancelled)="cancelFollowUpAppointment($event)"
@@ -440,6 +442,12 @@ export class AppComponent implements AfterViewInit {
     if (!updatedLead) return;
 
     this.finishBoardActivity(updatedLead, 'Follow-up update has been recorded.');
+  }
+
+  recordUnableToSetAppointment(event: LeadUnableToSetAppointmentEvent): void {
+    const updatedLead = this.dashboard?.recordUnableToSetAppointment(event.lead.id, event.notes);
+    if (!updatedLead) return;
+    this.finishBoardActivity(updatedLead, 'Your activity has been recorded.');
   }
 
   changeLeadState(event: LeadStateChangedEvent): void {

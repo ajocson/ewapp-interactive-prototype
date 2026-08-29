@@ -46,6 +46,11 @@ export interface LeadAppointmentCompletedEvent {
   notes: string;
 }
 
+export interface LeadUnableToSetAppointmentEvent {
+  lead: LeadCardData;
+  notes: string;
+}
+
 export interface LeadFollowUpRecordedEvent {
   lead: LeadCardData;
   notes: string;
@@ -102,6 +107,7 @@ export class LeadActivityDrawerComponent implements OnChanges {
   @Output() appointmentRescheduled = new EventEmitter<LeadAppointmentScheduledEvent>();
   @Output() appointmentCancelled = new EventEmitter<LeadAppointmentCancelledEvent>();
   @Output() appointmentCompleted = new EventEmitter<LeadAppointmentCompletedEvent>();
+  @Output() unableToSetAppointment = new EventEmitter<LeadUnableToSetAppointmentEvent>();
   @Output() followUpRecorded = new EventEmitter<LeadFollowUpRecordedEvent>();
   @Output() followUpAppointmentScheduled = new EventEmitter<LeadFollowUpAppointmentScheduledEvent>();
   @Output() followUpAppointmentCancelled = new EventEmitter<LeadFollowUpAppointmentCancelledEvent>();
@@ -131,6 +137,7 @@ export class LeadActivityDrawerComponent implements OnChanges {
   activityNotes = '';
   followUpNotes = '';
   appointmentNotes = '';
+  unableToSetAppointmentOpen = false;
   parkNotes = '';
   dropReason = '';
   selectedDate = '';
@@ -319,6 +326,7 @@ export class LeadActivityDrawerComponent implements OnChanges {
     this.scheduling = false;
     this.rescheduling = false;
     this.cancellingAppointment = false;
+    this.unableToSetAppointmentOpen = false;
     this.followUpRecording = false;
     this.schedulerMode = 'appointment';
     this.actionMode = null;
@@ -425,6 +433,23 @@ export class LeadActivityDrawerComponent implements OnChanges {
     }
 
     this.appointmentScheduled.emit(event);
+  }
+
+  openUnableToSetAppointment(): void {
+    this.scheduling = false;
+    this.rescheduling = false;
+    this.cancellingAppointment = false;
+    this.unableToSetAppointmentOpen = true;
+    this.appointmentNotes = '';
+  }
+
+  cancelUnableToSetAppointment(): void {
+    this.unableToSetAppointmentOpen = false;
+    this.appointmentNotes = '';
+  }
+
+  saveUnableToSetAppointment(): void {
+    this.unableToSetAppointment.emit({ lead: this.lead, notes: this.appointmentNotes.trim() });
   }
 
   openCancelAppointment(): void {

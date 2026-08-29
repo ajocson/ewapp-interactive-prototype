@@ -541,6 +541,23 @@ export class DashboardComponent implements OnDestroy {
     return updatedLead;
   }
 
+  recordUnableToSetAppointment(leadId: string, notes = ''): LeadCardData | null {
+    const board = this.boards.find((candidate) => candidate.id === 'contacted');
+    const lead = board?.leads.find((candidate) => candidate.id === leadId);
+    if (!board || !lead) return null;
+
+    const activityDate = new Date();
+    const updatedLead: LeadCardData = {
+      ...lead,
+      lastActivityTimestamp: activityDate.getTime(),
+      activities: [...lead.activities, this.createActivity('sales', 'Contacted - Unsuccessful Appointment', activityDate, notes)]
+    };
+    board.leads = [updatedLead, ...board.leads.filter((candidate) => candidate.id !== leadId)];
+    this.selectedLead = updatedLead;
+    this.changeDetectorRef.markForCheck();
+    return updatedLead;
+  }
+
   changeLeadState(leadId: string, state: Extract<LeadState, 'Reactivated' | 'Parked' | 'Dropped'>, details = ''): LeadCardData | null {
     const board = this.boards.find((candidate) => candidate.leads.some((lead) => lead.id === leadId));
     const lead = board?.leads.find((candidate) => candidate.id === leadId);

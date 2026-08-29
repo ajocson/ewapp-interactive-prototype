@@ -316,7 +316,7 @@
   --layer-popover: 30;
   --layer-sidebar-backdrop: 40;
   --lead-state-icon-size: 56px;
-  --drawer-notes-height: calc(var(--space-7xl) - var(--space-md));
+  --drawer-notes-height: calc(var(--space-7xl) - var(--space-md) + var(--space-2xl));
   --lead-state-person-top: 13.73px;
   --lead-state-person-left: 3.37px;
   --lead-state-person-width: 36.759px;
@@ -853,7 +853,7 @@ select {
   right: var(--space-none);
   display: none;
   width: max-content;
-  max-width: 180px;
+  max-width: none;
   padding: var(--tooltip-padding-y) var(--tooltip-padding-x);
   border-radius: var(--tooltip-radius);
   background: var(--tooltip-bg);
@@ -861,10 +861,11 @@ select {
   font-size: var(--caption-text-size);
   line-height: var(--caption-line-height);
   text-align: center;
-  white-space: normal;
+  white-space: nowrap;
 }
 .drawer-status small:hover .drawer-aging-tooltip,
 .drawer-status small:focus-visible .drawer-aging-tooltip { display: block; }
+.lead-card-global-tooltip { position: fixed; z-index: var(--layer-tooltip); box-sizing: border-box; width: max-content; max-width: none; padding: var(--tooltip-padding-y) var(--tooltip-padding-x); border-radius: var(--tooltip-radius); background: var(--tooltip-bg); color: var(--tooltip-text); font-size: var(--caption-text-size); line-height: var(--caption-line-height); white-space: nowrap; pointer-events: none; }
 .drawer-status__state--danger { color: var(--color-red-600); }
 .new-lead-modal { position: fixed; z-index: var(--layer-modal); inset: 0; display: grid; place-items: center; }
 .new-lead-modal__backdrop { position: absolute; inset: 0; border: 0; background: #F0F0F0; }

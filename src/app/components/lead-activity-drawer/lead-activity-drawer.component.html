@@ -173,6 +173,7 @@
           class="drawer-contact"
           [class.drawer-contact--contacted]="isContacted || isAppointmentSet || isMeeting"
           [class.drawer-contact--follow-up]="isFollowUp"
+          [class.drawer-contact--unable]="unableToSetAppointmentOpen"
         >
           <header *ngIf="!followUpRecording">
             <h3>Before you continue</h3>
@@ -193,7 +194,7 @@
             <div class="drawer-appointments">
               <h4>Appointments</h4>
               <lam-action-card title="Schedule Appointment" description="Set a date and time for your client appointment." icon="calendar_month" tone="success" (click)="openScheduler()" />
-              <lam-action-card title="Unable to Set Appointment" description="An appointment could not be scheduled with the client." icon="event_busy" tone="neutral" />
+              <lam-action-card *ngIf="!unableToSetAppointmentOpen" title="Unable to Set Appointment" description="An appointment could not be scheduled with the client." icon="event_busy" tone="neutral" (activated)="openUnableToSetAppointment()" />
             </div>
           </ng-container>
 
@@ -217,9 +218,24 @@
             <div class="drawer-appointments">
               <h4>Appointments</h4>
               <lam-action-card title="Schedule Appointment" description="Set a date and time for your client appointment." icon="calendar_month" tone="success" (activated)="openScheduler()" />
-              <lam-action-card title="Unable to Set Appointment" description="An appointment could not be scheduled with the client." icon="event_busy" tone="neutral" />
+              <lam-action-card *ngIf="!unableToSetAppointmentOpen" title="Unable to Set Appointment" description="An appointment could not be scheduled with the client." icon="event_busy" tone="neutral" (activated)="openUnableToSetAppointment()" />
             </div>
           </ng-container>
+
+          <section *ngIf="unableToSetAppointmentOpen" class="drawer-unable-appointment" aria-labelledby="unable-appointment-title">
+            <div class="drawer-unable-appointment__heading">
+              <span class="drawer-unable-appointment__icon material-symbols-rounded" aria-hidden="true">event_busy</span>
+              <h3 id="unable-appointment-title">Unable to Set Appointment</h3>
+            </div>
+            <label class="drawer-notes">
+              <span>Notes (Optional)</span>
+              <textarea rows="4" [(ngModel)]="appointmentNotes" placeholder="Add notes about the scheduling attempt"></textarea>
+            </label>
+            <footer>
+              <app-button class="drawer-action-button" label="Cancel" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="cancelUnableToSetAppointment()" />
+              <app-button class="drawer-action-button" label="Save" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="saveUnableToSetAppointment()" />
+            </footer>
+          </section>
 
           <ng-container *ngIf="isMeeting && !followUpRecording">
             <div class="drawer-meeting-actions">
@@ -276,7 +292,7 @@
         </section>
       </ng-template>
 
-      <section *ngIf="!scheduling && !cancellingAppointment && !followUpRecording" class="drawer-actions">
+      <section *ngIf="!scheduling && !cancellingAppointment && !followUpRecording" class="drawer-actions" [class.drawer-actions--hidden]="unableToSetAppointmentOpen">
         <h3>Lead Actions</h3>
         <div>
           <app-button class="drawer-action-button" label="Park Lead" leftIcon="pause_circle" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="openLeadAction('park')" />

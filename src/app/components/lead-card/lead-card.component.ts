@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { ChangeDetectionStrategy, Component, EventEmitter, inject, Input, OnDestroy, Output } from '@angular/core';
 
 import { LeadCardData, leadDisplayName } from '../../lead-board.model';
 import { TagTone } from '../../lead-board.model';
@@ -11,13 +12,15 @@ import { TdxTagEmphasis, TdxTagVariant } from '../../shared/components/tag/tag.m
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: false
 })
-export class LeadCardComponent {
+export class LeadCardComponent implements OnDestroy {
   @Input({ required: true }) lead!: LeadCardData;
   @Input() highlighted = false;
   @Input() showTatAging = false;
   @Output() selected = new EventEmitter<LeadCardData>();
 
   readonly TdxTagEmphasis = TdxTagEmphasis;
+  private readonly document = inject(DOCUMENT);
+  private tooltipElement: HTMLDivElement | null = null;
 
   get displayName(): string {
     return leadDisplayName(this.lead);
@@ -41,5 +44,33 @@ export class LeadCardComponent {
       danger: TdxTagVariant.Danger,
       neutral: TdxTagVariant.Neutral
     }[tone];
+  }
+
+  showAgingTooltip(event: MouseEvent, message: string): void {
+    this.hideAgingTooltip();
+
+    const target = event.currentTarget as HTMLElement;
+    const tooltip = this.document.createElement('div');
+    tooltip.className = 'lead-card-global-tooltip';
+    tooltip.textContent = message;
+    this.document.body.appendChild(tooltip);
+
+    const targetRect = target.getBoundingClientRect();
+    const tooltipRect = tooltip.getBoundingClientRect();
+    const viewportWidth = this.document.defaultView?.innerWidth ?? tooltipRect.width;
+    const left = Math.max(8, Math.min(targetRect.right - tooltipRect.width, viewportWidth - tooltipRect.width - 8));
+
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${targetRect.bottom + 4}px`;
+    this.tooltipElement = tooltip;
+  }
+
+  hideAgingTooltip(): void {
+    this.tooltipElement?.remove();
+    this.tooltipElement = null;
+  }
+
+  ngOnDestroy(): void {
+    this.hideAgingTooltip();
   }
 }

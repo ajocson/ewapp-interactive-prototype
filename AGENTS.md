@@ -159,6 +159,7 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - Responsive fixed-minimum-width columns with independent vertical scrolling and horizontal board scrolling.
 - Lead cards with gender-derived title, formatted creation timestamp, stage tag, optional schedule tag, semantic lead state, aging, and post-activity highlight. Schedule tags are hidden while a lead is parked or dropped.
 - Lead cards display Lead ID and aging indicators; Contacted, Appointments, Meetings, and Follow-Up also show TAT aging with tooltip support.
+- Aging tooltips on lead cards render as fixed page overlays so they are not clipped by the vertically scrollable board container. Preserve their original tooltip typography, padding, and one-line presentation.
 - Page search, source dropdown, checkbox-based lead status/state filters, referrer filter, sorting, and an active-filter indicator.
 - Applications adds page-level Lead ID/name search, source filtering, referrer suggestions, all-application-status filtering, sorting, and board-scoped status filters. Empty boards remain blank when no cards match; only the referrer suggestion popover reports `No results found`.
 - Per-board search plus lead-state checkbox and sort controls. Recently Created (using last activity when present) is the default, board width stays stable while searching, and no-result searches intentionally leave the board blank.
@@ -166,6 +167,7 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - The drawer includes TDX overview/timeline tabs, lead metadata, stage-aware Draft SI/full-proposal labeling, stage actions, and Sales Activities/System Transactions. The progress indicator has three steps outside Follow-Up and adds a fourth Follow-up step only for leads in the Follow-Up board.
 - Mark as Contacted moves a lead to Contacted. Scheduling moves it to Appointments; reschedule/cancel update it there; Appointment Completed moves it to Meetings; For Follow-up moves it to Follow-Up.
 - The appointment scheduler defaults to today, exposes half-hour time choices, and excludes elapsed times when today is selected. Scheduled appointments use the shared scheduled-activity card and support reschedule, cancellation, notes, and completion.
+- Contacted leads can record an unsuccessful scheduling attempt through the Figma-matched **Unable to Set Appointment** form. Saving keeps the lead in Contacted, records `Contacted - Unsuccessful Appointment` in Sales Activities, and shows the standard activity-recorded toast.
 - Follow-Up leads can proceed to application, schedule a follow-up appointment, or record updates. A scheduled follow-up presents an information banner, a follow-up appointment card, notes, and a Presentation Completed action. Completing that presentation restores the three follow-up actions, allowing repeated follow-up scheduling and update recording.
 - Park and Drop are available across boards, use local state-specific SVG assets, require confirmation, append activities, and preserve the lead's board stage. Drop uses a fixed list of supported reasons. Parked leads can be reactivated across boards and use the `Reactivated` state; dropped leads do not expose reactivation.
 - Successful lifecycle actions keep the drawer open and show a responsive-width success message. Closing the drawer then highlights the affected card at the top of its board.
@@ -232,6 +234,8 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - The shared TDX button component supports the Figma Secondary Large filled pink contract: 52px height, 20px horizontal padding, 12px vertical padding, 18px Lato Bold text, and 24px icons.
 - Lead Overview fields are role-aware: Agency shows Self-Generated Lead, Store/Branch details, and `PURPLE BLAZE_JDELACRUZ`; Banca shows referral metadata and Banca-only EWB Client Financial Segmentation.
 - Lead Overview values use regular font weight.
+- The Figma-matched Unable to Set Appointment state hides unrelated drawer actions while open, uses a 100px notes field, and provides equal-width Cancel/Save buttons. Cancel Appointment also uses equal-width action buttons.
+- Standard drawer notes fields are 20px taller than the earlier baseline.
 
 Verified on **2026-08-29**:
 
@@ -252,9 +256,8 @@ Verified on **2026-08-29**:
   - `lead-activity-drawer.component.scss`: about 8.82 kB vs. 8 kB warning budget.
 - The component-style error budget is 20 kB so the current proposal styles remain deployable while the existing 8 kB warnings are still reported.
 - No backend, authentication, API calls, persistence, or real customer data. Reloading resets all state.
-- No Angular Router; browser history/deep links are not implemented.
 - `LeadDetailComponent` exists and is tested but is not reachable from the root application flow.
-- Several visible controls remain prototype-only/no-op, including most navigation destinations, New Lead, sidebar Draft SI, global Search, Edit Lead Information, Unable to Set Appointment, Proceed to Application, Convert to Application, and some proposal actions. Applications navigation and its local filtering flow are implemented.
+- Several visible controls remain prototype-only/no-op, including most navigation destinations, New Lead, sidebar Draft SI, global Search, Edit Lead Information, Proceed to Application, Convert to Application, and some proposal actions. Applications navigation and its local filtering flow are implemented.
 - In the contacted LCAM drawer, “Generate Full Proposal” currently has no emitted action; only the new-lead “Generate Draft SI” branch is wired.
 - Activity records and appointment/lead mutations are entirely in memory and reset on reload. Initial timelines are synthesized from sample stage/state data rather than loaded from a durable event source.
 - The filter UI offers `Re-endorsed`, but `LeadState` and the sample data do not currently represent that state, so the option cannot match a lead.
@@ -271,7 +274,6 @@ Verified on **2026-08-29**:
 There are no explicit `TODO`/`FIXME` markers in the inspected source. The following gaps are inferred directly from unhandled controls and current implementation:
 
 - Wire contacted-drawer “Generate Full Proposal” if the intended destination is confirmed.
-- Implement the Unable to Set Appointment path and determine its board/timeline effect.
 - Wire or intentionally remove global Search, Edit Lead Information, Proceed to Application, Convert to Application, New Lead, sidebar Draft SI, and other remaining presentation-only controls.
 - Complete product-picker category filtering plus the intended Rider and downstream proposal/application interactions if those are required beyond the current local walkthrough.
 - Reconcile the `Re-endorsed` filter option with the `LeadState` model or remove it if that state is not required.
