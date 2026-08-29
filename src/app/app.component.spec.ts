@@ -160,6 +160,73 @@ describe('AppComponent LCAM activity feedback', () => {
     expect(fixture.nativeElement.querySelector('lam-proposal-flow')).toBeTruthy();
   });
 
+  it('dismisses an open Draft SI flow when Applications is selected', () => {
+    const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;
+    const lead = dashboard.boards.find((board) => board.id === 'lead')!.leads[0];
+    fixture.componentInstance.openLead(lead);
+    fixture.componentInstance.openDraftSi();
+    fixture.detectChanges();
+
+    fixture.componentInstance['navigation'].goToApplications();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('lam-draft-si-flow')).toBeNull();
+    expect(fixture.nativeElement.querySelector('lam-applications')).toBeTruthy();
+  });
+
+  it('opens the Info tab in view mode when a Draft SI is converted to a proposal', () => {
+    const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;
+    const lead = dashboard.boards.find((board) => board.id === 'lead')!.leads[0];
+    fixture.componentInstance.openLead(lead);
+    fixture.componentInstance.openDraftSi();
+
+    fixture.componentInstance.openDraftProposalInfo();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.draftSiOpen).toBe(false);
+    expect(fixture.componentInstance.proposalOpen).toBe(true);
+    expect(fixture.componentInstance.activeRecordTab).toBe('info');
+    expect(fixture.componentInstance.leadInfoEditMode).toBe(false);
+  });
+
+  it('closes the activity drawer before opening Draft SI', () => {
+    const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;
+    const lead = dashboard.boards.find((board) => board.id === 'lead')!.leads[0];
+    fixture.componentInstance.openLead(lead);
+    fixture.componentInstance.contactDrawerOpen = true;
+    fixture.componentInstance.proposalOpen = true;
+
+    fixture.componentInstance.openDraftSi();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.contactDrawerOpen).toBe(false);
+    expect(fixture.componentInstance.proposalOpen).toBe(true);
+    expect(fixture.nativeElement.querySelector('lam-lead-activity-drawer')).toBeNull();
+    expect(fixture.nativeElement.querySelector('lam-draft-si-flow')).toBeTruthy();
+  });
+
+  it('opens Draft SI from the drawer primary action for a new lead', () => {
+    const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;
+    const lead = dashboard.boards.find((board) => board.id === 'lead')!.leads[0];
+    fixture.componentInstance.openLead(lead);
+    fixture.componentInstance.proposalOpen = true;
+    fixture.componentInstance.openContactDrawer();
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('.drawer-full-button button') as HTMLButtonElement;
+    button.click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('lam-lead-activity-drawer')).toBeNull();
+    expect(fixture.nativeElement.querySelector('lam-proposal-flow')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('lam-draft-si-flow')).toBeTruthy();
+    const activityCountBeforeCompletion = dashboard.findLeadByLeadId(lead.leadId)?.activities.length ?? 0;
+    expect(dashboard.findLeadByLeadId(lead.leadId)?.activities.length).toBe(activityCountBeforeCompletion);
+    fixture.componentInstance.recordDraftSiGenerated();
+    expect(dashboard.findLeadByLeadId(lead.leadId)?.activities.length).toBe(activityCountBeforeCompletion + 1);
+    expect(dashboard.findLeadByLeadId(lead.leadId)?.activities.at(-1)?.label).toBe('Draft SI Generated');
+  });
+
   it('keeps LCAM Board neutral while presentation is completed from a proposal drawer', () => {
     const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;
     const lead = dashboard.boards.find((board) => board.id === 'appointments')!.leads.find((candidate) => candidate.appointment)!;

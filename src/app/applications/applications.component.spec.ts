@@ -56,4 +56,17 @@ describe('ApplicationsComponent page filters', () => {
 
     expect(component.hasNoReferrerResults).toBe(true);
   });
+
+  it('only applies source selections after Apply is requested', () => {
+    const component = fixture.componentInstance;
+
+    component.pendingSources = ['ESRA (NTB)'];
+    expect(component.filteredBoards.flatMap((board) => board.leads).length).toBe(18);
+
+    component.applySources();
+    expect(component.filteredBoards.flatMap((board) => board.leads).length).toBe(0);
+
+    component.resetPendingSources();
+    expect(component.pendingSources).toEqual(['All']);
+  });
 });

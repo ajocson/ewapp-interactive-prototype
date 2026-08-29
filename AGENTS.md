@@ -217,7 +217,7 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 
 ## Current Project State
 
-### Latest LCAM journey update — 2026-08-29
+### Latest EWApp prototype update — 2026-08-29
 
 - Angular Router now provides `/lcam`, `/lcam/:leadId`, and Profile, Proposals, and Applications record routes.
 - `LeadJourneyStateService` retains per-lead Info/Profile data and unlocked tabs only during the current browser session; full reload resets it.
@@ -225,15 +225,21 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - `LeadActivityDrawerComponent` is the single shared drawer; do not restore the removed proposal-local drawer.
 - `Presentation Completed` gates conversion. Appointment completion moves to Meetings; follow-up presentation completion stays on Follow-up.
 - Underwriting submission adds the lead to Applications → In Progress with `Application Submitted` status.
+- The login screen is Figma-aligned and accepts the prototype credentials `Banca/Banca` and `Agency/Agency`.
+- Login state and the selected Agency/Banca user type persist across browser reloads in the current session. Logout clears the authenticated view.
+- The login password field supports show/hide behavior.
+- The shared TDX button component supports the Figma Secondary Large filled pink contract: 52px height, 20px horizontal padding, 12px vertical padding, 18px Lato Bold text, and 24px icons.
+- Lead Overview fields are role-aware: Agency shows Self-Generated Lead, Store/Branch details, and `PURPLE BLAZE_JDELACRUZ`; Banca shows referral metadata and Banca-only EWB Client Financial Segmentation.
+- Lead Overview values use regular font weight.
 
-Verified on **2026-08-28**:
+Verified on **2026-08-29**:
 
 - Branch: `main`.
-- Latest checked-in commit at inspection time: `52df767` (`Update lead management flow`).
+- Latest checked-in commit at inspection time: `c1cd76c` (`Complete LCAM lead journey and underwriting handoff`).
 - Focused proposal-flow tests: **1 file, 9 tests passing** via `npm test -- --watch=false --include='src/app/proposal-flow/proposal-flow.component.spec.ts'`.
 - Production build: succeeds via `npm run build`.
 - Current initial production bundle reported by Angular: approximately 531.42 kB raw / 102.62 kB estimated transfer (`main` 484.57 kB plus global styles 46.86 kB).
-- The worktree contains uncommitted proposal-flow and global-style changes plus `UPDATES_Aug-28-2026_12-06PM.md`. Preserve and inspect the worktree before editing; do not reset, discard, or overwrite unrelated changes.
+- The worktree contains the current EWApp journey, login, shared button, lead overview, and update-log changes. Preserve and inspect the worktree before editing; do not reset, discard, or overwrite unrelated changes.
 
 ## Known Issues and Limitations
 

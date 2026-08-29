@@ -6,6 +6,7 @@ interface LeadJourneyState {
   unlockedTab: LeadJourneyTab;
   info?: Record<string, string | boolean>;
   profile?: Record<string, string | boolean>;
+  riskProfileCalculated?: boolean;
 }
 
 const TABS: readonly LeadJourneyTab[] = ['info', 'profile', 'proposals', 'applications'];
@@ -42,6 +43,14 @@ export class LeadJourneyStateService {
 
   profile(leadId: string): Record<string, string | boolean> | undefined {
     return this.stateFor(leadId).profile;
+  }
+
+  markRiskProfileCalculated(leadId: string): void {
+    this.stateFor(leadId).riskProfileCalculated = true;
+  }
+
+  hasCalculatedRiskProfile(leadId: string): boolean {
+    return this.stateFor(leadId).riskProfileCalculated ?? false;
   }
 
   private stateFor(leadId: string): LeadJourneyState {

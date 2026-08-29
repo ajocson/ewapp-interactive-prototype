@@ -1,12 +1,12 @@
 <main class="applications">
-  <lam-global-header />
+  <lam-global-header [userType]="userType" (loggedOut)="loggedOut.emit()" />
   <div class="applications__body">
     <lam-side-navigation *ngIf="navigation.isSidebarOpen()" />
     <button *ngIf="navigation.isSidebarOpen() && !isDesktopViewport" type="button" class="sidebar-backdrop" aria-label="Close navigation" (click)="closeSidebarFromOverlay()"></button>
     <section class="applications__content" aria-label="Applications">
       <div class="applications__filters" role="search">
         <app-search-field class="applications__search" name="application-search" placeholder="Search by lead name or ID" ariaLabel="Search by lead name or ID" [(value)]="searchTerm" />
-        <tdx-field-control name="application-source" ariaLabel="Source of application" [selectedValues]="pendingSources" [options]="sourceControlOptions" trailingIcon="keyboard_arrow_down" [width]="112" [menuWidth]="250" [menuFitContent]="true" [multiple]="true" allValue="All" allLabel="All Sources" (selectedValuesChange)="pendingSources = $event" />
+        <tdx-field-control name="application-source" ariaLabel="Source of application" [selectedValues]="pendingSources" [options]="sourceControlOptions" trailingIcon="keyboard_arrow_down" [width]="112" [menuWidth]="250" [menuFitContent]="true" [multiple]="true" allValue="All" allLabel="All Sources" [showMenuActions]="true" [resetDisabled]="!sourceSelectionHasValues" [applyDisabled]="!sourceSelectionDirty" (openChange)="handleSourceMenuOpen($event)" (selectedValuesChange)="pendingSources = $event" (resetRequested)="resetPendingSources()" (applyRequested)="applySources()" />
         <div class="applications__filter" [class.applications__filter--active]="filterHasAppliedValues" (click)="$event.stopPropagation()">
           <tdx-field-control label="Filter" ariaLabel="Filter applications" leadingIcon="filter_alt" [width]="76" (activated)="toggleFilterMenu()" />
           <span *ngIf="filterHasAppliedValues" class="visually-hidden" aria-live="polite">Active filters applied</span>
@@ -62,9 +62,11 @@
           <lam-lead-board
             *ngFor="let board of filteredBoards; trackBy: trackBoard"
             [board]="board"
+            [highlightedLeadId]="highlightedLeadId"
             filterLabel="Filter by Lead Status"
             [filterOptions]="statusOptionsFor(board)"
             [filterByTag]="true"
+            (leadSelected)="leadSelected.emit($event)"
           />
         </div>
       </div>

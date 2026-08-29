@@ -164,17 +164,15 @@
 
       <footer class="si-footer si-footer--lead">
         <button type="button" class="flow-button flow-button--outline" (click)="closed.emit()">Cancel</button>
-        <div class="si-footer__actions"><button type="button" class="flow-button flow-button--outline">Skip</button><button type="button" class="flow-button flow-button--outline flow-button--purple" (click)="goToStep(3)">Back to Coverage Info</button><button type="button" class="flow-button flow-button--primary" (click)="goToStep('results')">Generate Draft Sales Illustration</button></div>
+        <div class="si-footer__actions"><button type="button" class="flow-button flow-button--outline">Skip</button><button type="button" class="flow-button flow-button--outline flow-button--purple" (click)="goToStep(3)">Back to Coverage Info</button><button type="button" class="flow-button flow-button--primary" (click)="generateDraftSi()">Generate Draft Sales Illustration</button></div>
       </footer>
     </ng-container>
   </section>
 </div>
 
-<section class="si-results" *ngIf="step === 'results' && !proposalOpen" role="dialog" aria-modal="true" aria-labelledby="results-title">
-  <header class="si-results__brandbar"><img src="assets/si-brand-logo.png" alt="EastWest Ageas"><button type="button" aria-label="Close results" (click)="closed.emit()"><span class="material-symbols-rounded" aria-hidden="true">close</span></button></header>
+<section class="si-results" *ngIf="step === 'results'" role="dialog" aria-modal="true" aria-labelledby="results-title">
+  <header class="si-results__brandbar"><img src="assets/si-brand-logo.png" alt="EastWest Ageas"><button type="button" aria-label="Close results"><span class="material-symbols-rounded" aria-hidden="true">close</span></button></header>
   <div class="si-results__titlebar"><h1 id="results-title">Draft Sales Illustration Results</h1></div>
   <div class="si-results__actions"><button type="button" class="flow-button flow-button--outline flow-button--purple" (click)="startNewDraft()">Generate new draft SI</button><span></span><button type="button" class="flow-button flow-button--primary" (click)="openProposal()">Convert to Proposal</button><button type="button" class="flow-button flow-button--discovery" (click)="downloadResults()">Download Results</button></div>
   <div class="pdf-viewer" aria-label="Draft sales illustration document preview"><img src="assets/si-page-1.png" alt="Draft sales illustration page 1"></div>
 </section>
-
-<lam-proposal-flow *ngIf="proposalOpen" [lead]="lead" (closed)="proposalOpen = false" />

@@ -221,8 +221,8 @@ describe('DashboardComponent sidebar', () => {
     expect(lead.activities.filter((activity) => activity.category === 'system').map((activity) => activity.label)).toEqual([
       'Draft SI Generated',
       'CSA Created',
-      'Proposal Created',
-      'SI Generated'
+      'SI Generated',
+      'Proposal Created'
     ]);
     expect(lead.activities.find((activity) => activity.label === 'Appointment Scheduled')?.timeLabel).toBe('2:00-3:00 PM');
   });

@@ -40,9 +40,22 @@ describe('DraftSiFlowComponent', () => {
     expect(fixture.componentInstance.productName).toBe('Dream Builder');
   });
 
-  it('opens the proposal flow from generated results', () => {
+  it('records completion separately from opening Draft SI', () => {
+    let generated = false;
+    fixture.componentInstance.draftSiGenerated.subscribe(() => generated = true);
+
+    fixture.componentInstance.generateDraftSi();
+
+    expect(fixture.componentInstance.step).toBe('results');
+    expect(generated).toBe(true);
+  });
+
+  it('requests the Info proposal view from generated results', () => {
+    let proposalRequested = false;
+    fixture.componentInstance.proposalRequested.subscribe(() => proposalRequested = true);
+
     fixture.componentInstance.openProposal();
 
-    expect(fixture.componentInstance.proposalOpen).toBe(true);
+    expect(proposalRequested).toBe(true);
   });
 });

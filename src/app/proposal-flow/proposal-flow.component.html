@@ -11,9 +11,9 @@
   <div class="proposal-body">
     <lam-side-navigation *ngIf="navigation.isSidebarOpen()" class="proposal-sidebar" />
     <main class="proposal-main" [class.proposal-main--application]="applicationOpen">
-      <ng-container *ngIf="applicationOpen; else proposalRecordWorkspace">
+      <ng-container *ngIf="applicationOpen && applicationDetailOpen; else proposalRecordWorkspace">
         <header class="application-page-header">
-          <nav class="application-breadcrumbs" aria-label="Breadcrumb"><button type="button" class="proposal-breadcrumbs__link" (click)="closed.emit()">LCAM</button><span class="material-symbols-rounded" aria-hidden="true">chevron_right</span><span>Mr. {{ lead.name }}</span><span class="material-symbols-rounded" aria-hidden="true">chevron_right</span><strong>Dream Builder</strong></nav>
+          <nav class="application-breadcrumbs" aria-label="Breadcrumb"><button type="button" class="proposal-breadcrumbs__link" (click)="closed.emit()">LCAM</button><span class="material-symbols-rounded" aria-hidden="true">chevron_right</span><button type="button" class="proposal-breadcrumbs__link" (click)="backToApplicationCard()">Mr. {{ lead.name }}</button><span class="material-symbols-rounded" aria-hidden="true">chevron_right</span><strong>Dream Builder</strong></nav>
           <div class="application-page-header__summary"><h1>Dream Builder</h1><span>Application No. 810000106051</span><app-tag [label]="applicationUnderwritingSubmitted ? 'Pending On Underwriting Handling' : 'In Progress'" [variant]="TdxTagVariant.Success" [emphasis]="TdxTagEmphasis.Subtle" /></div>
         </header>
         <section class="application-workspace" [class.application-workspace--complete]="applicationComplete" aria-label="Dream Builder application">
@@ -28,7 +28,7 @@
             <div class="application-form-card__body">
               <p class="application-required"><span class="material-symbols-rounded" aria-hidden="true">info</span>All fields are required unless stated “Optional”</p>
               <section class="application-basic"><h3>Basic Information</h3><dl><div><dt>Full Name</dt><dd>Mr. {{ lead.name }}</dd></div><div><dt>Birth Date</dt><dd>January 1, 1989</dd></div><div><dt>Gender</dt><dd>Male</dd></div><div><dt>Age</dt><dd>37</dd></div></dl></section>
-              <section class="application-government-ids"><div class="application-id-notice"><span class="material-symbols-rounded" aria-hidden="true">info</span><div><strong>Submit and Verify your ID in the Owner Tab</strong><p>Complete ID submission and verification in the Owner Tab. Ensure all required steps are followed for successful verification.</p></div></div><h3>Government IDs</h3><div class="application-id-fields"><label>Select ID Type<select aria-label="Select identification type"><option>Select ID</option></select></label><label>ID Number<input aria-label="Identification number" placeholder="Input ID Number"></label></div><button type="button" class="application-check-button" (click)="completeApplicationDemo()">Complete Application (For Demo Pusposes only)</button></section>
+              <section class="application-government-ids"><div class="application-id-notice"><span class="material-symbols-rounded" aria-hidden="true">info</span><div><strong>Submit and Verify your ID in the Owner Tab</strong><p>Complete ID submission and verification in the Owner Tab. Ensure all required steps are followed for successful verification.</p></div></div><h3>Government IDs</h3><div class="application-id-fields"><label>Select ID Type<select aria-label="Select identification type"><option>Select ID</option></select></label><label>ID Number<input aria-label="Identification number" placeholder="Input ID Number"></label></div><app-button label="Complete Application (For Demo Pusposes only)" [variant]="TdxButtonVariant.Primary" [size]="TdxButtonSize.Small" (clicked)="completeApplicationDemo()" /></section>
             </div>
           </article>
           <ng-template #applicationForUpload>
@@ -69,7 +69,19 @@
       </nav>
 
       <div class="proposal-content">
-        <article class="proposal-card generated-proposal" *ngIf="proposalCreated">
+        <article class="application-summary-card" *ngIf="routeTab === 'applications'">
+          <button type="button" class="application-summary-card__link" (click)="openApplicationDetail()">
+            <span class="application-summary-card__heading"><strong>Dream Builder</strong><span><app-tag label="Application Start" [variant]="TdxTagVariant.Success" [emphasis]="TdxTagEmphasis.Subtle" /><span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span></span></span>
+            <span class="application-summary-card__details">
+              <span><small>Policy Number</small><strong>810000106193</strong></span>
+              <span><small>Years Payable</small><strong>10 years</strong></span>
+              <span><small>Life Insured</small><strong>Sample Referrer Lead</strong></span>
+              <span><small>Benefit Amount</small><strong>₱ 300,000.00</strong></span>
+              <span><small>Payment Due Date</small><strong>---</strong></span>
+            </span>
+          </button>
+        </article>
+        <article class="proposal-card generated-proposal" *ngIf="proposalCreated && routeTab !== 'applications'">
           <header class="generated-proposal__header"><div><h2>{{ selectedProduct }}</h2><small>90565</small></div><button type="button" class="summary-more" aria-label="More proposal actions"><span class="material-symbols-rounded" aria-hidden="true">more_vert</span></button></header>
           <nav class="generated-proposal__tabs" aria-label="Proposal sections"><button type="button" class="is-active">Info</button><button type="button">Benefits</button><button type="button">Riders</button></nav>
           <section class="generated-proposal__section"><h3>Proposal Information</h3><dl><div><dt>Effective Date</dt><dd>August 6, 2026</dd></div><div><dt>Valid Until</dt><dd>September 5, 2026</dd></div></dl></section>
@@ -80,9 +92,9 @@
             <button type="button" (click)="salesIllustrationGenerated = true" aria-label="View generated sales illustration"><span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span><span>Sales Illustration_Dream Builder_810000106051</span><span class="material-symbols-rounded" aria-hidden="true">keyboard_arrow_right</span></button>
             <a class="generated-proposal__download" href="assets/si-page-1.png" download="Sales Illustration_Dream Builder_810000106051.png">Download Sales Illustration</a>
           </section>
-          <footer><button *ngIf="!hasGeneratedSalesIllustration" type="button" class="generated-proposal__generate" (click)="generateSalesIllustration()">Generate Sales Illustration<span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button><button *ngIf="hasGeneratedSalesIllustration" type="button" class="generated-proposal__convert" (click)="convertToApplication()">Convert to Application<span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button></footer>
+          <footer><button *ngIf="!hasGeneratedSalesIllustration" type="button" class="generated-proposal__generate" (click)="generateSalesIllustration()">Generate Sales Illustration<span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button><button *ngIf="hasGeneratedSalesIllustration && !isTabEnabled('applications')" type="button" class="generated-proposal__convert" (click)="convertToApplication()">Convert to Application<span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button></footer>
         </article>
-        <article class="proposal-card proposal-draft" *ngIf="proposalDraftOpen">
+        <article class="proposal-card proposal-draft" *ngIf="proposalDraftOpen && routeTab !== 'applications'">
           <header class="proposal-draft__header"><h2>{{ selectedProduct }}</h2></header>
           <nav class="proposal-draft__tabs" aria-label="Proposal sections"><button type="button" [class.is-active]="proposalTab === 'info'" (click)="proposalTab = 'info'">Info</button><button type="button" [class.is-active]="proposalTab === 'benefits'" (click)="proposalTab = 'benefits'">Benefits</button><button type="button" disabled>Riders</button></nav>
           <section class="proposal-draft__info" *ngIf="proposalTab === 'info'">
@@ -116,7 +128,7 @@
           </section>
           <footer class="proposal-draft__actions"><button type="button" class="proposal-draft__save" (click)="requestSaveProposal()">Save Proposal <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button></footer>
         </article>
-        <article class="proposal-card individual-card" *ngIf="stage === 'individual-form'">
+        <article class="proposal-card individual-card" *ngIf="routeTab !== 'applications' && stage === 'individual-form'">
           <h2>Individual Information</h2>
           <form class="individual-form">
             <p class="form-message"><span class="material-symbols-rounded" aria-hidden="true">info</span>Complete all details to proceed with the CSA/Sales process.</p>
@@ -131,10 +143,10 @@
               <label>Mobile Number<div class="phone-input"><span>+639</span><input name="mobileNumber" [(ngModel)]="mobileNumber"></div></label><label>Email Address<input name="email" [(ngModel)]="emailAddress"></label><label>Source of Lead<input name="source" [(ngModel)]="sourceOfLead"></label>
             </div></fieldset>
           </form>
-          <footer class="card-footer"><button type="button" class="proposal-button proposal-button--outline" (click)="closed.emit()">Cancel</button><button type="button" class="proposal-button proposal-button--primary" (click)="saveLeadInfo()">Save Changes</button></footer>
+          <footer class="card-footer"><button type="button" class="proposal-button proposal-button--outline">Cancel</button><button type="button" class="proposal-button proposal-button--primary" (click)="saveLeadInfo()">Save Changes</button></footer>
         </article>
 
-        <article class="proposal-card proposal-card--summary" *ngIf="stage === 'individual-summary'">
+        <article class="proposal-card proposal-card--summary" *ngIf="routeTab !== 'applications' && stage === 'individual-summary'">
           <h2>Individual Information <button type="button" class="summary-more" aria-label="More information actions"><span class="material-symbols-rounded" aria-hidden="true">more_vert</span></button></h2>
           <section><h3>Basic Information</h3><dl><div><dt>Full Name</dt><dd>Mr. John Mark Doe</dd></div><div><dt>Birthdate</dt><dd>January 1, 1989</dd></div><div><dt>Gender</dt><dd>Male</dd></div><div><dt>Age</dt><dd>37</dd></div></dl></section>
           <section><h3>Contact Information</h3><dl><div><dt>Mobile Number</dt><dd>+639 171234567</dd></div><div><dt>Email Address</dt><dd>test@email.com</dd></div></dl></section>
@@ -142,9 +154,9 @@
           <footer class="summary-actions"><div><button type="button" class="proposal-button proposal-button--primary" (click)="requestAddProfile()">Continue and Add Profile (CSA)</button><button type="button" class="proposal-button proposal-button--outline">Generate Draft Sales Illustration <small>New</small></button></div><button type="button" class="quick-quotes-link">or view all generated Quick Quotes</button></footer>
         </article>
 
-        <article class="proposal-card csa-card" *ngIf="!proposalDraftOpen && !proposalCreated && stage !== 'individual-form' && stage !== 'individual-summary'">
+        <article class="proposal-card csa-card" *ngIf="routeTab !== 'applications' && !proposalDraftOpen && !proposalCreated && stage !== 'individual-form' && stage !== 'individual-summary'">
           <h2><span>Client Suitability Assessment<small *ngIf="stage === 'risk-profile'">August 6, 2026</small></span><button *ngIf="stage === 'risk-profile'" type="button" class="summary-more" aria-label="More CSA actions"><span class="material-symbols-rounded" aria-hidden="true">more_vert</span></button></h2>
-          <nav class="csa-tabs" aria-label="Client suitability assessment steps"><button type="button" [class.is-active]="stage === 'csa-information'" (click)="goTo('csa-information')">Information</button><button type="button" [class.is-active]="stage === 'life-needs'" (click)="goTo('life-needs')">Life Needs &amp; Priorities</button><button type="button" [class.is-active]="stage === 'calculation'" (click)="goTo('calculation')">Calculation of Needs</button><button type="button" [class.is-active]="stage === 'assessment' || stage === 'risk-profile'" (click)="goTo('assessment')">General Assessment</button></nav>
+          <nav class="csa-tabs" aria-label="Client suitability assessment steps"><button type="button" [class.is-active]="stage === 'csa-information'" (click)="stage === 'risk-profile' ? null : goTo('csa-information')">Information</button><button type="button" [class.is-active]="stage === 'life-needs'" (click)="stage === 'risk-profile' ? null : goTo('life-needs')">Life Needs &amp; Priorities</button><button type="button" [class.is-active]="stage === 'calculation'" (click)="stage === 'risk-profile' ? null : goTo('calculation')">Calculation of Needs</button><button type="button" [class.is-active]="stage === 'assessment' || stage === 'risk-profile'" (click)="stage === 'risk-profile' ? null : goTo('assessment')">General Assessment</button></nav>
 
           <form class="csa-form" *ngIf="stage === 'csa-information'">
             <fieldset><legend>General Information</legend><label>Civil Status<input name="civilStatus" [(ngModel)]="civilStatus"></label></fieldset>
@@ -160,7 +172,7 @@
             <fieldset><legend>Financial Capacity</legend><label>Total monthly earnings<input value="₱ 150,000"></label><label>Annual premium capacity<input value="₱ 117,750"></label><label>Total assets<input value="₱ 3,000,000"></label><label>Approximate net worth<input value="₱ 2,500,000"></label></fieldset>
           </form>
 
-          <section class="assessment" *ngIf="stage === 'assessment'"><h3>Risk Profile Assessment</h3><fieldset><legend>How long will you keep your money invested?</legend><button type="button" class="answer is-selected">A. &lt; 1 yr <span>✓</span></button><button type="button" class="answer">D. 7 to 9 years</button><button type="button" class="answer">B. 1 to 3 years</button><button type="button" class="answer">E. At least 10 years</button><button type="button" class="answer">C. 4 to 6 years</button></fieldset><fieldset><legend>What is your goal in investing?</legend><button type="button" class="answer answer--wide is-selected">A. Preservation of capital in exchange for very low returns that may not keep pace with inflation <span>✓</span></button><button type="button" class="answer answer--wide">B. Modest fluctuations in the value of capital in exchange for modest income and growth</button></fieldset><div class="assessment-actions"><button type="button" class="proposal-button proposal-button--outline">Back</button><button type="button" class="proposal-button proposal-button--primary" (click)="requestRiskProfile()">Calculate Risk Profile</button></div></section>
+          <section class="assessment" *ngIf="stage === 'assessment'"><h3>Risk Profile Assessment</h3><fieldset><legend>How long will you keep your money invested?</legend><button type="button" class="answer is-selected">A. &lt; 1 yr <span>✓</span></button><button type="button" class="answer">D. 7 to 9 years</button><button type="button" class="answer">B. 1 to 3 years</button><button type="button" class="answer">E. At least 10 years</button><button type="button" class="answer">C. 4 to 6 years</button></fieldset><fieldset><legend>What is your goal in investing?</legend><button type="button" class="answer answer--wide is-selected">A. Preservation of capital in exchange for very low returns that may not keep pace with inflation <span>✓</span></button><button type="button" class="answer answer--wide">B. Modest fluctuations in the value of capital in exchange for modest income and growth</button></fieldset><div class="assessment-actions"><button type="button" class="proposal-button proposal-button--primary" (click)="requestRiskProfile()">Calculate Risk Profile</button></div></section>
 
           <section class="risk-profile" *ngIf="stage === 'risk-profile'"><h3>Risk Profile</h3><div class="risk-profile__result"><strong>Your current risk profile:</strong><mark>Conservative</mark><ul><li>Preserve Capital</li><li>Product Option: Traditional Life Insurance</li></ul></div><footer><button type="button" class="create-proposal-button" (click)="openProductPicker()">Create Proposal <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button></footer></section>
         </article>
@@ -177,7 +189,7 @@
     <section class="product-picker" role="dialog" aria-modal="true" aria-labelledby="product-picker-title" (click)="$event.stopPropagation()">
       <header><h2 id="product-picker-title">Choose Product</h2><p>Select the insurance plan that best suits your needs. Limit your selection to one plan only.</p></header>
       <nav aria-label="Product category"><button type="button" [class.is-active]="productCategory === 'all'" (click)="productCategory = 'all'">All Products</button><button type="button" [class.is-active]="productCategory === 'traditional'" (click)="productCategory = 'traditional'">Traditional</button><button type="button" [class.is-active]="productCategory === 'variable'" (click)="productCategory = 'variable'">Variable Unit Link</button></nav>
-      <div class="product-picker__grid"><button *ngFor="let product of ['Dream Builder', 'Future Assure', 'Future Assure Max (Peso)', 'Future Assure Max (US Dollar)', 'Future Assure Regular Pay', 'Life Essentials', 'Sure Start']" type="button" [class.is-selected]="selectedProduct === product" (click)="selectProduct(product)"><span class="material-symbols-rounded" aria-hidden="true">shield</span><span>{{ product }}</span><span *ngIf="selectedProduct === product" class="material-symbols-rounded" aria-hidden="true">check_circle</span></button></div>
+      <div class="product-picker__grid"><button *ngFor="let product of ['Dream Builder', 'Future Assure', 'Future Assure Max (Peso)', 'Future Assure Max (US Dollar)', 'Future Assure Regular Pay', 'Life Essentials', 'Sure Start']" type="button" [class.is-selected]="selectedProduct === product" (click)="selectProduct(product)"><span class="product-picker__icon"><img src="assets/product-icon.svg" alt=""></span><span>{{ product }}</span><span *ngIf="selectedProduct === product" class="material-symbols-rounded" aria-hidden="true">check_circle</span></button></div>
       <footer><button type="button" class="proposal-button proposal-button--neutral-outline" (click)="productPickerOpen = false">Cancel</button><button type="button" class="proposal-button proposal-button--primary" [disabled]="!selectedProduct" (click)="createProposal()">Continue</button></footer>
     </section>
   </div>

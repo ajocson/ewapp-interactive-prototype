@@ -1,8 +1,8 @@
 <main class="dashboard">
-  <lam-global-header />
+  <lam-global-header [userType]="userType" (loggedOut)="loggedOut.emit()" />
 
   <div class="dashboard__body">
-    <lam-side-navigation *ngIf="navigation.isSidebarOpen()" />
+    <lam-side-navigation *ngIf="navigation.isSidebarOpen()" (newLeadRequested)="newLeadRequested.emit()" />
 
     <button
       *ngIf="navigation.isSidebarOpen() && !isDesktopViewport"

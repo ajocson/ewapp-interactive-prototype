@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, Inject, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, Inject, Input, OnDestroy, Output } from '@angular/core';
 
 import { LeadBoardData, LeadCardData, LeadTag } from '../lead-board.model';
 import { TdxButtonSize, TdxButtonVariant } from '../shared/components/button/button.model';
@@ -16,8 +16,12 @@ const DESKTOP_SIDEBAR_QUERY = '(min-width: 1024px)';
   standalone: false
 })
 export class ApplicationsComponent implements OnDestroy {
+  @Input() userType: 'Agency' | 'Banca' = 'Banca';
+  @Output() leadSelected = new EventEmitter<LeadCardData>();
+  @Output() loggedOut = new EventEmitter<void>();
   searchTerm = '';
   pendingSources: readonly string[] = ['All'];
+  appliedSources: readonly string[] = ['All'];
   isDesktopViewport = false;
   filterMenuOpen = false;
   pendingLeadStatuses: readonly string[] = ['All'];
@@ -58,6 +62,11 @@ export class ApplicationsComponent implements OnDestroy {
   ];
   readonly boards: readonly LeadBoardData[] = this.createBoards();
 
+  get highlightedLeadId(): string | null {
+    const leadId = this.navigation.latestSubmittedApplicationLeadId();
+    return leadId ? `application-${this.navigation.applicationSubmissions().find((lead) => lead.leadId === leadId)?.id ?? ''}` : null;
+  }
+
   private readonly desktopMediaQuery: MediaQueryList | null;
 
   constructor(
@@ -78,7 +87,7 @@ export class ApplicationsComponent implements OnDestroy {
 
   get filteredBoards(): readonly LeadBoardData[] {
     const terms = this.searchTerm.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
-    const selectedSources = this.pendingSources.filter(source => source !== 'All');
+    const selectedSources = this.appliedSources.filter(source => source !== 'All');
     return this.boards.map((board) => ({
       ...board,
       leads: board.leads.filter((lead) =>
@@ -111,6 +120,14 @@ export class ApplicationsComponent implements OnDestroy {
     return !this.valuesMatch(this.pendingLeadStatuses, this.appliedLeadStatuses)
       || this.pendingReferrer !== this.appliedReferrer
       || this.pendingSort !== this.appliedSort;
+  }
+
+  get sourceSelectionDirty(): boolean {
+    return !this.valuesMatch(this.pendingSources, this.appliedSources);
+  }
+
+  get sourceSelectionHasValues(): boolean {
+    return !this.pendingSources.includes('All');
   }
 
   get filterHasValues(): boolean {
@@ -155,6 +172,19 @@ export class ApplicationsComponent implements OnDestroy {
     this.appliedSort = this.pendingSort;
     this.filterMenuOpen = false;
     this.referrerSuggestionsOpen = false;
+    this.changeDetectorRef.markForCheck();
+  }
+
+  handleSourceMenuOpen(isOpen: boolean): void {
+    if (isOpen || this.sourceSelectionDirty) this.pendingSources = [...this.appliedSources];
+  }
+
+  resetPendingSources(): void {
+    this.pendingSources = ['All'];
+  }
+
+  applySources(): void {
+    this.appliedSources = [...this.pendingSources];
     this.changeDetectorRef.markForCheck();
   }
 

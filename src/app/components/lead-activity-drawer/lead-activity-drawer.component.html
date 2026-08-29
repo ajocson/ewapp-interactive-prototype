@@ -11,7 +11,14 @@
     <div class="drawer-status">
       <app-tag [label]="statusTag" [variant]="statusVariant" [emphasis]="tagEmphasis.Subtle" />
       <small [class.drawer-status__state--danger]="lead.leadType === 'Dropped'"><span class="material-symbols-rounded" aria-hidden="true">person</span>{{ lead.leadType }}</small>
-      <small><span class="material-symbols-rounded" aria-hidden="true">schedule</span>1 day</small>
+      <small [attr.aria-label]="'Overall aging: ' + lead.aging + '. Total days since Lead Generation.'">
+        <span class="material-symbols-rounded" aria-hidden="true">schedule</span>{{ lead.aging }}
+        <span class="drawer-aging-tooltip" aria-hidden="true">Total days since Lead Generation.</span>
+      </small>
+      <small *ngIf="lead.tatAging && statusTag !== 'New Lead'" [attr.aria-label]="'TAT aging: ' + lead.tatAging + '. Days elapsed in the 90-day Active Lead cycle.'">
+        <span class="material-symbols-rounded" aria-hidden="true">flag_2</span>{{ lead.tatAging }}
+        <span class="drawer-aging-tooltip drawer-aging-tooltip--tat" aria-hidden="true">Days elapsed in the 90-day Active Lead cycle.</span>
+      </small>
     </div>
   </header>
 
@@ -26,15 +33,28 @@
           <div><dt>Email</dt><dd>client@email.com</dd></div>
           <div><dt>Mobile Number</dt><dd>+63 9226789012</dd></div>
           <div><dt>Product Interested</dt><dd>{{ lead.productInterested }}</dd></div>
-          <div><dt>EWB Client Financial Segmentation</dt><dd>Mid</dd></div>
-          <div><dt>Source of Lead</dt><dd>{{ lead.source }}</dd></div>
-          <div><dt>Referrer Name</dt><dd>{{ lead.referrer }}</dd></div>
-          <div><dt>Referrer ID</dt><dd>100234</dd></div>
-          <div><dt>Store/Branch ID</dt><dd>RBG0380</dd></div>
-          <div class="drawer-details__wide"><dt>Store/Branch Assignment</dt><dd>595 THE FORT - BGC CORPORATE CENTER</dd></div>
+          <div *ngIf="userType === 'Banca'"><dt>EWB Client Financial Segmentation</dt><dd>Mid</dd></div>
+          <div><dt>Source of Lead</dt><dd>{{ userType === 'Agency' ? 'Self-Generated Lead' : lead.source }}</dd></div>
+          <ng-container *ngIf="userType === 'Agency'; else bancaLeadInfo">
+            <div><dt>Store/Branch Name</dt><dd>595 THE FORT - BGC CORPORATE CENTER</dd></div>
+            <div><dt>Store/Branch ID</dt><dd>RBG0380</dd></div>
+            <div><dt>Unit Name</dt><dd>PURPLE BLAZE_JDELACRUZ</dd></div>
+          </ng-container>
+          <ng-template #bancaLeadInfo>
+            <div><dt>Referrer Name</dt><dd>{{ lead.referrer }}</dd></div>
+            <div><dt>Referrer ID</dt><dd>100234</dd></div>
+            <div><dt>Referral Date</dt><dd>February 03, 2026</dd></div>
+            <div *ngIf="lead.source === 'Self-Generated Lead'"><dt>Manual Source</dt><dd>Self-Generated Lead</dd></div>
+            <div><dt>Store/Branch Name</dt><dd>595 THE FORT - BGC CORPORATE CENTER</dd></div>
+            <div><dt>Store/Branch ID</dt><dd>RBG0380</dd></div>
+          </ng-template>
         </dl>
 
-        <div *ngIf="!isLeadPaused" class="drawer-lead-actions">
+        <div *ngIf="isApplicationLead" class="drawer-lead-actions drawer-lead-actions--application">
+          <app-button class="drawer-full-button" label="View Application" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" />
+          <app-button class="drawer-edit" label="Generate/View Full Proposal" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Transparent" [size]="buttonSize.Small" />
+        </div>
+        <div *ngIf="!isApplicationLead && !isLeadPaused" class="drawer-lead-actions">
           <app-button
             class="drawer-full-button"
             [label]="primaryActionLabel"
@@ -91,7 +111,7 @@
         <app-button *ngIf="lead.leadType === 'Parked'" class="drawer-state-summary__button" label="Reactivate Lead" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="reactivateLead()" />
       </section>
 
-      <ng-container *ngIf="!actionMode && !isLeadPaused">
+      <ng-container *ngIf="!isApplicationLead && !actionMode && !isLeadPaused">
 
       <section *ngIf="scheduling; else appointmentActionState" class="drawer-scheduler" aria-labelledby="scheduler-title">
         <header class="drawer-scheduler__title">

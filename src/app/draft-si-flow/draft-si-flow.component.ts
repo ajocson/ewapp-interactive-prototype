@@ -13,6 +13,11 @@ import { DraftSiStep, InsuranceProduct, ProductCategory } from './draft-si-flow.
 export class DraftSiFlowComponent {
   @Input({ required: true }) lead!: LeadCardData;
   @Output() closed = new EventEmitter<void>();
+  @Output() activityRequested = new EventEmitter<void>();
+  @Output() contactRequired = new EventEmitter<void>();
+  @Output() appointmentRequired = new EventEmitter<void>();
+  @Output() proposalRequested = new EventEmitter<void>();
+  @Output() draftSiGenerated = new EventEmitter<void>();
 
   step: DraftSiStep = 1;
   activeCategory: ProductCategory = 'All Products';
@@ -22,7 +27,6 @@ export class DraftSiFlowComponent {
   paymentPeriod = '5 Pay';
   paymentFrequency = 'Annual';
   benefitAmount = '500,000';
-  proposalOpen = false;
 
   readonly categories: readonly ProductCategory[] = ['All Products', 'Traditional', 'Variable Unit Link'];
   readonly products: readonly InsuranceProduct[] = [
@@ -68,6 +72,11 @@ export class DraftSiFlowComponent {
     this.step = step;
   }
 
+  generateDraftSi(): void {
+    this.goToStep('results');
+    this.draftSiGenerated.emit();
+  }
+
   startNewDraft(): void {
     this.step = 1;
     this.activeCategory = 'All Products';
@@ -87,7 +96,7 @@ export class DraftSiFlowComponent {
   }
 
   openProposal(): void {
-    this.proposalOpen = true;
+    this.proposalRequested.emit();
   }
 
   trackProduct(index: number, product: InsuranceProduct): string {

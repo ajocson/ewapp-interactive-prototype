@@ -24,6 +24,7 @@
 .tdx-button--medium { --button-height: var(--button-height-md); --button-icon-size: var(--button-icon-size-md); --button-padding-x: var(--button-padding-x-md); --button-padding-y: var(--button-padding-y-md); font-size: var(--paragraph-md-text-size); line-height: var(--paragraph-md-line-height); }
 .tdx-button--large { --button-height: var(--button-height-lg); --button-icon-size: var(--button-icon-size-lg); --button-padding-x: var(--button-padding-x-lg); --button-padding-y: var(--button-padding-y-lg); font-size: var(--paragraph-lg-text-size); line-height: var(--paragraph-lg-line-height); }
 .tdx-button--primary { --button-focus-ring: var(--button-primary-focus-ring); }
+.tdx-button--secondary { --button-focus-ring: var(--button-secondary-focus-ring); }
 .tdx-button--subtle { --button-focus-ring: var(--button-secondary-focus-ring); }
 .tdx-button--danger { --button-focus-ring: var(--button-danger-focus-ring); }
 
@@ -36,6 +37,9 @@
 .tdx-button--primary.tdx-button--transparent { border-color: transparent; background: transparent; color: var(--button-primary-transparent-text-default); }
 .tdx-button--primary.tdx-button--transparent:hover:not(:disabled) { color: var(--button-primary-transparent-text-hover); }
 .tdx-button--primary.tdx-button--transparent:active:not(:disabled) { color: var(--button-primary-transparent-text-pressed); }
+.tdx-button--secondary.tdx-button--default { border-color: transparent; background: var(--button-secondary-filled-bg-default); color: var(--button-secondary-filled-text); }
+.tdx-button--secondary.tdx-button--default:hover:not(:disabled) { background: var(--button-secondary-filled-bg-hover); }
+.tdx-button--secondary.tdx-button--default:active:not(:disabled) { background: var(--button-secondary-filled-bg-pressed); }
 .tdx-button--subtle.tdx-button--default { border-color: transparent; background: var(--button-subtle-filled-bg-default); color: var(--button-subtle-filled-text); }
 .tdx-button--subtle.tdx-button--default:hover:not(:disabled) { background: var(--button-subtle-filled-bg-hover); }
 .tdx-button--subtle.tdx-button--default:active:not(:disabled) { background: var(--button-subtle-filled-bg-pressed); }

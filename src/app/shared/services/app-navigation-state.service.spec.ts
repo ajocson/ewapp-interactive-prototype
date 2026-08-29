@@ -21,4 +21,14 @@ describe('AppNavigationStateService', () => {
     expect(service.activeDestination()).toBe('lcam-board');
     expect(requested).toHaveBeenCalledOnce();
   });
+
+  it('opens Applications and emits a page navigation request', () => {
+    const requested = vi.fn();
+    service.applicationsRequested.subscribe(requested);
+
+    service.goToApplications();
+
+    expect(service.activeDestination()).toBe('applications');
+    expect(requested).toHaveBeenCalledOnce();
+  });
 });

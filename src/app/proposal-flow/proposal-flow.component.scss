@@ -102,5 +102,42 @@
 .create-proposal-button { display: flex; width: var(--proposal-create-button-width); height: var(--button-small-height); align-items: center; justify-content: space-between; padding: var(--button-small-padding-y) var(--button-small-padding-x); border: var(--border-width-none); border-radius: var(--radius-round); background: var(--color-purple-600); color: var(--text-neutral-inverse); font-weight: var(--font-weight-bold); }
 .create-proposal-button .material-symbols-rounded { font-size: var(--space-xl); }
 
+.application-summary-card {
+  width: 100%;
+  margin: var(--space-3xl) auto;
+  overflow: hidden;
+  border: var(--border-width-none);
+  border-radius: var(--radius-lg);
+  background: var(--surface-default);
+  box-shadow: var(--shadow-md);
+}
+
+.application-summary-card__link {
+  display: grid;
+  width: 100%;
+  gap: var(--space-3xl);
+  padding: var(--space-3xl);
+  border: var(--border-width-none);
+  background: transparent;
+  color: var(--text-neutral-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.application-summary-card__heading { display: flex; align-items: center; justify-content: space-between; }
+.application-summary-card__heading > strong { font-family: var(--typography-font-family-paragraph); font-size: var(--paragraph-md-text-size); font-weight: var(--font-weight-bold); line-height: var(--paragraph-md-line-height); }
+.application-summary-card__heading > span { display: flex; align-items: center; gap: var(--space-md); }
+.application-summary-card__heading .material-symbols-rounded { color: var(--icon-neutral-primary); font-size: var(--icon-xl); }
+.application-summary-card__details { display: grid; grid-template-columns: repeat(5, minmax(var(--space-none), 1fr)); gap: var(--space-3xl); }
+.application-summary-card__details > span { display: flex; min-width: var(--space-none); flex-direction: column; gap: var(--space-md); }
+.application-summary-card__details small { color: var(--text-neutral-secondary); font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
+.application-summary-card__details strong { font-size: var(--paragraph-md-text-size); font-weight: var(--font-weight-regular); line-height: var(--paragraph-md-line-height); }
+
+.application-government-ids > app-button {
+  display: block;
+  width: fit-content;
+  margin: var(--space-3xl) auto 0;
+}
+
 @media (max-width: 900px) { .proposal-sidebar { display: none; } .proposal-content { padding-inline: var(--space-lg); } }
 @media (max-width: 720px) { .lead-page-header { height: auto; } .proposal-breadcrumbs { display: none; } .profile-tabs { overflow-x: auto; justify-content: flex-start; } .profile-tabs button { flex: 0 0 var(--proposal-csa-tab-mobile-width); } .proposal-card { border-radius: var(--radius-lg); } .form-grid, .csa-form fieldset, .calculation-form fieldset, .assessment fieldset { grid-template-columns: 1fr; } .compact-field { width: 100%; } .csa-tabs { display: flex; overflow-x: auto; } .csa-tabs button { min-width: var(--proposal-csa-tab-mobile-width); } .proposal-card dl, .drawer-details { grid-template-columns: 1fr; } .answer--wide { grid-column: auto; } .proposal-draft__tabs { grid-template-columns: repeat(3, 1fr); } .proposal-draft__section, .proposal-draft__benefits { padding: 24px; } .proposal-draft__actions { padding: 24px 24px 16px; } }

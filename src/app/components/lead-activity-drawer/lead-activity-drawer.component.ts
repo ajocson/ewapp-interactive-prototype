@@ -14,6 +14,18 @@ const APPOINTMENT_STATUS_TAGS = new Set([
   'Appointment Canceled'
 ]);
 
+const APPLICATION_STATUS_TAGS = new Set([
+  'Application Submitted',
+  'Underwriting Ongoing',
+  'Needs More Info',
+  'Conditionally Accepted',
+  'Policy Released',
+  'Approved',
+  'Unapproved',
+  'Withdrawn',
+  'Postponed'
+]);
+
 export interface LeadContactedEvent {
   lead: LeadCardData;
   notes: string;
@@ -78,6 +90,7 @@ interface TimeOption {
   standalone: false
 })
 export class LeadActivityDrawerComponent implements OnChanges {
+  @Input() userType: 'Agency' | 'Banca' = 'Banca';
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
   @Input({ required: true }) lead!: LeadCardData;
@@ -167,8 +180,13 @@ export class LeadActivityDrawerComponent implements OnChanges {
     return this.lead.tags[0]?.label ?? 'New Lead';
   }
 
+  get isApplicationLead(): boolean {
+    return APPLICATION_STATUS_TAGS.has(this.statusTag);
+  }
+
   get statusVariant(): TdxTagVariant {
-    return this.statusTag === 'New Lead' ? TdxTagVariant.Primary : TdxTagVariant.Success;
+    const tone = this.lead.tags[0]?.tone;
+    return tone ? tone as TdxTagVariant : (this.statusTag === 'New Lead' ? TdxTagVariant.Primary : TdxTagVariant.Success);
   }
 
   get isContacted(): boolean {
@@ -538,9 +556,45 @@ export class LeadActivityDrawerComponent implements OnChanges {
   }
 
   private activitiesFor(category: LeadActivityRecord['category']): readonly LeadActivityRecord[] {
-    return [...this.lead.activities]
+    const activities = this.isApplicationLead && !this.lead.activities.length
+      ? this.genericApplicationActivities()
+      : this.lead.activities;
+
+    return [...activities]
       .filter((activity) => activity.category === category)
       .sort((first, second) => first.occurredAtTimestamp - second.occurredAtTimestamp);
+  }
+
+  private genericApplicationActivities(): readonly LeadActivityRecord[] {
+    const dateLabel = 'February 01, 2026';
+    const timeLabel = '9:00 AM';
+    const baseTimestamp = this.lead.createdAtTimestamp;
+    const record = (id: string, category: LeadActivityRecord['category'], label: string, offset: number, extra: Partial<LeadActivityRecord> = {}): LeadActivityRecord => ({
+      id: `generic-${this.lead.id}-${id}`,
+      category,
+      label,
+      dateLabel,
+      timeLabel,
+      occurredAtTimestamp: baseTimestamp + offset,
+      recordedDateLabel: dateLabel,
+      recordedTimeLabel: timeLabel,
+      ...extra
+    });
+
+    return [
+      record('new-lead', 'sales', 'New Lead Created', 0),
+      record('contacted', 'sales', 'Contacted', 1, { notes: 'Successfully connected with the client. Discussed their insurance needs.' }),
+      record('appointment', 'sales', 'Appointment Scheduled', 2, { scheduledDateLabel: 'February 02, 2026', scheduledTimeLabel: '2:00 - 3:00 PM' }),
+      record('meeting', 'sales', 'Meeting (Proposal Presented)', 3, { scheduledDateLabel: 'February 02, 2026', scheduledTimeLabel: '3:30 PM', notes: 'Presented the proposal and discussed the recommended coverage.' }),
+      record('application-start', 'sales', 'Application Start', 4),
+      record('application-status', 'sales', this.statusTag, 5),
+      record('draft-si', 'system', 'Draft SI Generated', 6),
+      record('csa', 'system', 'CSA Created', 7),
+      record('proposal', 'system', 'Proposal Created', 8),
+      record('si', 'system', 'SI Generated', 9),
+      record('converted', 'system', 'Converted to Application', 10),
+      record('submitted', 'system', 'Application Submitted', 11)
+    ];
   }
 
   private buildTimeOptions(startMinutes: number, endMinutes: number): readonly TimeOption[] {

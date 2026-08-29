@@ -7,7 +7,8 @@ import {
   HostListener,
   Inject,
   OnDestroy,
-  Output
+  Output,
+  Input
 } from '@angular/core';
 
 import {
@@ -34,7 +35,10 @@ const DESKTOP_SIDEBAR_QUERY = '(min-width: 1024px)';
   standalone: false
 })
 export class DashboardComponent implements OnDestroy {
+  @Input() userType: 'Agency' | 'Banca' = 'Banca';
   @Output() leadOpened = new EventEmitter<LeadCardData>();
+  @Output() newLeadRequested = new EventEmitter<void>();
+  @Output() loggedOut = new EventEmitter<void>();
   searchTerm = '';
   pendingSources: readonly string[] = ['All'];
   appliedSources: readonly string[] = ['All'];
@@ -260,6 +264,30 @@ export class DashboardComponent implements OnDestroy {
 
   findLeadByLeadId(leadId: string): LeadCardData | null {
     return this.boards.flatMap(board => board.leads).find(lead => lead.leadId === leadId) ?? null;
+  }
+
+  recordDraftSiGenerated(leadId: string): LeadCardData | null {
+    return this.recordSystemActivity(leadId, 'Draft SI Generated');
+  }
+
+  recordSystemActivity(leadId: string, label: string): LeadCardData | null {
+    for (const board of this.boards) {
+      const index = board.leads.findIndex((lead) => lead.leadId === leadId);
+      if (index < 0) continue;
+
+      const lead = board.leads[index];
+      const recordedAt = new Date();
+      const updatedLead: LeadCardData = {
+        ...lead,
+        lastActivityTimestamp: recordedAt.getTime(),
+        activities: [...lead.activities, this.createActivity('system', label, recordedAt)]
+      };
+      board.leads = board.leads.map((candidate, candidateIndex) => candidateIndex === index ? updatedLead : candidate);
+      this.selectedLead = updatedLead;
+      this.changeDetectorRef.markForCheck();
+      return updatedLead;
+    }
+    return null;
   }
 
   markLeadAsContacted(leadId: string, notes = ''): LeadCardData | null {
@@ -771,8 +799,8 @@ export class DashboardComponent implements OnDestroy {
       activities.push(
         this.createActivity('system', 'Draft SI Generated', activityDate(0, 9)),
         this.createActivity('system', 'CSA Created', activityDate(0, 15, 30)),
-        this.createActivity('system', 'Proposal Created', activityDate(1, 9)),
-        this.createActivity('system', 'SI Generated', activityDate(1, 9, 30))
+        this.createActivity('system', 'SI Generated', activityDate(1, 9)),
+        this.createActivity('system', 'Proposal Created', activityDate(1, 9, 30))
       );
     }
     if (hasReachedMeeting) {

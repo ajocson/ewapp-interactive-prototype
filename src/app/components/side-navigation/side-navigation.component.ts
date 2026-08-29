@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Output } from '@angular/core';
 
 import { SideNavigationItem } from './side-navigation.model';
 import { AppNavigationStateService } from '../../shared/services/app-navigation-state.service';
@@ -11,6 +11,7 @@ import { AppNavigationStateService } from '../../shared/services/app-navigation-
   standalone: false
 })
 export class SideNavigationComponent {
+  @Output() newLeadRequested = new EventEmitter<void>();
   constructor(readonly navigation: AppNavigationStateService) {}
 
   readonly primaryItems: readonly SideNavigationItem[] = [

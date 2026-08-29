@@ -35,7 +35,14 @@
         tooltipAlign="end"
         [filled]="true"
       />
-      <button type="button" class="avatar" aria-label="Open EA profile">EA</button>
+      <div class="global-header__profile-menu">
+        <button type="button" class="avatar" aria-label="Open EA profile" [attr.aria-expanded]="profileMenuOpen" (click)="toggleProfileMenu($event)">EA</button>
+        <div *ngIf="profileMenuOpen" class="profile-menu" role="menu">
+          <div class="profile-menu__user">{{ userType }} User</div>
+          <button type="button" role="menuitem">Change password</button>
+          <button type="button" role="menuitem" (click)="loggedOut.emit(); profileMenuOpen = false">Logout</button>
+        </div>
+      </div>
     </div>
   </div>
 </header>

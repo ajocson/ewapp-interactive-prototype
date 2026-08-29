@@ -42,6 +42,32 @@ describe('ProposalFlowComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Create Proposal');
   });
 
+  it('keeps the calculated risk profile visible when an earlier CSA step is selected again', () => {
+    const component = fixture.componentInstance;
+    component.goTo('risk-profile');
+    fixture.detectChanges();
+
+    const csaTabs = [...fixture.nativeElement.querySelectorAll('.csa-tabs button')] as HTMLButtonElement[];
+    csaTabs.forEach((tab) => tab.click());
+
+    expect(component.stage).toBe('risk-profile');
+    expect(fixture.nativeElement.textContent).toContain('Conservative');
+  });
+
+  it('restores General Assessment when returning to Profile after a risk calculation', () => {
+    const component = fixture.componentInstance;
+    component.requestAddProfile();
+    component.proceedConfirmation();
+    component.goTo('assessment');
+    component.requestRiskProfile();
+    component.proceedConfirmation();
+    component.selectRecordTab('info');
+    component.selectRecordTab('profile');
+
+    expect(component.routeTab).toBe('profile');
+    expect(component.stage).toBe('risk-profile');
+  });
+
   it('uses the Figma product-selection flow before showing a proposal', () => {
     const component = fixture.componentInstance;
     component.lead = { ...component.lead, tags: [{ label: 'Contacted', tone: 'success' }] };
@@ -65,9 +91,12 @@ describe('ProposalFlowComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Premium Calculation');
     expect(fixture.nativeElement.textContent).toContain('Minimum basic sum insured: ₱250,000');
     component.requestSaveProposal();
+    let proposalSaved = false;
+    component.proposalSaved.subscribe(() => proposalSaved = true);
     component.confirmSaveProposal();
     fixture.detectChanges();
     expect(component.proposalCreated).toBe(true);
+    expect(proposalSaved).toBe(true);
     expect(component.proposalToastMessage).toBe('Proposal saved successfully.');
   });
 
@@ -80,6 +109,20 @@ describe('ProposalFlowComponent', () => {
 
     expect(contactRequired).toBe(true);
     expect(component.productPickerOpen).toBe(false);
+  });
+
+  it('closes the product picker without leaving the current lead page', () => {
+    const component = fixture.componentInstance;
+    component.lead = { ...component.lead, tags: [{ label: 'Contacted', tone: 'success' }] };
+    component.goTo('risk-profile');
+    component.openProductPicker();
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('.product-picker footer .proposal-button--neutral-outline') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(component.productPickerOpen).toBe(false);
+    expect(component.stage).toBe('risk-profile');
   });
 
   it('allows a contacted lead to create a proposal after its status moves to an appointment', () => {
@@ -135,6 +178,16 @@ describe('ProposalFlowComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Sales Illustration_Dream Builder_810000106051');
     expect(fixture.nativeElement.textContent).toContain('Convert to Application');
     expect(fixture.nativeElement.querySelector('.generated-proposal__generate')).toBeNull();
+  });
+
+  it('emits SI generation when the sales illustration is opened', () => {
+    const component = fixture.componentInstance;
+    let generated = false;
+    component.siGenerated.subscribe(() => generated = true);
+
+    component.generateSalesIllustration();
+
+    expect(generated).toBe(true);
   });
 
   it('opens the Figma application form after converting a generated proposal', () => {
@@ -232,6 +285,17 @@ describe('ProposalFlowComponent', () => {
     expect(component.stage).toBe('risk-profile');
   });
 
+  it('emits CSA completion after the save confirmation', () => {
+    const component = fixture.componentInstance;
+    let created = false;
+    component.csaCreated.subscribe(() => created = true);
+
+    component.requestRiskProfile();
+    component.proceedConfirmation();
+
+    expect(created).toBe(true);
+  });
+
   it('requests the shared activity drawer from the proposal header', () => {
     let activityRequested = false;
     fixture.componentInstance.activityRequested.subscribe(() => activityRequested = true);
@@ -239,6 +303,17 @@ describe('ProposalFlowComponent', () => {
     (fixture.nativeElement.querySelector('[aria-controls="lead-activity-drawer"]') as HTMLButtonElement).click();
 
     expect(activityRequested).toBe(true);
+  });
+
+  it('does not close or navigate away when cancelling lead information edits', () => {
+    let closed = false;
+    fixture.componentInstance.closed.subscribe(() => closed = true);
+
+    const cancelButton = fixture.nativeElement.querySelector('.individual-card .card-footer .proposal-button--outline') as HTMLButtonElement;
+    cancelButton.click();
+
+    expect(closed).toBe(false);
+    expect(fixture.componentInstance.stage).toBe('individual-form');
   });
 
   it('uses the shared navigation state from the proposal header', () => {
