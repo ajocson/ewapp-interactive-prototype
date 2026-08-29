@@ -11,13 +11,11 @@
     <div class="drawer-status">
       <app-tag [label]="statusTag" [variant]="statusVariant" [emphasis]="tagEmphasis.Subtle" />
       <small [class.drawer-status__state--danger]="lead.leadType === 'Dropped'"><span class="material-symbols-rounded" aria-hidden="true">person</span>{{ lead.leadType }}</small>
-      <small [attr.aria-label]="'Overall aging: ' + lead.aging + '. Total days since Lead Generation.'">
+      <small [attr.aria-label]="'Overall aging: ' + lead.aging + '. Total days since Lead Generation.'" (mouseenter)="showAgingTooltip($event, 'Total days since Lead Generation.')" (mouseleave)="hideAgingTooltip()">
         <span class="material-symbols-rounded" aria-hidden="true">schedule</span>{{ lead.aging }}
-        <span class="drawer-aging-tooltip" aria-hidden="true">Total days since Lead Generation.</span>
       </small>
-      <small *ngIf="lead.tatAging && statusTag !== 'New Lead'" [attr.aria-label]="'TAT aging: ' + lead.tatAging + '. Days elapsed in the 90-day Active Lead cycle.'">
+      <small *ngIf="lead.tatAging && statusTag !== 'New Lead'" [attr.aria-label]="'TAT aging: ' + lead.tatAging + '. Days elapsed in the 90-day Active Lead cycle.'" (mouseenter)="showAgingTooltip($event, 'Days elapsed in the 90-day Active Lead cycle.')" (mouseleave)="hideAgingTooltip()">
         <span class="material-symbols-rounded" aria-hidden="true">flag_2</span>{{ lead.tatAging }}
-        <span class="drawer-aging-tooltip drawer-aging-tooltip--tat" aria-hidden="true">Days elapsed in the 90-day Active Lead cycle.</span>
       </small>
     </div>
   </header>

@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnChanges, Output } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnChanges, OnDestroy, Output } from '@angular/core';
 
 import { LeadActivityRecord, LeadAppointment, LeadCardData, leadDisplayName } from '../../lead-board.model';
 import { TdxButtonEmphasis, TdxButtonSize, TdxButtonVariant } from '../../shared/components/button/button.model';
@@ -94,9 +95,11 @@ interface TimeOption {
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: false
 })
-export class LeadActivityDrawerComponent implements OnChanges {
+export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
   @Input() userType: 'Agency' | 'Banca' = 'Banca';
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
+  private readonly document = inject(DOCUMENT);
+  private agingTooltipElement: HTMLDivElement | null = null;
 
   @Input({ required: true }) lead!: LeadCardData;
   @Output() closed = new EventEmitter<void>();
@@ -340,6 +343,34 @@ export class LeadActivityDrawerComponent implements OnChanges {
     this.selectedDate = this.lead.appointment?.date ?? '';
     this.selectedStartMinutes = this.lead.appointment?.startMinutes ?? null;
     this.selectedEndMinutes = this.lead.appointment?.endMinutes ?? null;
+  }
+
+  showAgingTooltip(event: MouseEvent, message: string): void {
+    this.hideAgingTooltip();
+
+    const target = event.currentTarget as HTMLElement;
+    const tooltip = this.document.createElement('div');
+    tooltip.className = 'lead-card-global-tooltip';
+    tooltip.textContent = message;
+    this.document.body.appendChild(tooltip);
+
+    const targetRect = target.getBoundingClientRect();
+    const tooltipRect = tooltip.getBoundingClientRect();
+    const viewportWidth = this.document.defaultView?.innerWidth ?? tooltipRect.width;
+    const left = Math.max(8, Math.min(targetRect.right - tooltipRect.width, viewportWidth - tooltipRect.width - 8));
+
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${targetRect.bottom + 4}px`;
+    this.agingTooltipElement = tooltip;
+  }
+
+  hideAgingTooltip(): void {
+    this.agingTooltipElement?.remove();
+    this.agingTooltipElement = null;
+  }
+
+  ngOnDestroy(): void {
+    this.hideAgingTooltip();
   }
 
   requestPrimaryAction(): void {

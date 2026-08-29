@@ -14,6 +14,7 @@
 - Increased standard drawer notes textareas by 20px; the Figma-specified Unable to Set Appointment note field remains 100px tall.
 - Updated drawer aging tooltips to a single-line treatment without a restrictive maximum width.
 - Reworked lead-card aging tooltips as fixed page overlays. They preserve the standard tooltip typography, padding, color, and one-line format while avoiding clipping from the board's vertical scroll container.
+- Reworked drawer aging and TAT tooltips as the same fixed page overlay, preventing drawer clipping and raising the overlay above the side drawer layer.
 
 ## Validation
 

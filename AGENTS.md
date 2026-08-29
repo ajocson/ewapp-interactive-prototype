@@ -159,7 +159,7 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - Responsive fixed-minimum-width columns with independent vertical scrolling and horizontal board scrolling.
 - Lead cards with gender-derived title, formatted creation timestamp, stage tag, optional schedule tag, semantic lead state, aging, and post-activity highlight. Schedule tags are hidden while a lead is parked or dropped.
 - Lead cards display Lead ID and aging indicators; Contacted, Appointments, Meetings, and Follow-Up also show TAT aging with tooltip support.
-- Aging tooltips on lead cards render as fixed page overlays so they are not clipped by the vertically scrollable board container. Preserve their original tooltip typography, padding, and one-line presentation.
+- Aging tooltips on lead cards and lead-activity drawers render as fixed page overlays so they are not clipped by the vertically scrollable board container or drawer shell. Preserve their original tooltip typography, padding, and one-line presentation; the overlay layer must remain above the side drawer.
 - Page search, source dropdown, checkbox-based lead status/state filters, referrer filter, sorting, and an active-filter indicator.
 - Applications adds page-level Lead ID/name search, source filtering, referrer suggestions, all-application-status filtering, sorting, and board-scoped status filters. Empty boards remain blank when no cards match; only the referrer suggestion popover reports `No results found`.
 - Per-board search plus lead-state checkbox and sort controls. Recently Created (using last activity when present) is the default, board width stays stable while searching, and no-result searches intentionally leave the board blank.
