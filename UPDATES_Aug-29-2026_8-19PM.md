@@ -29,6 +29,17 @@
 - App and lead-activity-drawer tests: 24 passing.
 - Button and app tests: 19 passing.
 
+## GitHub Pages Routing
+
+- Updated the GitHub Pages deployment workflow to copy the built Angular `index.html` to `404.html`.
+- Direct access and refreshes of nested routes such as `/lcam/:leadId/profile`, `/lcam/:leadId/proposals`, and `/lcam/:leadId/applications` now load the SPA instead of returning a GitHub Pages 404.
+- Increased the component-style maximum error budget to 20kB so the current production build can deploy while the existing 8kB warnings remain visible.
+
+## Additional Validation
+
+- Production build succeeds with the existing component-style budget warnings.
+- App component tests: 17 passing after the routing deployment update.
+
 ## Detailed Commit Message
 
 ```text

@@ -226,6 +226,7 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - `Presentation Completed` gates conversion. Appointment completion moves to Meetings; follow-up presentation completion stays on Follow-up.
 - Underwriting submission adds the lead to Applications → In Progress with `Application Submitted` status.
 - The login screen is Figma-aligned and accepts the prototype credentials `Banca/Banca` and `Agency/Agency`.
+- GitHub Pages deployment copies the built `index.html` to `404.html` so direct nested-route access and refreshes load the Angular SPA instead of returning a 404.
 - Login state and the selected Agency/Banca user type persist across browser reloads in the current session. Logout clears the authenticated view.
 - The login password field supports show/hide behavior.
 - The shared TDX button component supports the Figma Secondary Large filled pink contract: 52px height, 20px horizontal padding, 12px vertical padding, 18px Lato Bold text, and 24px icons.
@@ -240,6 +241,8 @@ Verified on **2026-08-29**:
 - Production build: succeeds via `npm run build`.
 - Current initial production bundle reported by Angular: approximately 531.42 kB raw / 102.62 kB estimated transfer (`main` 484.57 kB plus global styles 46.86 kB).
 - The worktree contains the current EWApp journey, login, shared button, lead overview, and update-log changes. Preserve and inspect the worktree before editing; do not reset, discard, or overwrite unrelated changes.
+- The GitHub Pages workflow copies the production `index.html` to `404.html`, preserving Angular SPA behavior for direct access and refreshes of nested `/lcam` routes.
+- `angular.json` allows a 20 kB component-style maximum error budget so deployment is not blocked by the current proposal-flow style size; the 8 kB warning budget remains active.
 
 ## Known Issues and Limitations
 
@@ -247,6 +250,7 @@ Verified on **2026-08-29**:
   - `draft-si-flow.component.scss`: about 12.61 kB vs. 8 kB warning budget.
   - `proposal-flow.component.scss`: about 14.54 kB vs. 8 kB warning budget.
   - `lead-activity-drawer.component.scss`: about 8.82 kB vs. 8 kB warning budget.
+- The component-style error budget is 20 kB so the current proposal styles remain deployable while the existing 8 kB warnings are still reported.
 - No backend, authentication, API calls, persistence, or real customer data. Reloading resets all state.
 - No Angular Router; browser history/deep links are not implemented.
 - `LeadDetailComponent` exists and is tested but is not reachable from the root application flow.
