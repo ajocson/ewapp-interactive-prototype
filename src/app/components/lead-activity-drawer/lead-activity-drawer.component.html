@@ -43,7 +43,7 @@
             [size]="buttonSize.Small"
             (clicked)="requestPrimaryAction()"
           />
-          <app-button class="drawer-edit" label="Edit Lead Information" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Transparent" [size]="buttonSize.Small" />
+          <app-button class="drawer-edit" label="Edit Lead Information" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Transparent" [size]="buttonSize.Small" (clicked)="editLeadRequested.emit()" />
         </div>
       </section>
 
@@ -203,7 +203,7 @@
 
           <ng-container *ngIf="isMeeting && !followUpRecording">
             <div class="drawer-meeting-actions">
-              <lam-action-card title="Proceed to Application" description="Start the client’s application process." icon="contract_edit" tone="success" />
+              <lam-action-card title="Proceed to Application" description="Start the client’s application process." icon="contract_edit" tone="success" (activated)="proceedToApplication()" />
               <lam-action-card title="For Follow-up" description="Mark this lead for follow-up and add any relevant notes." icon="chat_add_on" tone="brand" (activated)="openFollowUpForm()" />
             </div>
           </ng-container>

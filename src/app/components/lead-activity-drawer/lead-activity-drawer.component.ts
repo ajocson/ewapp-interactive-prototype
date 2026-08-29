@@ -83,6 +83,7 @@ export class LeadActivityDrawerComponent implements OnChanges {
   @Input({ required: true }) lead!: LeadCardData;
   @Output() closed = new EventEmitter<void>();
   @Output() draftSiRequested = new EventEmitter<void>();
+  @Output() editLeadRequested = new EventEmitter<void>();
   @Output() contacted = new EventEmitter<LeadContactedEvent>();
   @Output() appointmentScheduled = new EventEmitter<LeadAppointmentScheduledEvent>();
   @Output() appointmentRescheduled = new EventEmitter<LeadAppointmentScheduledEvent>();
@@ -94,6 +95,7 @@ export class LeadActivityDrawerComponent implements OnChanges {
   @Output() followUpAppointmentCompleted = new EventEmitter<LeadFollowUpAppointmentCompletedEvent>();
   @Output() updateRecorded = new EventEmitter<LeadUpdateRecordedEvent>();
   @Output() proposalRequested = new EventEmitter<void>();
+  @Output() fullProposalRequested = new EventEmitter<void>();
   @Output() leadStateChanged = new EventEmitter<LeadStateChangedEvent>();
 
   readonly buttonVariant = TdxButtonVariant;
@@ -204,7 +206,7 @@ export class LeadActivityDrawerComponent implements OnChanges {
       return 'Generate/View Full Proposal';
     }
 
-    return this.isContacted ? 'Generate Full Proposal' : 'Generate Draft SI';
+    return this.isContacted ? 'Generate/View Full Proposal' : 'Generate Draft SI';
   }
 
   get isLeadPaused(): boolean {
@@ -315,9 +317,11 @@ export class LeadActivityDrawerComponent implements OnChanges {
   }
 
   requestPrimaryAction(): void {
-    if (!this.isContacted && !this.isAppointmentSet && !this.isMeeting) {
+    if (this.statusTag === 'New Lead') {
       this.draftSiRequested.emit();
+      return;
     }
+    this.fullProposalRequested.emit();
   }
 
   markAsContacted(): void {
@@ -462,7 +466,7 @@ export class LeadActivityDrawerComponent implements OnChanges {
   }
 
   proceedToApplication(): void {
-    if (this.isFollowUp) this.proposalRequested.emit();
+    if (this.isMeeting || this.isFollowUp) this.proposalRequested.emit();
   }
 
   openLeadAction(mode: 'park' | 'drop'): void {

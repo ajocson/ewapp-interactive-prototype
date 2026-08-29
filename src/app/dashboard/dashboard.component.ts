@@ -258,6 +258,10 @@ export class DashboardComponent implements OnDestroy {
     this.leadOpened.emit(lead);
   }
 
+  findLeadByLeadId(leadId: string): LeadCardData | null {
+    return this.boards.flatMap(board => board.leads).find(lead => lead.leadId === leadId) ?? null;
+  }
+
   markLeadAsContacted(leadId: string, notes = ''): LeadCardData | null {
     const leadBoard = this.boards.find((board) => board.id === 'lead');
     const contactedBoard = this.boards.find((board) => board.id === 'contacted');
@@ -386,7 +390,7 @@ export class DashboardComponent implements OnDestroy {
       leadType: 'Active',
       lastActivityTimestamp: Date.now(),
       tags: [{ label: 'Meeting', tone: 'success' }],
-      activities: [...lead.activities, this.createActivity('sales', 'Meeting (Proposal Presented)', new Date(), notes)]
+      activities: [...lead.activities, this.createActivity('sales', 'Presentation Completed', new Date(), notes)]
     };
 
     appointmentsBoard.leads = appointmentsBoard.leads.filter((candidate) => candidate.id !== leadId);
@@ -482,7 +486,7 @@ export class DashboardComponent implements OnDestroy {
       ...leadWithoutAppointment,
       lastActivityTimestamp: activityDate.getTime(),
       tags: [{ label: 'Follow-up', tone: 'success' }],
-      activities: [...lead.activities, this.createActivity('sales', 'Follow up updated', activityDate, notes)]
+      activities: [...lead.activities, this.createActivity('sales', 'Presentation Completed', activityDate, notes)]
     };
 
     followUpBoard.leads = [updatedLead, ...followUpBoard.leads.filter((candidate) => candidate.id !== leadId)];
@@ -773,7 +777,7 @@ export class DashboardComponent implements OnDestroy {
     }
     if (hasReachedMeeting) {
       activities.push(
-        this.createActivity('sales', 'Meeting (Proposal Presented)', activityDate(1, 15, 30))
+        this.createActivity('sales', 'Presentation Completed', activityDate(1, 15, 30))
       );
     }
     if (hasReachedFollowUp) {

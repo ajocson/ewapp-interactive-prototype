@@ -44,6 +44,7 @@ describe('ProposalFlowComponent', () => {
 
   it('uses the Figma product-selection flow before showing a proposal', () => {
     const component = fixture.componentInstance;
+    component.lead = { ...component.lead, tags: [{ label: 'Contacted', tone: 'success' }] };
 
     component.goTo('risk-profile');
     component.openProductPicker();
@@ -70,6 +71,37 @@ describe('ProposalFlowComponent', () => {
     expect(component.proposalToastMessage).toBe('Proposal saved successfully.');
   });
 
+  it('requires a lead to be contacted before opening the product picker', () => {
+    const component = fixture.componentInstance;
+    let contactRequired = false;
+    component.contactRequired.subscribe(() => contactRequired = true);
+
+    component.openProductPicker();
+
+    expect(contactRequired).toBe(true);
+    expect(component.productPickerOpen).toBe(false);
+  });
+
+  it('allows a contacted lead to create a proposal after its status moves to an appointment', () => {
+    const component = fixture.componentInstance;
+    component.lead = {
+      ...component.lead,
+      tags: [{ label: 'Appointment Scheduled', tone: 'success' }],
+      activities: [{
+        id: 'contacted',
+        category: 'sales',
+        label: 'Contacted',
+        dateLabel: 'Aug 29, 2026',
+        timeLabel: '2:00 PM',
+        occurredAtTimestamp: 0
+      }]
+    };
+
+    component.openProductPicker();
+
+    expect(component.productPickerOpen).toBe(true);
+  });
+
   it('automatically hides the proposal-save toast after four seconds', () => {
     vi.useFakeTimers();
     const component = fixture.componentInstance;
@@ -82,8 +114,9 @@ describe('ProposalFlowComponent', () => {
     vi.useRealTimers();
   });
 
-  it('opens the generated sales-illustration viewer and returns to the saved proposal', () => {
+  it('keeps a generated sales illustration available after returning from the viewer', () => {
     const component = fixture.componentInstance;
+    component.proposalCreated = true;
 
     component.generateSalesIllustration();
     fixture.changeDetectorRef.markForCheck();
@@ -98,6 +131,84 @@ describe('ProposalFlowComponent', () => {
     fixture.detectChanges();
 
     expect(component.salesIllustrationGenerated).toBe(false);
+    expect(component.hasGeneratedSalesIllustration).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('Sales Illustration_Dream Builder_810000106051');
+    expect(fixture.nativeElement.textContent).toContain('Convert to Application');
+    expect(fixture.nativeElement.querySelector('.generated-proposal__generate')).toBeNull();
+  });
+
+  it('opens the Figma application form after converting a generated proposal', () => {
+    const component = fixture.componentInstance;
+    component.proposalCreated = true;
+    component.hasGeneratedSalesIllustration = true;
+    component.lead = {
+      ...component.lead,
+      tags: [{ label: 'Appointment Scheduled', tone: 'success' }],
+      activities: [{
+        id: 'presentation-completed',
+        category: 'sales',
+        label: 'Presentation Completed',
+        dateLabel: 'Aug 29, 2026',
+        timeLabel: '2:30 PM',
+        occurredAtTimestamp: 0
+      }]
+    };
+
+    component.convertToApplication();
+    fixture.detectChanges();
+
+    expect(component.applicationOpen).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('Application No. 810000106051');
+    expect(fixture.nativeElement.textContent).toContain('Insured Information');
+    expect(fixture.nativeElement.textContent).toContain('Government IDs');
+    expect(fixture.nativeElement.textContent).toContain('Complete Application (For Demo Pusposes only)');
+  });
+
+  it('requires presentation completion before converting, regardless of the current lead stage', () => {
+    const component = fixture.componentInstance;
+    let appointmentRequired = false;
+    component.lead = { ...component.lead, tags: [{ label: 'Meeting', tone: 'success' }] };
+    component.appointmentRequired.subscribe(() => appointmentRequired = true);
+
+    component.convertToApplication();
+
+    expect(appointmentRequired).toBe(true);
+    expect(component.applicationOpen).toBe(false);
+  });
+
+  it('shows the Figma For Upload state after completing the demo application', () => {
+    const component = fixture.componentInstance;
+    component.applicationOpen = true;
+
+    component.completeApplicationDemo();
+    fixture.detectChanges();
+
+    expect(component.applicationComplete).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('For Upload');
+    expect(fixture.nativeElement.textContent).toContain('Uploaded Documents');
+    expect(fixture.nativeElement.textContent).toContain('Sales Illustration');
+    expect(fixture.nativeElement.textContent).toContain('Validated Payment Slip');
+    expect(fixture.nativeElement.textContent).toContain('Submit to Underwriting');
+    expect(fixture.nativeElement.textContent).toContain('8/9');
+  });
+
+  it('submits the completed application to underwriting after confirmation', () => {
+    const component = fixture.componentInstance;
+    component.applicationOpen = true;
+    component.applicationComplete = true;
+
+    component.submitToUnderwriting();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Submitted to Underwriting');
+
+    component.finishUnderwritingSubmission();
+    fixture.detectChanges();
+
+    expect(component.applicationUnderwritingSubmitted).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('Pending On Underwriting Handling');
+    expect(fixture.nativeElement.textContent).toContain('9/9');
+    expect(fixture.nativeElement.textContent).not.toContain('Submit to Underwriting');
   });
 
   it('confirms before adding a profile', () => {
@@ -121,18 +232,13 @@ describe('ProposalFlowComponent', () => {
     expect(component.stage).toBe('risk-profile');
   });
 
-  it('opens and closes the activity drawer independently', () => {
-    fixture.componentInstance.openDrawer();
-    fixture.changeDetectorRef.markForCheck();
-    fixture.detectChanges();
-    expect(fixture.componentInstance.drawerOpen).toBe(true);
-    expect(fixture.nativeElement.querySelector('app-stepper')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('app-tab-group')).not.toBeNull();
-    expect(fixture.componentInstance.activitySteps.map(step => step.label)).toEqual(['Contacted', 'Appointment', 'Meeting']);
-    expect(fixture.nativeElement.querySelectorAll('app-button').length).toBeGreaterThan(3);
+  it('requests the shared activity drawer from the proposal header', () => {
+    let activityRequested = false;
+    fixture.componentInstance.activityRequested.subscribe(() => activityRequested = true);
 
-    fixture.componentInstance.handleEscape();
-    expect(fixture.componentInstance.drawerOpen).toBe(false);
+    (fixture.nativeElement.querySelector('[aria-controls="lead-activity-drawer"]') as HTMLButtonElement).click();
+
+    expect(activityRequested).toBe(true);
   });
 
   it('uses the shared navigation state from the proposal header', () => {

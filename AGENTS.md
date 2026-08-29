@@ -217,6 +217,15 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 
 ## Current Project State
 
+### Latest LCAM journey update — 2026-08-29
+
+- Angular Router now provides `/lcam`, `/lcam/:leadId`, and Profile, Proposals, and Applications record routes.
+- `LeadJourneyStateService` retains per-lead Info/Profile data and unlocked tabs only during the current browser session; full reload resets it.
+- Keep the Info → Profile/CSA → Proposals → Applications sequence. Policies remains disabled.
+- `LeadActivityDrawerComponent` is the single shared drawer; do not restore the removed proposal-local drawer.
+- `Presentation Completed` gates conversion. Appointment completion moves to Meetings; follow-up presentation completion stays on Follow-up.
+- Underwriting submission adds the lead to Applications → In Progress with `Application Submitted` status.
+
 Verified on **2026-08-28**:
 
 - Branch: `main`.

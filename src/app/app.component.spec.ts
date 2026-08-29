@@ -45,6 +45,20 @@ describe('AppComponent LCAM activity feedback', () => {
     vi.useRealTimers();
   });
 
+  it('opens a lead record from its LCAM URL with Info selected', () => {
+    const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;
+    const lead = dashboard.boards.find((board) => board.id === 'lead')?.leads[0];
+    expect(lead).toBeTruthy();
+
+    fixture.componentInstance['openRoute'](`/lcam/${lead!.leadId}`);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.selectedLead?.leadId).toBe(lead!.leadId);
+    expect(fixture.componentInstance.proposalOpen).toBe(true);
+    expect(fixture.componentInstance.activeRecordTab).toBe('info');
+    expect(fixture.nativeElement.querySelector('.profile-tabs .is-active')?.textContent).toContain('Info');
+  });
+
   it('uses the appointment-specific success message when a contact is scheduled', () => {
     vi.useFakeTimers();
     const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;
@@ -144,6 +158,16 @@ describe('AppComponent LCAM activity feedback', () => {
 
     expect(fixture.nativeElement.querySelector('lam-lead-activity-drawer')).toBeNull();
     expect(fixture.nativeElement.querySelector('lam-proposal-flow')).toBeTruthy();
+  });
+
+  it('keeps LCAM Board neutral while presentation is completed from a proposal drawer', () => {
+    const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;
+    const lead = dashboard.boards.find((board) => board.id === 'appointments')!.leads.find((candidate) => candidate.appointment)!;
+    fixture.componentInstance.proposalOpen = true;
+
+    fixture.componentInstance.completeLeadAppointment({ lead, notes: '' });
+
+    expect(fixture.componentInstance['navigation'].activeDestination()).toBe('lead-flow');
   });
 
   it('keeps the drawer open and confirms when a lead is parked or dropped', () => {

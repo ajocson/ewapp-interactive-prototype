@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, ViewChild, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, ViewChild, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router } from '@angular/router';
 
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ApplicationsComponent } from './applications/applications.component';
@@ -17,18 +18,21 @@ import {
 } from './components/lead-activity-drawer/lead-activity-drawer.component';
 import { LeadCardData } from './lead-board.model';
 import { AppNavigationStateService } from './shared/services/app-navigation-state.service';
+import { LeadRecordTab } from './proposal-flow/proposal-flow.component';
+import { LeadJourneyStateService } from './shared/services/lead-journey-state.service';
 
 @Component({
   selector: 'lam-root',
   template: `
+    <router-outlet />
     <div *ngIf="!showApplications" class="app-dashboard-host" [attr.inert]="selectedLead ? '' : null" [attr.aria-hidden]="selectedLead ? true : null">
       <lam-dashboard (leadOpened)="openLead($event)" />
     </div>
     <lam-applications *ngIf="showApplications" />
     <lam-lead-activity-drawer
-      *ngIf="selectedLead && !draftSiOpen && !proposalOpen"
+      *ngIf="selectedLead && !draftSiOpen && (!proposalOpen || contactDrawerOpen)"
       [lead]="selectedLead"
-      (closed)="closeLead()"
+      (closed)="contactDrawerOpen ? closeContactDrawer() : closeLead()"
       (contacted)="markLeadAsContacted($event)"
       (appointmentScheduled)="scheduleLeadAppointment($event)"
       (appointmentRescheduled)="rescheduleLeadAppointment($event)"
@@ -40,8 +44,10 @@ import { AppNavigationStateService } from './shared/services/app-navigation-stat
       (followUpAppointmentCompleted)="completeFollowUpAppointment($event)"
       (updateRecorded)="recordLeadUpdate($event)"
       (proposalRequested)="openProposal()"
+      (fullProposalRequested)="openLeadJourney()"
       (leadStateChanged)="changeLeadState($event)"
       (draftSiRequested)="openDraftSi()"
+      (editLeadRequested)="editLeadInfo()"
     />
     <app-section-message
       *ngIf="activityRecorded"
@@ -51,19 +57,24 @@ import { AppNavigationStateService } from './shared/services/app-navigation-stat
       [description]="activityToastMessage"
     />
     <lam-draft-si-flow *ngIf="selectedLead && draftSiOpen" [lead]="selectedLead" (closed)="closeLead()" />
-    <lam-proposal-flow *ngIf="selectedLead && proposalOpen" [lead]="selectedLead" (closed)="closeLead()" />
+    <lam-proposal-flow *ngIf="selectedLead && proposalOpen" [lead]="selectedLead" [routeTab]="activeRecordTab" [editMode]="leadInfoEditMode" (routeTabChange)="navigateToRecordTab($event)" (contactRequired)="openContactDrawer()" (appointmentRequired)="openContactDrawer()" (activityRequested)="openContactDrawer()" (underwritingSubmitted)="viewSubmittedApplication($event)" (closed)="closeLead()" />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: false
 })
-export class AppComponent {
+export class AppComponent implements AfterViewInit {
   @ViewChild(DashboardComponent) private dashboard?: DashboardComponent;
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly navigation = inject(AppNavigationStateService);
+  private readonly router = inject(Router);
+  private readonly journeyState = inject(LeadJourneyStateService);
   selectedLead: LeadCardData | null = null;
   draftSiOpen = false;
   proposalOpen = false;
+  contactDrawerOpen = false;
+  activeRecordTab: LeadRecordTab = 'info';
+  leadInfoEditMode = false;
   activityRecorded = false;
   activityToastMessage = 'Your activity has been recorded.';
   private pendingHighlightLeadId: string | null = null;
@@ -78,10 +89,19 @@ export class AppComponent {
     this.navigation.lcamBoardRequested
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.closeLead());
+    this.router.events
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(event => {
+        if (event instanceof NavigationEnd) this.openRoute(event.urlAfterRedirects);
+      });
     this.destroyRef.onDestroy(() => {
       if (this.activityToastTimer) clearTimeout(this.activityToastTimer);
       if (this.activityToastDismissTimer) clearTimeout(this.activityToastDismissTimer);
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.openRoute(this.router.url);
   }
 
   openLead(lead: LeadCardData): void {
@@ -99,10 +119,79 @@ export class AppComponent {
   }
 
   openProposal(): void {
+    if (!this.selectedLead) return;
     this.draftSiOpen = false;
     this.proposalOpen = true;
+    this.contactDrawerOpen = false;
+    this.activeRecordTab = 'proposals';
+    this.leadInfoEditMode = false;
+    this.journeyState.unlock(this.selectedLead.leadId, 'proposals');
     this.navigation.showLeadFlow();
+    void this.router.navigate(['/lcam', this.selectedLead.leadId, 'proposals']);
     this.changeDetectorRef.markForCheck();
+  }
+
+  editLeadInfo(): void {
+    if (!this.selectedLead) return;
+    this.draftSiOpen = false;
+    this.proposalOpen = true;
+    this.contactDrawerOpen = false;
+    this.activeRecordTab = 'info';
+    this.leadInfoEditMode = true;
+    this.navigation.showLeadFlow();
+    void this.router.navigate(['/lcam', this.selectedLead.leadId]);
+    this.changeDetectorRef.markForCheck();
+  }
+
+  openLeadJourney(): void {
+    if (!this.selectedLead) return;
+
+    const tab = this.journeyState.highestUnlockedTab(this.selectedLead.leadId);
+    if (tab === 'info') {
+      this.editLeadInfo();
+      return;
+    }
+
+    this.draftSiOpen = false;
+    this.proposalOpen = true;
+    this.contactDrawerOpen = false;
+    this.activeRecordTab = tab;
+    this.leadInfoEditMode = false;
+    this.navigation.showLeadFlow();
+    void this.router.navigate(['/lcam', this.selectedLead.leadId, tab]);
+    this.changeDetectorRef.markForCheck();
+  }
+
+  openContactDrawer(): void {
+    this.contactDrawerOpen = true;
+    this.changeDetectorRef.markForCheck();
+  }
+
+  viewSubmittedApplication(lead: LeadCardData): void {
+    this.navigation.submitApplication(lead);
+    this.selectedLead = null;
+    this.draftSiOpen = false;
+    this.proposalOpen = false;
+    this.contactDrawerOpen = false;
+    this.leadInfoEditMode = false;
+    this.navigation.goToApplications();
+    this.changeDetectorRef.markForCheck();
+  }
+
+  closeContactDrawer(): void {
+    this.contactDrawerOpen = false;
+    this.changeDetectorRef.markForCheck();
+  }
+
+  navigateToRecordTab(tab: LeadRecordTab): void {
+    if (!this.selectedLead) return;
+
+    this.activeRecordTab = tab;
+    this.leadInfoEditMode = false;
+    const commands = tab === 'info'
+      ? ['/lcam', this.selectedLead.leadId]
+      : ['/lcam', this.selectedLead.leadId, tab];
+    void this.router.navigate(commands);
   }
 
   markLeadAsContacted(event: LeadContactedEvent): void {
@@ -193,7 +282,11 @@ export class AppComponent {
     this.selectedLead = updatedLead;
     this.pendingHighlightLeadId = updatedLead.id;
     this.activityToastMessage = message;
-    this.navigation.activeDestination.set('lcam-board');
+    if (this.proposalOpen) {
+      this.navigation.showLeadFlow();
+    } else {
+      this.navigation.activeDestination.set('lcam-board');
+    }
     this.activityToastTimer = setTimeout(() => {
       this.activityRecorded = true;
       this.activityToastTimer = undefined;
@@ -215,7 +308,57 @@ export class AppComponent {
     this.selectedLead = null;
     this.draftSiOpen = false;
     this.proposalOpen = false;
+    this.contactDrawerOpen = false;
+    this.activeRecordTab = 'info';
+    this.leadInfoEditMode = false;
     this.navigation.activeDestination.set('lcam-board');
+    if (this.router.url !== '/lcam') void this.router.navigate(['/lcam']);
+    this.changeDetectorRef.markForCheck();
+  }
+
+  private openRoute(url: string): void {
+    const path = url.split(/[?#]/, 1)[0];
+    const match = /^\/lcam(?:\/([^/]+)(?:\/(profile|proposals|applications))?)?\/?$/.exec(path);
+    if (!match) return;
+
+    const [, leadId, routeTab] = match;
+    if (!leadId) {
+    this.selectedLead = null;
+    this.draftSiOpen = false;
+    this.proposalOpen = false;
+    this.contactDrawerOpen = false;
+      this.activeRecordTab = 'info';
+      this.navigation.activeDestination.set('lcam-board');
+      this.changeDetectorRef.markForCheck();
+      return;
+    }
+
+    if (!this.dashboard) return;
+
+    const lead = this.dashboard.findLeadByLeadId(leadId);
+    if (!lead) {
+      void this.router.navigate(['/lcam']);
+      return;
+    }
+
+    const requestedTab = (routeTab ?? 'info') as LeadRecordTab;
+    const activeTab = this.journeyState.canAccess(lead.leadId, requestedTab)
+      ? requestedTab
+      : this.journeyState.highestUnlockedTab(lead.leadId);
+    if (activeTab !== requestedTab) {
+      const commands = activeTab === 'info' ? ['/lcam', lead.leadId] : ['/lcam', lead.leadId, activeTab];
+      void this.router.navigate(commands);
+      return;
+    }
+
+    const isEditingCurrentLead = this.leadInfoEditMode && this.selectedLead?.leadId === lead.leadId && activeTab === 'info';
+    this.selectedLead = lead;
+    this.draftSiOpen = false;
+    this.proposalOpen = true;
+    this.contactDrawerOpen = false;
+    this.activeRecordTab = activeTab;
+    this.leadInfoEditMode = isEditingCurrentLead;
+    this.navigation.showLeadFlow();
     this.changeDetectorRef.markForCheck();
   }
 

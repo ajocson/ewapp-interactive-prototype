@@ -1,12 +1,14 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, Input, OnDestroy, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
 
 import { LeadCardData } from '../lead-board.model';
 import { TdxButtonEmphasis, TdxButtonSize, TdxButtonVariant } from '../shared/components/button/button.model';
 import { StepperStep } from '../shared/components/stepper/stepper.model';
-import { TdxTabItem } from '../shared/components/tab-group/tab-group.model';
 import { TdxTagEmphasis, TdxTagVariant } from '../shared/components/tag/tag.model';
 import { ProposalStage } from './proposal-flow.model';
 import { AppNavigationStateService } from '../shared/services/app-navigation-state.service';
+import { LeadJourneyStateService } from '../shared/services/lead-journey-state.service';
+
+export type LeadRecordTab = 'info' | 'profile' | 'proposals' | 'applications';
 
 @Component({
   selector: 'lam-proposal-flow',
@@ -15,12 +17,25 @@ import { AppNavigationStateService } from '../shared/services/app-navigation-sta
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: false
 })
-export class ProposalFlowComponent implements OnDestroy {
+export class ProposalFlowComponent implements OnChanges, OnDestroy {
   @Input({ required: true }) lead!: LeadCardData;
+  @Input() routeTab: LeadRecordTab = 'info';
+  private leadInfoEditMode = false;
+  @Input() set editMode(value: boolean) {
+    this.leadInfoEditMode = value;
+    if (value) this.stage = 'individual-form';
+  }
+  get editMode(): boolean {
+    return this.leadInfoEditMode;
+  }
   @Output() closed = new EventEmitter<void>();
+  @Output() routeTabChange = new EventEmitter<LeadRecordTab>();
+  @Output() contactRequired = new EventEmitter<void>();
+  @Output() appointmentRequired = new EventEmitter<void>();
+  @Output() activityRequested = new EventEmitter<void>();
+  @Output() underwritingSubmitted = new EventEmitter<LeadCardData>();
 
   stage: ProposalStage = 'individual-form';
-  drawerOpen = false;
   productPickerOpen = false;
   proposalDraftOpen = false;
   proposalCreated = false;
@@ -30,11 +45,14 @@ export class ProposalFlowComponent implements OnDestroy {
   proposalDate = '';
   sameAsLeadInformation = true;
   salesIllustrationGenerated = false;
+  hasGeneratedSalesIllustration = false;
+  applicationOpen = false;
+  applicationComplete = false;
+  applicationUnderwritingConfirmationOpen = false;
+  applicationUnderwritingSubmitted = false;
   proposalSaveConfirmation = false;
   proposalToastMessage = '';
   confirmation: 'add-profile' | 'save-csa' | null = null;
-  selectedDrawerAction = '';
-  drawerTab = 'overview';
   private proposalToastTimeout?: number;
 
   readonly TdxButtonVariant = TdxButtonVariant;
@@ -46,10 +64,6 @@ export class ProposalFlowComponent implements OnDestroy {
     { label: 'Contacted', state: 'completed' },
     { label: 'Appointment', state: 'current' },
     { label: 'Meeting', state: 'upcoming' }
-  ];
-  readonly drawerTabs: TdxTabItem[] = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'activity-timeline', label: 'Activity Timeline' }
   ];
 
   firstName = 'John Mark';
@@ -67,8 +81,22 @@ export class ProposalFlowComponent implements OnDestroy {
   noExistingInsurance = true;
 
   readonly needs = ['Health and Wellness', "Children's Education", 'Income Protection', 'Medium to Long-Term Savings', 'Retirement', 'Estate Planning'];
+  readonly applicationDocuments = [
+    { title: 'Sales Illustration', fileName: '810000106051_John Mark Doe_Sales Illustration_SI.pdf' },
+    { title: 'Client Suitability Assessment', fileName: '810000106051_John Mark Doe_Client Suitability Assessment (CSA)_CSA.pdf' },
+    { title: 'Application Form', fileName: '810000106051_John Mark Doe_Application Form_AF.pdf' },
+    { title: 'Agent Declaration', fileName: '810000106051_John Mark Doe_Agent Declaration_AD.pdf' },
+    { title: 'Payment Details Form', fileName: '810000106051_John Mark Doe_Payment Details Form_PD.pdf' },
+    { title: 'Additional Declaration Form', fileName: '810000106051_John Mark Doe_Additional Declaration Form_ADF.pdf' },
+    { title: 'Validated Payment Slip', fileName: '810000106051_John Mark Doe_Validated Payment Slip_PD.pdf' }
+  ];
 
-  constructor(readonly navigation: AppNavigationStateService, private readonly changeDetectorRef: ChangeDetectorRef) {}
+  constructor(readonly navigation: AppNavigationStateService, private readonly changeDetectorRef: ChangeDetectorRef, private readonly journeyState: LeadJourneyStateService) {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['lead']) this.restoreLeadJourney();
+    if (changes['routeTab']) this.showRecordTab(this.routeTab);
+  }
 
   ngOnDestroy(): void {
     if (this.proposalToastTimeout !== undefined) window.clearTimeout(this.proposalToastTimeout);
@@ -77,7 +105,6 @@ export class ProposalFlowComponent implements OnDestroy {
   @HostListener('document:keydown.escape')
   handleEscape(): void {
     if (this.confirmation) this.confirmation = null;
-    else if (this.drawerOpen) this.drawerOpen = false;
     else this.closed.emit();
   }
 
@@ -85,7 +112,66 @@ export class ProposalFlowComponent implements OnDestroy {
     this.stage = stage;
   }
 
+  selectRecordTab(tab: LeadRecordTab): void {
+    if (!this.isTabEnabled(tab)) return;
+    this.showRecordTab(tab);
+    this.routeTabChange.emit(tab);
+  }
+
+  private showRecordTab(tab: LeadRecordTab): void {
+    if (!this.isTabEnabled(tab)) tab = this.journeyState.highestUnlockedTab(this.lead.leadId);
+    this.routeTab = tab;
+    this.salesIllustrationGenerated = false;
+
+    if (tab === 'info') {
+      this.applicationOpen = false;
+      this.proposalDraftOpen = false;
+      this.proposalCreated = false;
+      this.stage = this.editMode ? 'individual-form' : 'individual-summary';
+    } else if (tab === 'profile') {
+      this.applicationOpen = false;
+      this.proposalDraftOpen = false;
+      this.proposalCreated = false;
+      this.stage = 'csa-information';
+    } else if (tab === 'proposals') {
+      this.applicationOpen = false;
+      this.proposalDraftOpen = false;
+      this.proposalCreated = true;
+      this.selectedProduct = this.selectedProduct || 'Dream Builder';
+      this.hasGeneratedSalesIllustration = this.hasGeneratedSalesIllustration || this.hasCompletedPresentation();
+      this.stage = 'risk-profile';
+    } else {
+      this.applicationOpen = true;
+      this.applicationComplete = false;
+      this.applicationUnderwritingConfirmationOpen = false;
+      this.applicationUnderwritingSubmitted = false;
+    }
+
+    this.changeDetectorRef.markForCheck();
+  }
+
+  isTabEnabled(tab: LeadRecordTab): boolean {
+    return this.journeyState.canAccess(this.lead.leadId, tab);
+  }
+
+  saveLeadInfo(): void {
+    this.journeyState.saveInfo(this.lead.leadId, { firstName: this.firstName, title: this.title, noMiddleName: this.noMiddleName, lastName: this.lastName, gender: this.gender, birthDate: this.birthDate, suffix: this.suffix, mobileNumber: this.mobileNumber, emailAddress: this.emailAddress, sourceOfLead: this.sourceOfLead });
+    this.editMode = false;
+    this.stage = 'individual-summary';
+    this.changeDetectorRef.markForCheck();
+  }
+
+  private restoreLeadJourney(): void {
+    const info = this.journeyState.info(this.lead.leadId);
+    if (!info) return;
+    this.firstName = String(info['firstName'] ?? this.firstName); this.title = String(info['title'] ?? this.title); this.noMiddleName = Boolean(info['noMiddleName']); this.lastName = String(info['lastName'] ?? this.lastName); this.gender = String(info['gender'] ?? this.gender); this.birthDate = String(info['birthDate'] ?? this.birthDate); this.suffix = String(info['suffix'] ?? this.suffix); this.mobileNumber = String(info['mobileNumber'] ?? this.mobileNumber); this.emailAddress = String(info['emailAddress'] ?? this.emailAddress); this.sourceOfLead = String(info['sourceOfLead'] ?? this.sourceOfLead);
+  }
+
   openProductPicker(): void {
+    if (!this.hasBeenContacted()) {
+      this.contactRequired.emit();
+      return;
+    }
     this.productPickerOpen = true;
     this.selectedProduct = '';
     this.productCategory = 'all';
@@ -97,17 +183,63 @@ export class ProposalFlowComponent implements OnDestroy {
 
   createProposal(): void {
     if (!this.selectedProduct) return;
+    this.journeyState.unlock(this.lead.leadId, 'proposals');
     this.productPickerOpen = false;
     this.proposalDraftOpen = true;
     this.proposalCreated = false;
+    this.salesIllustrationGenerated = false;
+    this.hasGeneratedSalesIllustration = false;
+    this.routeTabChange.emit('proposals');
   }
 
   generateSalesIllustration(): void {
+    this.hasGeneratedSalesIllustration = true;
     this.salesIllustrationGenerated = true;
   }
 
   backToProposal(): void {
     this.salesIllustrationGenerated = false;
+    this.changeDetectorRef.markForCheck();
+  }
+
+  convertToApplication(): void {
+    if (!this.hasCompletedPresentation()) {
+      this.appointmentRequired.emit();
+      return;
+    }
+    this.journeyState.unlock(this.lead.leadId, 'applications');
+    this.applicationOpen = true;
+    this.applicationComplete = false;
+    this.applicationUnderwritingConfirmationOpen = false;
+    this.applicationUnderwritingSubmitted = false;
+    this.routeTabChange.emit('applications');
+    this.changeDetectorRef.markForCheck();
+  }
+
+  private hasCompletedPresentation(): boolean {
+    return this.lead.activities?.some((activity) => activity.label === 'Presentation Completed') ?? false;
+  }
+
+  private hasBeenContacted(): boolean {
+    return this.lead.tags.some((tag) => tag.label === 'Contacted')
+      || (this.lead.activities?.some((activity) => activity.label === 'Contacted') ?? false);
+  }
+
+  completeApplicationDemo(): void {
+    this.applicationComplete = true;
+    this.changeDetectorRef.markForCheck();
+  }
+
+  submitToUnderwriting(): void {
+    this.applicationUnderwritingConfirmationOpen = true;
+    this.changeDetectorRef.markForCheck();
+  }
+
+  finishUnderwritingSubmission(): void {
+    this.applicationUnderwritingConfirmationOpen = false;
+    this.applicationUnderwritingSubmitted = true;
+    this.underwritingSubmitted.emit(this.lead);
+    this.changeDetectorRef.markForCheck();
   }
 
   requestSaveProposal(): void {
@@ -119,6 +251,7 @@ export class ProposalFlowComponent implements OnDestroy {
     this.proposalDraftOpen = false;
     this.proposalCreated = true;
     this.salesIllustrationGenerated = false;
+    this.hasGeneratedSalesIllustration = false;
     this.proposalToastMessage = 'Proposal saved successfully.';
     if (this.proposalToastTimeout !== undefined) window.clearTimeout(this.proposalToastTimeout);
     this.proposalToastTimeout = window.setTimeout(() => {
@@ -126,10 +259,6 @@ export class ProposalFlowComponent implements OnDestroy {
       this.proposalToastTimeout = undefined;
       this.changeDetectorRef.markForCheck();
     }, 4000);
-  }
-
-  openDrawer(): void {
-    this.drawerOpen = true;
   }
 
   requestAddProfile(): void {
@@ -143,10 +272,14 @@ export class ProposalFlowComponent implements OnDestroy {
   proceedConfirmation(): void {
     const confirmation = this.confirmation;
     this.confirmation = null;
-    this.stage = confirmation === 'add-profile' ? 'csa-information' : 'risk-profile';
+    if (confirmation === 'add-profile') {
+      this.journeyState.unlock(this.lead.leadId, 'profile');
+      this.stage = 'csa-information';
+      this.routeTabChange.emit('profile');
+    } else {
+      this.journeyState.saveProfile(this.lead.leadId, { civilStatus: this.civilStatus, designatedBusiness: this.designatedBusiness, noExistingInsurance: this.noExistingInsurance });
+      this.stage = 'risk-profile';
+    }
   }
 
-  chooseDrawerAction(action: string): void {
-    this.selectedDrawerAction = action;
-  }
 }

@@ -68,6 +68,7 @@ export class ApplicationsComponent implements OnDestroy {
     this.desktopMediaQuery = document.defaultView?.matchMedia?.(DESKTOP_SIDEBAR_QUERY) ?? null;
     this.isDesktopViewport = this.desktopMediaQuery?.matches ?? false;
     this.navigation.setSidebarOpen(this.isDesktopViewport);
+    this.addSubmittedApplications();
     this.desktopMediaQuery?.addEventListener('change', this.handleDesktopBreakpointChange);
   }
 
@@ -231,6 +232,20 @@ export class ApplicationsComponent implements OnDestroy {
         this.createLead('application-18', '22759', 'Robert Downey', 'Male', { label: 'Postponed', tone: 'neutral' })
       ] }
     ];
+  }
+
+  private addSubmittedApplications(): void {
+    const inProgressBoard = this.boards.find((board) => board.id === 'applications-in-progress');
+    if (!inProgressBoard) return;
+
+    const submittedLeads = this.navigation.applicationSubmissions().map((lead) => ({
+      ...lead,
+      id: `application-${lead.id}`,
+      leadType: 'Booked' as const,
+      appointment: undefined,
+      tags: [{ label: 'Application Submitted', tone: 'success' as const }]
+    }));
+    inProgressBoard.leads = [...submittedLeads, ...inProgressBoard.leads.filter((lead) => !submittedLeads.some((submitted) => submitted.leadId === lead.leadId))];
   }
 
   private createLead(id: string, leadId: string, name: string, gender: LeadCardData['gender'], tag: LeadTag): LeadCardData {

@@ -10,19 +10,62 @@
   <lam-global-header />
   <div class="proposal-body">
     <lam-side-navigation *ngIf="navigation.isSidebarOpen()" class="proposal-sidebar" />
-    <main class="proposal-main">
+    <main class="proposal-main" [class.proposal-main--application]="applicationOpen">
+      <ng-container *ngIf="applicationOpen; else proposalRecordWorkspace">
+        <header class="application-page-header">
+          <nav class="application-breadcrumbs" aria-label="Breadcrumb"><button type="button" class="proposal-breadcrumbs__link" (click)="closed.emit()">LCAM</button><span class="material-symbols-rounded" aria-hidden="true">chevron_right</span><span>Mr. {{ lead.name }}</span><span class="material-symbols-rounded" aria-hidden="true">chevron_right</span><strong>Dream Builder</strong></nav>
+          <div class="application-page-header__summary"><h1>Dream Builder</h1><span>Application No. 810000106051</span><app-tag [label]="applicationUnderwritingSubmitted ? 'Pending On Underwriting Handling' : 'In Progress'" [variant]="TdxTagVariant.Success" [emphasis]="TdxTagEmphasis.Subtle" /></div>
+        </header>
+        <section class="application-workspace" [class.application-workspace--complete]="applicationComplete" aria-label="Dream Builder application">
+          <aside class="application-progress" aria-label="Application steps">
+            <div class="application-progress__completion" [class.is-complete]="applicationComplete" [class.is-submitted]="applicationUnderwritingSubmitted"><strong>Steps Completed</strong><span>{{ applicationUnderwritingSubmitted ? '9/9' : applicationComplete ? '8/9' : '0/9' }}</span><div><span></span></div></div>
+            <section><h2>Customer Details</h2><ol><li [class.is-current]="!applicationComplete">Insured Information</li><li>Insured Underwriting</li><li>Owner Information</li><li>Beneficiary</li></ol></section>
+            <section><h2>Plan Details</h2><ol><li>Premium &amp; Coverage</li><li>Payment</li></ol></section>
+            <section><h2>Forms</h2><ol><li>Forms Generation</li><li [class.is-current]="applicationComplete">For Upload</li></ol></section>
+          </aside>
+          <article class="application-form-card" *ngIf="!applicationComplete; else applicationForUpload">
+            <header><h2>Insured Information</h2></header>
+            <div class="application-form-card__body">
+              <p class="application-required"><span class="material-symbols-rounded" aria-hidden="true">info</span>All fields are required unless stated “Optional”</p>
+              <section class="application-basic"><h3>Basic Information</h3><dl><div><dt>Full Name</dt><dd>Mr. {{ lead.name }}</dd></div><div><dt>Birth Date</dt><dd>January 1, 1989</dd></div><div><dt>Gender</dt><dd>Male</dd></div><div><dt>Age</dt><dd>37</dd></div></dl></section>
+              <section class="application-government-ids"><div class="application-id-notice"><span class="material-symbols-rounded" aria-hidden="true">info</span><div><strong>Submit and Verify your ID in the Owner Tab</strong><p>Complete ID submission and verification in the Owner Tab. Ensure all required steps are followed for successful verification.</p></div></div><h3>Government IDs</h3><div class="application-id-fields"><label>Select ID Type<select aria-label="Select identification type"><option>Select ID</option></select></label><label>ID Number<input aria-label="Identification number" placeholder="Input ID Number"></label></div><button type="button" class="application-check-button" (click)="completeApplicationDemo()">Complete Application (For Demo Pusposes only)</button></section>
+            </div>
+          </article>
+          <ng-template #applicationForUpload>
+            <article class="application-form-card application-upload-card">
+              <header><h2>For Upload</h2></header>
+              <div class="application-form-card__body">
+                <h3>Uploaded Documents</h3>
+                <div class="application-upload-list">
+                  <article *ngFor="let document of applicationDocuments"><div><strong>{{ document.title }}</strong><span>{{ document.fileName }}</span></div><span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span></article>
+                </div>
+                <button *ngIf="!applicationUnderwritingSubmitted" type="button" class="application-submit-button" (click)="submitToUnderwriting()">Submit to Underwriting<span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button>
+              </div>
+            </article>
+          </ng-template>
+        </section>
+        <ng-container *ngIf="applicationUnderwritingConfirmationOpen">
+          <div class="application-submit-modal__backdrop" aria-hidden="true"></div>
+          <section class="application-submit-modal" role="dialog" aria-modal="true" aria-labelledby="underwriting-submission-title">
+            <img src="assets/submitted-to-underwriting.png" alt="">
+            <div class="application-submit-modal__copy"><h2 id="underwriting-submission-title">Submitted to Underwriting</h2><p>The application has been successfully sent to Underwriting and the TLIC has been emailed to the customer.</p></div>
+            <button type="button" (click)="finishUnderwritingSubmission()">Go to Applications Page</button>
+          </section>
+        </ng-container>
+      </ng-container>
+      <ng-template #proposalRecordWorkspace>
       <header class="lead-page-header">
         <div class="lead-page-header__row">
-          <nav class="proposal-breadcrumbs" aria-label="Breadcrumb"><span>Dashboard</span><span class="material-symbols-rounded" aria-hidden="true">chevron_right</span><strong>Mr. {{ lead.name }}</strong></nav>
-          <div class="lead-page-header__actions"><app-button label="Record Activity" [variant]="TdxButtonVariant.Primary" [emphasis]="TdxButtonEmphasis.Outline" [size]="TdxButtonSize.Small" ariaControls="lead-activity-drawer" [ariaExpanded]="drawerOpen" (clicked)="openDrawer()" /><app-button label="" [variant]="TdxButtonVariant.Subtle" [size]="TdxButtonSize.Small" leftIcon="more_horiz" ariaLabel="More lead actions" /></div>
+          <nav class="proposal-breadcrumbs" aria-label="Breadcrumb"><button type="button" class="proposal-breadcrumbs__link" (click)="closed.emit()">LCAM</button><span class="material-symbols-rounded" aria-hidden="true">chevron_right</span><strong>Mr. {{ lead.name }}</strong></nav>
+          <div class="lead-page-header__actions"><app-button label="Record Activity" [variant]="TdxButtonVariant.Primary" [emphasis]="TdxButtonEmphasis.Outline" [size]="TdxButtonSize.Small" ariaControls="lead-activity-drawer" (clicked)="activityRequested.emit()" /><app-button label="" [variant]="TdxButtonVariant.Subtle" [size]="TdxButtonSize.Small" leftIcon="more_horiz" ariaLabel="More lead actions" /></div>
         </div>
         <h1 id="proposal-lead-title">Mr. {{ lead.name }}</h1><small>Date Created: Jul 23, 2026 2:29 PM</small>
       </header>
 
       <nav class="profile-tabs" aria-label="Lead record sections">
-        <button type="button" [class.is-active]="!proposalDraftOpen && !proposalCreated && (stage === 'individual-form' || stage === 'individual-summary')" (click)="goTo('individual-summary')">Info</button>
-        <button type="button" [class.is-active]="!proposalDraftOpen && !proposalCreated && stage !== 'individual-form' && stage !== 'individual-summary'" [disabled]="stage === 'individual-form' || stage === 'individual-summary'" (click)="goTo('csa-information')">Profile</button>
-        <button type="button" [class.is-active]="proposalDraftOpen || proposalCreated" [disabled]="!proposalDraftOpen && !proposalCreated">Proposals</button><button type="button" disabled>Applications</button><button type="button">Policies</button>
+        <button type="button" [class.is-active]="routeTab === 'info'" (click)="selectRecordTab('info')">Info</button>
+        <button type="button" [class.is-active]="routeTab === 'profile'" [disabled]="!isTabEnabled('profile')" (click)="selectRecordTab('profile')">Profile</button>
+        <button type="button" [class.is-active]="routeTab === 'proposals'" [disabled]="!isTabEnabled('proposals')" (click)="selectRecordTab('proposals')">Proposals</button><button type="button" [class.is-active]="routeTab === 'applications'" [disabled]="!isTabEnabled('applications')" (click)="selectRecordTab('applications')">Applications</button><button type="button" disabled>Policies</button>
       </nav>
 
       <div class="proposal-content">
@@ -32,7 +75,12 @@
           <section class="generated-proposal__section"><h3>Proposal Information</h3><dl><div><dt>Effective Date</dt><dd>August 6, 2026</dd></div><div><dt>Valid Until</dt><dd>September 5, 2026</dd></div></dl></section>
           <section class="generated-proposal__section"><h3>Proposed Owner</h3><dl><div class="generated-proposal__name"><dt>Proposed Owner Name</dt><dd>Mr. {{ lead.name }}</dd></div><div><dt>Birthdate</dt><dd>January 1, 1989</dd></div><div><dt>Age</dt><dd>37</dd></div><div><dt>Gender</dt><dd>Male</dd></div></dl></section>
           <section class="generated-proposal__section"><h3>Proposed Insured</h3><dl><div class="generated-proposal__name"><dt>Proposed Insured Name</dt><dd>Mr. {{ lead.name }}</dd></div><div><dt>Birthdate</dt><dd>January 1, 1989</dd></div><div><dt>Age</dt><dd>37</dd></div><div><dt>Gender</dt><dd>Male</dd></div></dl></section>
-          <footer><button type="button" class="generated-proposal__generate" (click)="generateSalesIllustration()">Generate Sales Illustration<span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button></footer>
+          <section class="generated-proposal__si" *ngIf="hasGeneratedSalesIllustration">
+            <h3>Sales Illustration</h3>
+            <button type="button" (click)="salesIllustrationGenerated = true" aria-label="View generated sales illustration"><span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span><span>Sales Illustration_Dream Builder_810000106051</span><span class="material-symbols-rounded" aria-hidden="true">keyboard_arrow_right</span></button>
+            <a class="generated-proposal__download" href="assets/si-page-1.png" download="Sales Illustration_Dream Builder_810000106051.png">Download Sales Illustration</a>
+          </section>
+          <footer><button *ngIf="!hasGeneratedSalesIllustration" type="button" class="generated-proposal__generate" (click)="generateSalesIllustration()">Generate Sales Illustration<span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button><button *ngIf="hasGeneratedSalesIllustration" type="button" class="generated-proposal__convert" (click)="convertToApplication()">Convert to Application<span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button></footer>
         </article>
         <article class="proposal-card proposal-draft" *ngIf="proposalDraftOpen">
           <header class="proposal-draft__header"><h2>{{ selectedProduct }}</h2></header>
@@ -83,7 +131,7 @@
               <label>Mobile Number<div class="phone-input"><span>+639</span><input name="mobileNumber" [(ngModel)]="mobileNumber"></div></label><label>Email Address<input name="email" [(ngModel)]="emailAddress"></label><label>Source of Lead<input name="source" [(ngModel)]="sourceOfLead"></label>
             </div></fieldset>
           </form>
-          <footer class="card-footer"><button type="button" class="proposal-button proposal-button--outline" (click)="closed.emit()">Cancel</button><button type="button" class="proposal-button proposal-button--primary" (click)="goTo('individual-summary')">Save Changes</button></footer>
+          <footer class="card-footer"><button type="button" class="proposal-button proposal-button--outline" (click)="closed.emit()">Cancel</button><button type="button" class="proposal-button proposal-button--primary" (click)="saveLeadInfo()">Save Changes</button></footer>
         </article>
 
         <article class="proposal-card proposal-card--summary" *ngIf="stage === 'individual-summary'">
@@ -117,6 +165,7 @@
           <section class="risk-profile" *ngIf="stage === 'risk-profile'"><h3>Risk Profile</h3><div class="risk-profile__result"><strong>Your current risk profile:</strong><mark>Conservative</mark><ul><li>Preserve Capital</li><li>Product Option: Traditional Life Insurance</li></ul></div><footer><button type="button" class="create-proposal-button" (click)="openProductPicker()">Create Proposal <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button></footer></section>
         </article>
       </div>
+      </ng-template>
     </main>
   </div>
 
@@ -133,11 +182,5 @@
     </section>
   </div>
 
-  <div class="drawer-overlay" *ngIf="drawerOpen" (click)="drawerOpen = false" aria-hidden="true"></div>
-  <aside id="lead-activity-drawer" class="lead-drawer" *ngIf="drawerOpen" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
-    <header><div class="drawer-title-row"><h2 id="drawer-title">Mr. John Mark Doe</h2><div class="drawer-header-actions"><app-button label="" [variant]="TdxButtonVariant.Subtle" [size]="TdxButtonSize.Small" leftIcon="more_vert" ariaLabel="More lead actions" /><lam-icon-button icon="close" label="Close drawer" size="icon" interactionBackground="none" [showTooltip]="false" (activated)="drawerOpen = false" /></div></div><div class="drawer-status"><app-tag label="SI Generated" [variant]="TdxTagVariant.Success" [emphasis]="TdxTagEmphasis.Subtle" /><small><span class="material-symbols-rounded" aria-hidden="true">person</span> Active</small><small><span class="material-symbols-rounded" aria-hidden="true">schedule</span> 1 day</small></div></header>
-    <app-tab-group [tabs]="drawerTabs" [activeId]="drawerTab" ariaLabel="Lead activity sections" (activeIdChange)="drawerTab = $event" />
-    <div class="drawer-scroll"><section class="drawer-lead-info"><dl class="drawer-details"><div><dt>Birthdate</dt><dd>January 05, 1989</dd></div><div><dt>Gender</dt><dd>Male</dd></div><div><dt>Email</dt><dd>client@email.com</dd></div><div><dt>Mobile Number</dt><dd>+63 9226789012</dd></div><div><dt>Referrer Name</dt><dd>Maxwell Anderson</dd></div><div><dt>Referrer ID</dt><dd>100234</dd></div><div><dt>Source of Lead</dt><dd>Leads from store</dd></div><div><dt>EWB Client Financial Segmentation</dt><dd>Mid</dd></div><div><dt>Store/Branch Assignment</dt><dd>595 THE FORT - BGC CORPORATE CENTER</dd></div><div><dt>Store/Branch ID</dt><dd>RBG0380</dd></div></dl><div class="drawer-lead-actions"><app-button class="drawer-full-button" label="Generate Full Proposal" [variant]="TdxButtonVariant.Primary" [emphasis]="TdxButtonEmphasis.Outline" [size]="TdxButtonSize.Small" (clicked)="drawerOpen = false; requestAddProfile()" /><app-button class="drawer-edit" label="Edit Lead Information" [variant]="TdxButtonVariant.Primary" [emphasis]="TdxButtonEmphasis.Transparent" [size]="TdxButtonSize.Small" /></div></section><section class="drawer-next"><h3>Before you continue</h3><p>Complete the remaining steps before starting the application.</p><app-stepper class="drawer-stepper" [steps]="activitySteps" [currentIndex]="1" orientation="horizontal" /><app-section-message description="Schedule an appointment or indicate if you’re unable to set one." appearance="info" /><h4>Appointments</h4><lam-action-card title="Schedule Appointment" description="Set a date and time for your client appointment." icon="calendar_month" tone="success" (activated)="chooseDrawerAction('scheduled')" /><lam-action-card title="Unable to Set Appointment" description="An appointment could not be scheduled with the client." icon="event_busy" tone="danger" (activated)="chooseDrawerAction('unable')" /></section></div>
-  </aside>
   </ng-template>
 </section>

@@ -150,7 +150,7 @@ describe('DashboardComponent sidebar', () => {
     expect(meeting?.tags).toEqual([{ label: 'Meeting', tone: 'success' }]);
     expect(component.boards.find((board) => board.id === 'appointments')?.leads.some((lead) => lead.id === 'contacted-1')).toBe(false);
     expect(component.filteredBoards.find((board) => board.id === 'meetings')?.leads[0]).toEqual(meeting);
-    expect(meeting?.activities.at(-1)).toMatchObject({ category: 'sales', label: 'Meeting (Proposal Presented)', notes: 'Client attended.' });
+    expect(meeting?.activities.at(-1)).toMatchObject({ category: 'sales', label: 'Presentation Completed', notes: 'Client attended.' });
     expect(rescheduledAgain?.appointment).toEqual(appointment);
   });
 
@@ -202,7 +202,7 @@ describe('DashboardComponent sidebar', () => {
     const completed = component.completeFollowUpAppointment(lead.id, 'Appointment result recorded.');
     expect(completed?.appointment).toBeUndefined();
     expect(completed?.tags).toEqual([{ label: 'Follow-up', tone: 'success' }]);
-    expect(completed?.activities.at(-1)).toMatchObject({ label: 'Follow up updated', notes: 'Appointment result recorded.' });
+    expect(completed?.activities.at(-1)).toMatchObject({ label: 'Presentation Completed', notes: 'Appointment result recorded.' });
 
     const updated = component.recordLeadUpdate(lead.id, 'Client prefers an afternoon call.');
     expect(updated?.activities.at(-1)).toMatchObject({ label: 'Follow up updated', notes: 'Client prefers an afternoon call.' });
@@ -215,7 +215,7 @@ describe('DashboardComponent sidebar', () => {
       'New Lead Created',
       'Contacted',
       'Appointment Scheduled',
-      'Meeting (Proposal Presented)',
+      'Presentation Completed',
       'Follow up created'
     ]);
     expect(lead.activities.filter((activity) => activity.category === 'system').map((activity) => activity.label)).toEqual([
