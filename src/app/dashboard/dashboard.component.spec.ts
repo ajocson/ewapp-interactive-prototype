@@ -208,14 +208,13 @@ describe('DashboardComponent sidebar', () => {
     expect(updated?.activities.at(-1)).toMatchObject({ label: 'Follow up updated', notes: 'Client prefers an afternoon call.' });
   });
 
-  it('seeds Follow-Up leads with the completed sales journey and required system transactions', () => {
+  it('seeds Follow-Up leads with an appointment awaiting presentation completion', () => {
     const lead = fixture.componentInstance.boards.find((board) => board.id === 'follow-up')!.leads[0];
 
     expect(lead.activities.filter((activity) => activity.category === 'sales').map((activity) => activity.label)).toEqual([
       'New Lead Created',
       'Contacted',
       'Appointment Scheduled',
-      'Presentation Completed',
       'Follow up created'
     ]);
     expect(lead.activities.filter((activity) => activity.category === 'system').map((activity) => activity.label)).toEqual([

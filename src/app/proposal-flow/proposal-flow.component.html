@@ -57,7 +57,7 @@
       <header class="lead-page-header">
         <div class="lead-page-header__row">
           <nav class="proposal-breadcrumbs" aria-label="Breadcrumb"><button type="button" class="proposal-breadcrumbs__link" (click)="closed.emit()">LCAM</button><span class="material-symbols-rounded" aria-hidden="true">chevron_right</span><strong>Mr. {{ lead.name }}</strong></nav>
-          <div class="lead-page-header__actions"><app-button label="Record Activity" [variant]="TdxButtonVariant.Primary" [emphasis]="TdxButtonEmphasis.Outline" [size]="TdxButtonSize.Small" ariaControls="lead-activity-drawer" (clicked)="activityRequested.emit()" /><app-button label="" [variant]="TdxButtonVariant.Subtle" [size]="TdxButtonSize.Small" leftIcon="more_horiz" ariaLabel="More lead actions" /></div>
+          <div class="lead-page-header__actions"><app-button *ngIf="routeTab !== 'applications'" label="Record Activity" [variant]="TdxButtonVariant.Primary" [emphasis]="TdxButtonEmphasis.Outline" [size]="TdxButtonSize.Small" ariaControls="lead-activity-drawer" (clicked)="activityRequested.emit()" /><app-button label="" [variant]="TdxButtonVariant.Subtle" [size]="TdxButtonSize.Small" leftIcon="more_horiz" ariaLabel="More lead actions" /></div>
         </div>
         <h1 id="proposal-lead-title">Mr. {{ lead.name }}</h1><small>Date Created: Jul 23, 2026 2:29 PM</small>
       </header>

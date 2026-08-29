@@ -165,10 +165,11 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - Per-board search plus lead-state checkbox and sort controls. Recently Created (using last activity when present) is the default, board width stays stable while searching, and no-result searches intentionally leave the board blank.
 - Card selection opens the lead activity drawer.
 - The drawer includes TDX overview/timeline tabs, lead metadata, stage-aware Draft SI/full-proposal labeling, stage actions, and Sales Activities/System Transactions. The progress indicator has three steps outside Follow-Up and adds a fourth Follow-up step only for leads in the Follow-Up board.
-- Mark as Contacted moves a lead to Contacted. Scheduling moves it to Appointments; reschedule/cancel update it there; Appointment Completed moves it to Meetings; For Follow-up moves it to Follow-Up.
+- Mark as Contacted moves a lead to Contacted. Scheduling moves it to Appointments; reschedule/cancel update it there; Appointment Completed moves it to Meetings; For Follow-up moves it to Follow-Up without carrying an active appointment or the prior meeting presentation state.
 - The appointment scheduler defaults to today, exposes half-hour time choices, and excludes elapsed times when today is selected. Scheduled appointments use the shared scheduled-activity card and support reschedule, cancellation, notes, and completion.
 - Contacted leads can record an unsuccessful scheduling attempt through the Figma-matched **Unable to Set Appointment** form. Saving keeps the lead in Contacted, records `Contacted - Unsuccessful Appointment` in Sales Activities, and shows the standard activity-recorded toast.
 - Follow-Up leads can proceed to application, schedule a follow-up appointment, or record updates. A scheduled follow-up presents an information banner, a follow-up appointment card, notes, and a Presentation Completed action. Completing that presentation restores the three follow-up actions, allowing repeated follow-up scheduling and update recording.
+- Follow-up conversion checks the current active appointment, not historical appointment records. A new appointment requires a newer Presentation Completed activity; clicking Convert to Application before that reopens the Follow-up drawer.
 - Park and Drop are available across boards, use local state-specific SVG assets, require confirmation, append activities, and preserve the lead's board stage. Drop uses a fixed list of supported reasons. Parked leads can be reactivated across boards and use the `Reactivated` state; dropped leads do not expose reactivation.
 - Successful lifecycle actions keep the drawer open and show a responsive-width success message. Closing the drawer then highlights the affected card at the top of its board.
 - The timeline uses chronological Sales Activities and System Transactions. Initial sample histories reflect the required journey for their board/state, including the lead creation, contact, appointment/meeting/follow-up, park/drop/reactivate, and SI/CSA/proposal system records that apply to that lead.
@@ -189,6 +190,7 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - CSA stages for information, needs ranking display, calculation fields, assessment, and risk-profile result.
 - Risk Profile can open a product-picker overlay. A selected product opens the local Dream Builder proposal draft: the Figma-matched Info tab includes proposal, lead, and insured information, while Benefits includes premium-calculation fields. Save Proposal is enabled, confirms before saving, then shows the Figma-matched saved-proposal summary and a success toast that auto-hides after four seconds.
 - The saved-proposal summary exposes Generate Sales Illustration. That action opens a dedicated viewer with Back to Proposal, a download link, and the local `assets/si-page-1.png` Dream Builder sample rendered at the source document width; returning restores the summary.
+- Application-context Proposal pages treat the proposal and sales illustration as already converted and hide Generate Sales Illustration and Convert to Application. Application record pages open in For Upload and hide Record Activity and Submit to Underwriting.
 - The product picker presents seven local sample products, permits exactly one selection, and uses the secondary/magenta selection treatment. Its category tabs currently change only the active visual state; they do not filter the product grid.
 - Record Activity side drawer with shared TDX tab, tag, button, stepper, section-message, and action-card components.
 - Responsive layouts for narrower viewports.
@@ -218,6 +220,8 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - The Figma-specific proposal panels are local walkthrough states, not a durable proposal or sales-illustration integration. Keep their transitions explicit: draft → save confirmation → saved proposal → generated-SI viewer → saved proposal.
 
 ## Current Project State
+
+- Verified on **2026-08-29** after the latest Applications/Follow-up conversion updates.
 
 ### Latest EWApp prototype update — 2026-08-29
 
@@ -257,14 +261,14 @@ Verified on **2026-08-29**:
 - The component-style error budget is 20 kB so the current proposal styles remain deployable while the existing 8 kB warnings are still reported.
 - No backend, authentication, API calls, persistence, or real customer data. Reloading resets all state.
 - `LeadDetailComponent` exists and is tested but is not reachable from the root application flow.
-- Several visible controls remain prototype-only/no-op, including most navigation destinations, New Lead, sidebar Draft SI, global Search, Edit Lead Information, Proceed to Application, Convert to Application, and some proposal actions. Applications navigation and its local filtering flow are implemented.
-- In the contacted LCAM drawer, “Generate Full Proposal” currently has no emitted action; only the new-lead “Generate Draft SI” branch is wired.
+- Several visible controls remain prototype-only/no-op, including most navigation destinations, New Lead, sidebar Draft SI, global Search, Edit Lead Information, Proceed to Application, and some proposal actions. Applications navigation and its local filtering flow are implemented.
+- In the contacted LCAM drawer, “Generate Full Proposal” is wired to the existing lead journey; application-context drawer actions route to their corresponding record pages.
 - Activity records and appointment/lead mutations are entirely in memory and reset on reload. Initial timelines are synthesized from sample stage/state data rather than loaded from a durable event source.
 - The filter UI offers `Re-endorsed`, but `LeadState` and the sample data do not currently represent that state, so the option cannot match a lead.
 - Board and form data are hard-coded in component classes/templates. Some proposal and SI summary values are also fixed rather than derived from the selected lead/form state.
 - Draft SI results display and download only `si-page-1.png`; `si-page-2.png` exists but is unused.
 - Draft SI product selection still enables only Dream Builder. The proposal product picker is separate and permits selection of all seven hard-coded products, but its category tabs do not yet filter that list.
-- Proposal-draft and saved-proposal content is local and partial: Rider interactions, generated-SI data, and Convert to Application do not implement a complete downstream proposal/application workflow. The existing viewer uses the fixed local `si-page-1.png` asset.
+- Proposal-draft and saved-proposal content is local and partial: Rider interactions, generated-SI data, and downstream proposal/application persistence are not complete. The existing viewer uses the fixed local `si-page-1.png` asset.
 - Shared-component adoption is intentionally incomplete in the Figma-specific proposal draft, saved-proposal, and generated-SI viewer panels; the per-board sort list also still uses native radio inputs rather than the shared radio component.
 - No lint command, automated accessibility audit, visual regression suite, or browser E2E suite is configured.
 - Dark-theme tokens are partial and no UI theme switch is implemented.
@@ -273,7 +277,6 @@ Verified on **2026-08-29**:
 
 There are no explicit `TODO`/`FIXME` markers in the inspected source. The following gaps are inferred directly from unhandled controls and current implementation:
 
-- Wire contacted-drawer “Generate Full Proposal” if the intended destination is confirmed.
 - Wire or intentionally remove global Search, Edit Lead Information, Proceed to Application, Convert to Application, New Lead, sidebar Draft SI, and other remaining presentation-only controls.
 - Complete product-picker category filtering plus the intended Rider and downstream proposal/application interactions if those are required beyond the current local walkthrough.
 - Reconcile the `Re-endorsed` filter option with the `LeadState` model or remove it if that state is not required.

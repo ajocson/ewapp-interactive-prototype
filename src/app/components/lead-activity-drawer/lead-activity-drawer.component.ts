@@ -97,6 +97,7 @@ interface TimeOption {
 })
 export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
   @Input() userType: 'Agency' | 'Banca' = 'Banca';
+  @Input() fromApplicationsPage = false;
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly document = inject(DOCUMENT);
   private agingTooltipElement: HTMLDivElement | null = null;
@@ -118,6 +119,8 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
   @Output() updateRecorded = new EventEmitter<LeadUpdateRecordedEvent>();
   @Output() proposalRequested = new EventEmitter<void>();
   @Output() fullProposalRequested = new EventEmitter<void>();
+  @Output() applicationRequested = new EventEmitter<void>();
+  @Output() applicationProposalRequested = new EventEmitter<void>();
   @Output() leadStateChanged = new EventEmitter<LeadStateChangedEvent>();
 
   readonly buttonVariant = TdxButtonVariant;
@@ -379,6 +382,14 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
       return;
     }
     this.fullProposalRequested.emit();
+  }
+
+  viewApplication(): void {
+    this.applicationRequested.emit();
+  }
+
+  requestApplicationProposal(): void {
+    this.applicationProposalRequested.emit();
   }
 
   markAsContacted(): void {

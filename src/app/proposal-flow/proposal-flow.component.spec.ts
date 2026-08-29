@@ -217,10 +217,15 @@ describe('ProposalFlowComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Complete Application (For Demo Pusposes only)');
   });
 
-  it('requires presentation completion before converting, regardless of the current lead stage', () => {
+  it('requires presentation completion before converting when an appointment is scheduled', () => {
     const component = fixture.componentInstance;
     let appointmentRequired = false;
-    component.lead = { ...component.lead, tags: [{ label: 'Meeting', tone: 'success' }] };
+    component.lead = {
+      ...component.lead,
+      tags: [{ label: 'Follow-up', tone: 'success' }],
+      appointment: { date: '2026-08-29', dateLabel: 'August 29, 2026', startMinutes: 660, endMinutes: 690, timeLabel: '11:00 AM-11:30 AM' },
+      activities: [{ id: 'appointment', category: 'sales', label: 'Appointment Scheduled', dateLabel: 'Aug 29, 2026', timeLabel: '2:00 PM', occurredAtTimestamp: Date.now() }]
+    };
     component.appointmentRequired.subscribe(() => appointmentRequired = true);
 
     component.convertToApplication();

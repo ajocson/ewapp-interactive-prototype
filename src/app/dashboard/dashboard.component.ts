@@ -300,6 +300,7 @@ export class DashboardComponent implements OnDestroy {
     const contactedLead: LeadCardData = {
       ...lead,
       leadType: 'Active',
+      appointment: undefined,
       lastActivityTimestamp: Date.now(),
       tags: [{ label: 'Contacted', tone: 'success' }],
       activities: [...lead.activities, this.createActivity('sales', 'Contacted', new Date(), notes)]
@@ -438,9 +439,13 @@ export class DashboardComponent implements OnDestroy {
     const followUpLead: LeadCardData = {
       ...lead,
       leadType: 'Active',
+      appointment: undefined,
       lastActivityTimestamp: Date.now(),
       tags: [{ label: 'Follow-up', tone: 'success' }],
-      activities: [...lead.activities, this.createActivity('sales', 'Follow up created', new Date(), notes)]
+      activities: [
+        ...lead.activities.filter((activity) => activity.label !== 'Presentation Completed'),
+        this.createActivity('sales', 'Follow up created', new Date(), notes)
+      ]
     };
 
     meetingsBoard.leads = meetingsBoard.leads.filter((candidate) => candidate.id !== leadId);
@@ -820,7 +825,7 @@ export class DashboardComponent implements OnDestroy {
         this.createActivity('system', 'Proposal Created', activityDate(1, 9, 30))
       );
     }
-    if (hasReachedMeeting) {
+    if (hasReachedMeeting && !hasReachedFollowUp) {
       activities.push(
         this.createActivity('sales', 'Presentation Completed', activityDate(1, 15, 30))
       );

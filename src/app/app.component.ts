@@ -36,6 +36,7 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
       *ngIf="selectedLead && ((!draftSiOpen && !proposalOpen) || contactDrawerOpen)"
       [lead]="selectedLead"
       [userType]="userType"
+      [fromApplicationsPage]="applicationLeadContext"
       (closed)="contactDrawerOpen ? closeContactDrawer() : closeLead()"
       (contacted)="markLeadAsContacted($event)"
       (appointmentScheduled)="scheduleLeadAppointment($event)"
@@ -50,6 +51,8 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
       (updateRecorded)="recordLeadUpdate($event)"
       (proposalRequested)="openProposal()"
       (fullProposalRequested)="openLeadJourney()"
+      (applicationRequested)="viewApplication()"
+      (applicationProposalRequested)="openApplicationProposal()"
       (leadStateChanged)="changeLeadState($event)"
       (draftSiRequested)="openDraftSi()"
       (editLeadRequested)="editLeadInfo()"
@@ -76,7 +79,7 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
       [description]="activityToastMessage"
     />
     <lam-draft-si-flow *ngIf="selectedLead && draftSiOpen" [lead]="selectedLead" (closed)="closeDraftSi()" (draftSiGenerated)="recordDraftSiGenerated()" (proposalRequested)="openDraftProposalInfo()" (activityRequested)="openContactDrawer()" (contactRequired)="openContactDrawer()" (appointmentRequired)="openContactDrawer()" />
-    <lam-proposal-flow *ngIf="selectedLead && proposalOpen" [lead]="selectedLead" [routeTab]="activeRecordTab" [editMode]="leadInfoEditMode" (routeTabChange)="navigateToRecordTab($event)" (csaCreated)="recordCsaCreated()" (siGenerated)="recordSiGenerated()" (proposalSaved)="recordProposalCreated()" (applicationConverted)="recordApplicationConverted()" (contactRequired)="openContactDrawer()" (appointmentRequired)="openContactDrawer()" (activityRequested)="openContactDrawer()" (underwritingSubmitted)="viewSubmittedApplication($event)" (closed)="closeLead()" />
+    <lam-proposal-flow *ngIf="selectedLead && proposalOpen" [lead]="selectedLead" [routeTab]="activeRecordTab" [editMode]="leadInfoEditMode" [submittedApplicationContext]="applicationLeadContext" (routeTabChange)="navigateToRecordTab($event)" (csaCreated)="recordCsaCreated()" (siGenerated)="recordSiGenerated()" (proposalSaved)="recordProposalCreated()" (applicationConverted)="recordApplicationConverted()" (contactRequired)="openContactDrawer()" (appointmentRequired)="openContactDrawer()" (activityRequested)="openContactDrawer()" (underwritingSubmitted)="viewSubmittedApplication($event)" (closed)="closeLead()" />
     <section *ngIf="newLeadOpen" class="new-lead-modal" role="dialog" aria-modal="true" aria-labelledby="new-lead-title">
       <div class="new-lead-modal__backdrop" aria-hidden="true"></div>
       <div class="new-lead-modal__panel">
@@ -138,6 +141,7 @@ export class AppComponent implements AfterViewInit {
   contactDrawerOpen = false;
   activeRecordTab: LeadRecordTab = 'info';
   leadInfoEditMode = false;
+  applicationLeadContext = false;
   activityRecorded = false;
   activityToastMessage = 'Your activity has been recorded.';
   private pendingHighlightLeadId: string | null = null;
@@ -173,6 +177,7 @@ export class AppComponent implements AfterViewInit {
   openLead(lead: LeadCardData): void {
     this.clearActivityToast();
     this.selectedLead = lead;
+    this.applicationLeadContext = false;
     this.draftSiOpen = false;
     this.proposalOpen = false;
     this.changeDetectorRef.markForCheck();
@@ -180,6 +185,7 @@ export class AppComponent implements AfterViewInit {
 
   openApplicationLead(lead: LeadCardData): void {
     this.openLead(lead);
+    this.applicationLeadContext = true;
   }
 
   openNewLead(): void {
@@ -320,6 +326,21 @@ export class AppComponent implements AfterViewInit {
   openLeadJourney(): void {
     if (!this.selectedLead) return;
 
+    const hasGeneratedSalesIllustration = this.selectedLead.activities?.some((activity) => activity.label === 'SI Generated') ?? false;
+    const hasCreatedProposal = this.selectedLead.activities?.some((activity) => activity.label === 'Proposal Created') ?? false;
+    if (hasCreatedProposal || (hasGeneratedSalesIllustration && (this.selectedLead.tags[0]?.label === 'Meeting' || this.selectedLead.tags[0]?.label === 'Follow-up'))) {
+      this.journeyState.unlock(this.selectedLead.leadId, 'proposals');
+      this.draftSiOpen = false;
+      this.proposalOpen = true;
+      this.contactDrawerOpen = false;
+      this.activeRecordTab = 'proposals';
+      this.leadInfoEditMode = false;
+      this.navigation.showLeadFlow();
+      void this.router.navigate(['/lcam', this.selectedLead.leadId, 'proposals']);
+      this.changeDetectorRef.markForCheck();
+      return;
+    }
+
     const tab = this.journeyState.highestUnlockedTab(this.selectedLead.leadId);
     if (tab === 'info') {
       this.editLeadInfo();
@@ -333,6 +354,33 @@ export class AppComponent implements AfterViewInit {
     this.leadInfoEditMode = false;
     this.navigation.showLeadFlow();
     void this.router.navigate(['/lcam', this.selectedLead.leadId, tab]);
+    this.changeDetectorRef.markForCheck();
+  }
+
+  viewApplication(): void {
+    if (!this.selectedLead) return;
+    this.journeyState.unlock(this.selectedLead.leadId, 'applications');
+    this.draftSiOpen = false;
+    this.proposalOpen = true;
+    this.contactDrawerOpen = false;
+    this.activeRecordTab = 'applications';
+    this.leadInfoEditMode = false;
+    this.navigation.showLeadFlow();
+    void this.router.navigate(['/lcam', this.selectedLead.leadId, 'applications']);
+    this.changeDetectorRef.markForCheck();
+  }
+
+  openApplicationProposal(): void {
+    if (!this.selectedLead) return;
+    this.journeyState.unlock(this.selectedLead.leadId, 'proposals');
+    this.journeyState.unlock(this.selectedLead.leadId, 'applications');
+    this.draftSiOpen = false;
+    this.proposalOpen = true;
+    this.contactDrawerOpen = false;
+    this.activeRecordTab = 'proposals';
+    this.leadInfoEditMode = false;
+    this.navigation.showLeadFlow();
+    void this.router.navigate(['/lcam', this.selectedLead.leadId, 'proposals']);
     this.changeDetectorRef.markForCheck();
   }
 
@@ -522,7 +570,8 @@ export class AppComponent implements AfterViewInit {
 
     if (!this.dashboard) return;
 
-    const lead = this.dashboard.findLeadByLeadId(leadId);
+    const lead = this.dashboard.findLeadByLeadId(leadId)
+      ?? (this.applicationLeadContext && this.selectedLead?.leadId === leadId ? this.selectedLead : null);
     if (!lead) {
       void this.router.navigate(['/lcam']);
       return;

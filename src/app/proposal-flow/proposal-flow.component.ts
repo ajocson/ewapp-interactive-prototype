@@ -20,6 +20,7 @@ export type LeadRecordTab = 'info' | 'profile' | 'proposals' | 'applications';
 export class ProposalFlowComponent implements OnChanges, OnDestroy {
   @Input({ required: true }) lead!: LeadCardData;
   @Input() routeTab: LeadRecordTab = 'info';
+  @Input() submittedApplicationContext = false;
   private leadInfoEditMode = false;
   @Input() set editMode(value: boolean) {
     this.leadInfoEditMode = value;
@@ -118,6 +119,9 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
   }
 
   selectRecordTab(tab: LeadRecordTab): void {
+    if (tab === 'applications' && this.submittedApplicationContext) {
+      this.journeyState.unlock(this.lead.leadId, 'applications');
+    }
     if (!this.isTabEnabled(tab)) return;
     this.showRecordTab(tab);
     this.routeTabChange.emit(tab);
@@ -143,14 +147,14 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
       this.proposalDraftOpen = false;
       this.proposalCreated = true;
       this.selectedProduct = this.selectedProduct || 'Dream Builder';
-      this.hasGeneratedSalesIllustration = this.hasGeneratedSalesIllustration || this.hasCompletedPresentation();
+      this.hasGeneratedSalesIllustration = this.hasGeneratedSalesIllustration || this.submittedApplicationContext || this.hasGeneratedSalesIllustrationRecord() || this.hasCompletedPresentation();
       this.stage = 'risk-profile';
     } else {
       this.applicationOpen = true;
       this.applicationDetailOpen = false;
-      this.applicationComplete = false;
+      this.applicationComplete = this.submittedApplicationContext;
       this.applicationUnderwritingConfirmationOpen = false;
-      this.applicationUnderwritingSubmitted = false;
+      this.applicationUnderwritingSubmitted = this.submittedApplicationContext;
     }
 
     this.changeDetectorRef.markForCheck();
@@ -218,13 +222,17 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
   }
 
   convertToApplication(): void {
-    if (!this.hasCompletedPresentation()) {
+    if (!this.canConvertToApplication) {
       this.appointmentRequired.emit();
       return;
     }
     this.journeyState.unlock(this.lead.leadId, 'applications');
     this.applicationOpen = true;
     this.applicationDetailOpen = true;
+    if (this.submittedApplicationContext) {
+      this.applicationComplete = true;
+      this.applicationUnderwritingSubmitted = true;
+    }
     this.applicationComplete = false;
     this.applicationUnderwritingConfirmationOpen = false;
     this.applicationUnderwritingSubmitted = false;
@@ -249,6 +257,23 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
 
   private hasCompletedPresentation(): boolean {
     return this.lead.activities?.some((activity) => activity.label === 'Presentation Completed') ?? false;
+  }
+
+  get canConvertToApplication(): boolean {
+    const latestAppointment = this.latestActivityTimestamp('Appointment Scheduled');
+    const latestPresentation = this.latestActivityTimestamp('Presentation Completed');
+    const hasAppointment = Boolean(this.lead.appointment);
+    return hasAppointment ? latestPresentation >= latestAppointment : true;
+  }
+
+  private latestActivityTimestamp(label: string): number {
+    return Math.max(0, ...(this.lead.activities ?? [])
+      .filter((activity) => activity.label === label)
+      .map((activity) => activity.occurredAtTimestamp));
+  }
+
+  private hasGeneratedSalesIllustrationRecord(): boolean {
+    return this.lead.activities?.some((activity) => activity.label === 'SI Generated') ?? false;
   }
 
   private hasBeenContacted(): boolean {
