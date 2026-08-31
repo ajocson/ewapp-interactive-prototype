@@ -194,7 +194,8 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
   }
 
   get isApplicationLead(): boolean {
-    return APPLICATION_STATUS_TAGS.has(this.statusTag);
+    return APPLICATION_STATUS_TAGS.has(this.statusTag)
+      || (this.lead.activities?.some((activity) => activity.label === 'Application Created') ?? false);
   }
 
   get statusVariant(): TdxTagVariant {

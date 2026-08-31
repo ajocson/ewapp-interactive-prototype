@@ -16,7 +16,7 @@ describe('AppComponent LCAM activity feedback', () => {
     fixture.detectChanges();
   });
 
-  it('keeps the drawer open after recording and highlights the moved lead only when it closes', () => {
+  it('highlights the moved lead immediately and starts the fade timer when the drawer closes', () => {
     vi.useFakeTimers();
     const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;
     const lead = dashboard.boards.find((board) => board.id === 'lead')?.leads[0];
@@ -32,7 +32,7 @@ describe('AppComponent LCAM activity feedback', () => {
     expect(fixture.nativeElement.querySelector('lam-lead-activity-drawer')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.activity-toast')).toBeNull();
     expect(dashboard.filteredBoards.find((board) => board.id === 'contacted')?.leads[0].id).toBe(lead!.id);
-    expect(dashboard.highlightedLeadId).toBeNull();
+    expect(dashboard.highlightedLeadId).toBe(lead!.id);
     vi.advanceTimersByTime(800);
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.activity-toast')?.textContent).toContain('Your activity has been recorded.');
@@ -41,7 +41,10 @@ describe('AppComponent LCAM activity feedback', () => {
     expect(fixture.nativeElement.querySelector('lam-lead-activity-drawer')).toBeNull();
     expect(dashboard.highlightedLeadId).toBe(lead!.id);
     expect(fixture.nativeElement.querySelector('.lead-card--highlighted')?.textContent).toContain(lead!.name);
-    vi.advanceTimersByTime(4000);
+    vi.advanceTimersByTime(2999);
+    expect(dashboard.highlightedLeadId).toBe(lead!.id);
+    vi.advanceTimersByTime(1);
+    expect(dashboard.highlightedLeadId).toBeNull();
     vi.useRealTimers();
   });
 
@@ -286,7 +289,7 @@ describe('AppComponent LCAM activity feedback', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.lead-state-modal')).toBeNull();
     expect(dashboard.boards.find((board) => board.id === 'lead')!.leads[0].leadType).toBe('Parked');
-    expect(dashboard.highlightedLeadId).toBeNull();
+    expect(dashboard.highlightedLeadId).toBe(lead.id);
     vi.advanceTimersByTime(4800);
     vi.useRealTimers();
   });
@@ -326,7 +329,7 @@ describe('AppComponent LCAM activity feedback', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.activity-toast')?.textContent).toContain('Lead reactivated successfully.');
     expect(dashboard.boards.find((board) => board.id === 'appointments')!.leads[0].leadType).toBe('Reactivated');
-    expect(dashboard.highlightedLeadId).toBeNull();
+    expect(dashboard.highlightedLeadId).toBe(lead.id);
     vi.advanceTimersByTime(4000);
     vi.useRealTimers();
   });

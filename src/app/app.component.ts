@@ -88,27 +88,63 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
         <p class="new-lead-modal__intro">Step 1: Please fill up customer information</p>
         <p class="new-lead-modal__required"><span class="material-symbols-rounded" aria-hidden="true">info</span>All fields are required unless stated “Optional”</p>
         <div class="new-lead-form">
-          <label><span>Title</span><select disabled><option>Mr.</option><option>Ms.</option></select></label>
-          <label><span>Gender</span><select disabled><option>Male</option><option>Female</option></select></label>
-          <label class="new-lead-form__full"><span>First Name</span><input value="John" readonly /></label>
-          <label class="new-lead-form__full"><span>Middle Name</span><input value="Mark" readonly /><span class="new-lead-form__checkbox"><input type="checkbox" disabled /> I do not have middle name <span class="material-symbols-rounded" aria-hidden="true">help</span></span></label>
-          <label class="new-lead-form__full"><span>Last name</span><input value="Doe" readonly /></label>
-          <label><span>Suffix (Optional)</span><select disabled><option>None</option></select></label>
-          <label><span>Birth Date</span><input type="date" value="1989-01-05" readonly /></label>
+          <label class="new-lead-form__static-select"><span>Title</span><select [value]="newLeadTitle" disabled><option>Mr.</option><option>Ms.</option><option>Mrs.</option></select></label>
+          <label class="new-lead-form__static-select"><span>Gender</span><select [value]="newLeadGender" disabled><option>Male</option><option>Female</option></select></label>
+          <label class="new-lead-form__full"><span>First Name</span><input [(ngModel)]="newLeadFirstName" /></label>
+          <label class="new-lead-form__full"><span>Middle Name</span><input [(ngModel)]="newLeadMiddleName" disabled /><span class="new-lead-form__checkbox"><input type="checkbox" [checked]="true" aria-disabled="true" tabindex="-1" (click)="$event.preventDefault()" /> I do not have middle name <span class="material-symbols-rounded" aria-hidden="true">help</span></span></label>
+          <label class="new-lead-form__full"><span>Last name</span><input [(ngModel)]="newLeadLastName" /></label>
+          <label class="new-lead-form__suffix"><span>Suffix (Optional)</span><select [value]="newLeadSuffix" disabled><option>None</option><option>Jr.</option><option>Sr.</option></select></label>
+          <label><span>Birth Date</span><input type="date" [value]="newLeadBirthDate" readonly /></label>
           <div class="new-lead-form__section"><h3>Contact Information</h3><a href="#" (click)="$event.preventDefault()">Why do we need this?</a></div>
-          <label class="new-lead-form__full"><span>Mobile Number</span><input value="+63 9226789012" readonly /><small>It can be used for essential communication related to their insurance coverage only.</small></label>
-          <label class="new-lead-form__full"><span>Email Address</span><input type="email" value="client@email.com" readonly /><small>It can be used to set up the customer portal account later, receive important updates to their policy, exclusive features, and many more.</small></label>
+          <label class="new-lead-form__full"><span>Mobile Number</span><input [value]="newLeadMobileNumber" readonly /><small>It can be used for essential communication related to their insurance coverage only.</small></label>
+          <label class="new-lead-form__full"><span>Email Address</span><input type="email" [value]="newLeadEmailAddress" readonly /><small>It can be used to set up the customer portal account later, receive important updates to their policy, exclusive features, and many more.</small></label>
         </div>
-        <footer><app-button class="new-lead-modal__continue" label="Continue" rightIcon="chevron_right" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" (clicked)="newLeadStep = 2" /></footer>
+        <footer><app-button class="new-lead-modal__continue" label="Continue" rightIcon="chevron_right" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" [disabled]="!newLeadFirstName.trim() || !newLeadLastName.trim()" (clicked)="newLeadStep = 2" /></footer>
         </ng-container>
         <ng-template #sourceStep>
           <p class="new-lead-modal__intro">Step 2: Please input source of lead</p>
           <p class="new-lead-modal__required"><span class="material-symbols-rounded" aria-hidden="true">info</span>All fields are required unless stated “Optional”</p>
           <label class="new-lead-source"><span>Source of Lead</span><tdx-field-control name="new-lead-source" ariaLabel="Source of Lead" label="Select your source of lead" [value]="newLeadSource" [options]="newLeadSourceOptions" trailingIcon="keyboard_arrow_down" [fluid]="true" (valueChange)="newLeadSource = $event" /></label>
-          <footer class="new-lead-modal__step-actions"><app-button label="Back" leftIcon="chevron_left" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Medium" (clicked)="newLeadStep = 1" /><app-button label="Create Lead" rightIcon="chevron_right" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" (clicked)="createNewLead()" /></footer>
+          <ng-container *ngIf="newLeadSource === 'Self-Generated Lead'">
+            <label class="new-lead-source new-lead-source--readonly"><span>Product Interested</span><tdx-field-control name="new-lead-product" ariaLabel="Product Interested" [label]="newLeadProduct" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
+            <label class="new-lead-source new-lead-source--readonly"><span>Manual Source</span><tdx-field-control name="new-lead-manual-source" ariaLabel="Manual Source" [label]="newLeadManualSource" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
+          </ng-container>
+          <ng-container *ngIf="newLeadSource !== 'Self-Generated Lead'">
+            <label class="new-lead-source new-lead-source--readonly"><span>Product Interested</span><tdx-field-control name="new-lead-product" ariaLabel="Product Interested" [label]="newLeadProduct" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
+            <label class="new-lead-source"><span>Referral Date</span><input class="new-lead-source__input" type="date" [value]="newLeadReferralDate" readonly /></label>
+            <label class="new-lead-source"><span>Referrer ID</span><input class="new-lead-source__input" [value]="newLeadReferrerId" readonly /></label>
+            <label class="new-lead-source new-lead-source--readonly"><span>Referrer Name</span><input class="new-lead-source__input" [value]="newLeadReferrerName" disabled /></label>
+            <label class="new-lead-source"><span>Store Name</span><tdx-field-control name="new-lead-store" ariaLabel="Store Name" [label]="newLeadStoreName" [value]="newLeadStoreName" [options]="newLeadStoreOptions" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
+            <label class="new-lead-source new-lead-source--readonly"><span>Store ID</span><input class="new-lead-source__input" [value]="newLeadStoreId" disabled /></label>
+          </ng-container>
+          <footer class="new-lead-modal__step-actions"><app-button label="Back" leftIcon="chevron_left" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Medium" (clicked)="newLeadStep = 1" /><app-button label="Create Lead" rightIcon="chevron_right" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" [disabled]="!newLeadSource" (clicked)="openNewLeadConfirmation()" /></footer>
         </ng-template>
       </div>
     </section>
+    <div *ngIf="newLeadConfirmation" class="confirmation-overlay" role="presentation">
+      <section class="confirmation-dialog" role="alertdialog" aria-modal="true" aria-labelledby="save-lead-title" aria-describedby="save-lead-description">
+        <h2 id="save-lead-title">Save Lead Information</h2>
+        <p id="save-lead-description">Kindly ensure that all the provided information is accurate and correct before saving Lead Information.</p>
+        <footer>
+          <app-button label="Cancel" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="newLeadConfirmation = false" />
+          <app-button label="Proceed" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="confirmCreateNewLead()" />
+        </footer>
+      </section>
+    </div>
+    <div *ngIf="duplicateLeadConfirmation" class="confirmation-overlay duplicate-lead-overlay" role="presentation">
+      <section class="confirmation-dialog duplicate-lead-dialog" role="alertdialog" aria-modal="true" aria-labelledby="existing-lead-title" aria-describedby="existing-lead-description">
+        <button type="button" class="duplicate-lead-dialog__close" aria-label="Close duplicate lead warning" (click)="duplicateLeadConfirmation = false">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+        <img class="duplicate-lead-dialog__warning" src="assets/icons/duplicate-lead-warning.svg" alt="" aria-hidden="true" />
+        <h2 id="existing-lead-title">This customer already exists</h2>
+        <p id="existing-lead-description">A lead with the same customer details already exists in your account.<br />You can still create a new lead.</p>
+        <footer class="duplicate-lead-dialog__actions">
+          <app-button label="View Existing Lead" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Medium" (clicked)="viewExistingLead()" />
+          <app-button label="Create New Lead" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" (clicked)="confirmDuplicateLead()" />
+        </footer>
+      </section>
+    </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: false
@@ -131,11 +167,39 @@ export class AppComponent implements AfterViewInit {
   userType: 'Agency' | 'Banca' = this.readUserType();
   passwordVisible = false;
   newLeadStep: 1 | 2 = 1;
-  newLeadSource = '';
+  newLeadConfirmation = false;
+  duplicateLeadConfirmation = false;
+  newLeadTitle = 'Mr.';
+  newLeadGender = 'Male';
+  newLeadFirstName = '';
+  newLeadMiddleName = '';
+  newLeadNoMiddleName = false;
+  newLeadLastName = '';
+  newLeadSuffix = 'None';
+  newLeadBirthDate = '1989-01-05';
+  newLeadMobileNumber = '+63 9226789012';
+  newLeadEmailAddress = 'client@email.com';
+  newLeadSource = 'Self-Generated Lead';
+  newLeadProduct = 'Dream Builder';
+  newLeadManualSource = 'Self-Generated Lead';
+  newLeadReferralDate = new Date().toISOString().slice(0, 10);
+  newLeadReferrerId = '54321';
+  newLeadReferrerName = 'Juan Dela Cruz';
+  newLeadStoreName = '198 G. ARANETA AVENUE';
+  newLeadStoreId = '384768653';
   readonly newLeadSourceOptions: readonly TdxFieldControlOption[] = [
     'Alternative Distribution', 'CBG (Consumer Banking Group)', 'CLC (Consumer Lending Cluster)',
     'PBG (Partnership Banking Group)', 'Self-Generated Lead'
   ].map((label) => ({ label, value: label }));
+  readonly newLeadProductOptions: readonly TdxFieldControlOption[] = [
+    { label: 'Dream Builder', value: 'Dream Builder' }
+  ];
+  readonly newLeadManualSourceOptions: readonly TdxFieldControlOption[] = [
+    'Self-Generated Lead', 'Referral', 'Digital'
+  ].map((label) => ({ label, value: label }));
+  readonly newLeadStoreOptions: readonly TdxFieldControlOption[] = [
+    { label: '198 G. ARANETA AVENUE', value: '198 G. ARANETA AVENUE' }
+  ];
   draftSiOpen = false;
   proposalOpen = false;
   contactDrawerOpen = false;
@@ -190,7 +254,7 @@ export class AppComponent implements AfterViewInit {
 
   openNewLead(): void {
     this.newLeadStep = 1;
-    this.newLeadSource = '';
+    this.newLeadSource = 'Self-Generated Lead';
     this.newLeadOpen = true;
   }
 
@@ -226,7 +290,49 @@ export class AppComponent implements AfterViewInit {
   createNewLead(): void {
     this.newLeadOpen = false;
     this.newLeadStep = 1;
-    this.dashboard?.highlightLeadCard('lead-1');
+    const newLead = this.dashboard?.addNewLead({
+      name: [this.newLeadFirstName, this.newLeadMiddleName, this.newLeadLastName].filter(Boolean).join(' '),
+      gender: this.newLeadGender as 'Male' | 'Female',
+      source: this.newLeadSource || 'Self-Generated Leads'
+    });
+    if (newLead) {
+      this.dashboard?.highlightLeadCard(newLead.id);
+      this.dashboard?.startHighlightTimer();
+    }
+    this.changeDetectorRef.markForCheck();
+  }
+
+  openNewLeadConfirmation(): void {
+    this.newLeadConfirmation = true;
+    this.changeDetectorRef.markForCheck();
+  }
+
+  confirmCreateNewLead(): void {
+    const name = [this.newLeadFirstName, this.newLeadMiddleName, this.newLeadLastName].filter(Boolean).join(' ');
+    if (this.dashboard?.hasLeadWithName(name)) {
+      this.newLeadConfirmation = false;
+      this.duplicateLeadConfirmation = true;
+      this.changeDetectorRef.markForCheck();
+      return;
+    }
+    this.newLeadConfirmation = false;
+    this.createNewLead();
+  }
+
+  confirmDuplicateLead(): void {
+    this.duplicateLeadConfirmation = false;
+    this.createNewLead();
+  }
+
+  viewExistingLead(): void {
+    const name = [this.newLeadFirstName, this.newLeadMiddleName, this.newLeadLastName].filter(Boolean).join(' ');
+    const existingLead = this.dashboard?.findLeadByName(name);
+    this.duplicateLeadConfirmation = false;
+    this.newLeadOpen = false;
+    if (existingLead) {
+      this.openLead(existingLead);
+      this.openDraftProposalInfo();
+    }
     this.changeDetectorRef.markForCheck();
   }
 
@@ -515,6 +621,7 @@ export class AppComponent implements AfterViewInit {
 
     this.selectedLead = updatedLead;
     this.pendingHighlightLeadId = updatedLead.id;
+    this.dashboard?.highlightLeadCard(updatedLead.id);
     this.activityToastMessage = message;
     if (this.proposalOpen) {
       this.navigation.showLeadFlow();
@@ -537,7 +644,7 @@ export class AppComponent implements AfterViewInit {
   closeLead(): void {
     const returnToApplications = this.showApplications;
     if (this.pendingHighlightLeadId) {
-      this.dashboard?.highlightLeadCard(this.pendingHighlightLeadId);
+      this.dashboard?.startHighlightTimer();
       this.pendingHighlightLeadId = null;
     }
     this.selectedLead = null;

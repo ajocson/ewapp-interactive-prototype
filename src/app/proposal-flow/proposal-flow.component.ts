@@ -29,6 +29,11 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
   get editMode(): boolean {
     return this.leadInfoEditMode;
   }
+
+  get isConvertedApplication(): boolean {
+    return this.submittedApplicationContext
+      || (this.lead.activities?.some((activity) => activity.label === 'Application Created') ?? false);
+  }
   @Output() closed = new EventEmitter<void>();
   @Output() routeTabChange = new EventEmitter<LeadRecordTab>();
   @Output() contactRequired = new EventEmitter<void>();
@@ -73,6 +78,7 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
   ];
 
   firstName = 'John Mark';
+  middleName = '';
   title = 'Mr.';
   noMiddleName = true;
   lastName = 'Doe';
@@ -165,25 +171,45 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
   }
 
   saveLeadInfo(): void {
-    this.journeyState.saveInfo(this.lead.leadId, { firstName: this.firstName, title: this.title, noMiddleName: this.noMiddleName, lastName: this.lastName, gender: this.gender, birthDate: this.birthDate, suffix: this.suffix, mobileNumber: this.mobileNumber, emailAddress: this.emailAddress, sourceOfLead: this.sourceOfLead });
+    this.journeyState.saveInfo(this.lead.leadId, { firstName: this.firstName, middleName: this.middleName, title: this.title, noMiddleName: this.noMiddleName, lastName: this.lastName, gender: this.gender, birthDate: this.birthDate, suffix: this.suffix, mobileNumber: this.mobileNumber, emailAddress: this.emailAddress, sourceOfLead: this.sourceOfLead });
     this.editMode = false;
     this.stage = 'individual-summary';
     this.changeDetectorRef.markForCheck();
   }
 
   private restoreLeadJourney(): void {
+    const systemTransactionLabels = this.lead.activities
+      ?.filter((activity) => activity.category === 'system')
+      .map((activity) => activity.label) ?? [];
+    const hasRecordProgress = systemTransactionLabels.some((label) =>
+      ['Draft SI', 'Draft SI Generated', 'CSA Created', 'SI Generated', 'Proposal Created'].includes(label)
+    );
+    const hasCompletedCsa = systemTransactionLabels.some((label) =>
+      ['CSA Created', 'SI Generated', 'Proposal Created'].includes(label)
+    );
+    if (hasRecordProgress) {
+      this.journeyState.unlock(this.lead.leadId, 'profile');
+      this.journeyState.unlock(this.lead.leadId, 'proposals');
+    }
+    if (hasCompletedCsa) this.journeyState.markRiskProfileCalculated(this.lead.leadId);
+    const nameParts = this.lead.name.trim().split(/\s+/).filter(Boolean);
+    const firstName = nameParts.shift() ?? '';
+    const lastName = nameParts.pop() ?? '';
+    this.firstName = firstName;
+    this.middleName = nameParts.join(' ');
+    this.lastName = lastName;
+    this.title = this.lead.gender === 'Female' ? 'Ms.' : 'Mr.';
+    this.gender = this.lead.gender;
+    this.noMiddleName = this.middleName.length === 0;
+    this.sourceOfLead = this.lead.source;
     const info = this.journeyState.info(this.lead.leadId);
     if (!info) return;
-    this.firstName = String(info['firstName'] ?? this.firstName); this.title = String(info['title'] ?? this.title); this.noMiddleName = Boolean(info['noMiddleName']); this.lastName = String(info['lastName'] ?? this.lastName); this.gender = String(info['gender'] ?? this.gender); this.birthDate = String(info['birthDate'] ?? this.birthDate); this.suffix = String(info['suffix'] ?? this.suffix); this.mobileNumber = String(info['mobileNumber'] ?? this.mobileNumber); this.emailAddress = String(info['emailAddress'] ?? this.emailAddress); this.sourceOfLead = String(info['sourceOfLead'] ?? this.sourceOfLead);
+    this.firstName = String(info['firstName'] ?? this.firstName); this.middleName = String(info['middleName'] ?? this.middleName); this.title = String(info['title'] ?? this.title); this.noMiddleName = Boolean(info['noMiddleName']); this.lastName = String(info['lastName'] ?? this.lastName); this.gender = String(info['gender'] ?? this.gender); this.birthDate = String(info['birthDate'] ?? this.birthDate); this.suffix = String(info['suffix'] ?? this.suffix); this.mobileNumber = String(info['mobileNumber'] ?? this.mobileNumber); this.emailAddress = String(info['emailAddress'] ?? this.emailAddress); this.sourceOfLead = String(info['sourceOfLead'] ?? this.sourceOfLead);
   }
 
   openProductPicker(): void {
     if (!this.hasBeenContacted()) {
       this.contactRequired.emit();
-      return;
-    }
-    if (this.requiresAppointmentBeforeProposal) {
-      this.appointmentRequired.emit();
       return;
     }
     this.productPickerOpen = true;
@@ -194,10 +220,6 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
   createProposalFromRiskProfile(): void {
     if (!this.hasBeenContacted()) {
       this.contactRequired.emit();
-      return;
-    }
-    if (this.requiresAppointmentBeforeProposal) {
-      this.appointmentRequired.emit();
       return;
     }
     this.selectedProduct = 'Dream Builder';
@@ -273,11 +295,7 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
     const hasAppointment = Boolean(this.lead.appointment);
     return hasAppointment
       ? latestPresentation >= latestAppointment
-      : this.lead.tags[0]?.label !== 'Appointment Canceled';
-  }
-
-  private get requiresAppointmentBeforeProposal(): boolean {
-    return this.lead.tags[0]?.label === 'Contacted' && !this.lead.appointment;
+      : this.lead.tags[0]?.label === 'Follow-up';
   }
 
   private latestActivityTimestamp(label: string): number {

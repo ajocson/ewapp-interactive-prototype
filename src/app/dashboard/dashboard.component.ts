@@ -262,6 +262,44 @@ export class DashboardComponent implements OnDestroy {
     this.leadOpened.emit(lead);
   }
 
+  addNewLead(details: { name: string; gender: 'Male' | 'Female'; source: string; referrer?: string }): LeadCardData {
+    const createdAt = new Date();
+    const id = `manual-${createdAt.getTime()}`;
+    const newLead: LeadCardData = {
+      id,
+      leadId: this.createLeadId(id),
+      name: details.name,
+      gender: details.gender,
+      createdAt: this.formatCreatedAt(createdAt),
+      createdAtTimestamp: createdAt.getTime(),
+      lastActivityTimestamp: createdAt.getTime(),
+      leadType: 'Inactive',
+      aging: '0d',
+      source: details.source,
+      referrer: details.referrer ?? 'Manual Entry',
+      productInterested: 'Dream Builder',
+      tags: [{ label: 'New Lead', tone: 'primary' }],
+      activities: [this.createActivity('sales', 'New Lead Created', createdAt)]
+    };
+    const leadBoard = this.boards.find((board) => board.id === 'lead');
+    if (leadBoard) leadBoard.leads = [newLead, ...leadBoard.leads];
+    this.selectedLead = newLead;
+    this.changeDetectorRef.markForCheck();
+    return newLead;
+  }
+
+  hasLeadWithName(name: string): boolean {
+    const normalizedName = name.trim().toLocaleLowerCase();
+    return this.boards.flatMap((board) => board.leads)
+      .some((lead) => lead.name.trim().toLocaleLowerCase() === normalizedName);
+  }
+
+  findLeadByName(name: string): LeadCardData | null {
+    const normalizedName = name.trim().toLocaleLowerCase();
+    return this.boards.flatMap((board) => board.leads)
+      .find((lead) => lead.name.trim().toLocaleLowerCase() === normalizedName) ?? null;
+  }
+
   findLeadByLeadId(leadId: string): LeadCardData | null {
     return this.boards.flatMap(board => board.leads).find(lead => lead.leadId === leadId) ?? null;
   }
@@ -594,19 +632,20 @@ export class DashboardComponent implements OnDestroy {
     return updatedLead;
   }
 
-  private highlightLead(leadId: string): void {
+  highlightLeadCard(leadId: string): void {
     if (this.highlightTimer) clearTimeout(this.highlightTimer);
     this.highlightedLeadId = leadId;
     this.changeDetectorRef.markForCheck();
+  }
+
+  startHighlightTimer(): void {
+    if (!this.highlightedLeadId) return;
+    if (this.highlightTimer) clearTimeout(this.highlightTimer);
     this.highlightTimer = setTimeout(() => {
       this.highlightedLeadId = null;
       this.highlightTimer = undefined;
       this.changeDetectorRef.markForCheck();
     }, 3000);
-  }
-
-  highlightLeadCard(leadId: string): void {
-    this.highlightLead(leadId);
   }
 
   private createBoards(): readonly LeadBoardData[] {

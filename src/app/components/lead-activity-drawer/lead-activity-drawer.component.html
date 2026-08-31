@@ -48,8 +48,8 @@
           </ng-template>
         </dl>
 
-        <div *ngIf="isApplicationLead && fromApplicationsPage" class="drawer-lead-actions drawer-lead-actions--application">
-          <app-button class="drawer-full-button" label="View Application" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="viewApplication()" />
+        <div *ngIf="isApplicationLead" class="drawer-lead-actions drawer-lead-actions--application">
+          <app-button class="drawer-full-button" label="View Applications" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="viewApplication()" />
           <app-button class="drawer-edit" label="Generate/View Full Proposal" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Transparent" [size]="buttonSize.Small" (clicked)="requestApplicationProposal()" />
         </div>
         <div *ngIf="!isApplicationLead && !isLeadPaused" class="drawer-lead-actions">
@@ -261,7 +261,7 @@
 
           <ng-container *ngIf="isMeeting && !followUpRecording">
             <div class="drawer-meeting-actions">
-              <lam-action-card title="Proceed to Application" description="Start the client’s application process." icon="contract_edit" tone="success" (activated)="proceedToApplication()" />
+              <lam-action-card title="Proceed to Application" description="Start the client’s application process." icon="contract_edit" tone="info" (activated)="proceedToApplication()" />
               <lam-action-card title="For Follow-up" description="Mark this lead for follow-up and add any relevant notes." icon="chat_add_on" tone="brand" (activated)="openFollowUpForm()" />
             </div>
           </ng-container>

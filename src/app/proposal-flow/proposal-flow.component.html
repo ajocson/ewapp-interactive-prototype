@@ -56,10 +56,10 @@
       <ng-template #proposalRecordWorkspace>
       <header class="lead-page-header">
         <div class="lead-page-header__row">
-          <nav class="proposal-breadcrumbs" aria-label="Breadcrumb"><button type="button" class="proposal-breadcrumbs__link" (click)="closed.emit()">LCAM</button><span class="material-symbols-rounded" aria-hidden="true">chevron_right</span><strong>Mr. {{ lead.name }}</strong></nav>
-          <div class="lead-page-header__actions"><app-button *ngIf="routeTab !== 'applications'" label="Record Activity" [variant]="TdxButtonVariant.Primary" [emphasis]="TdxButtonEmphasis.Outline" [size]="TdxButtonSize.Small" ariaControls="lead-activity-drawer" (clicked)="activityRequested.emit()" /></div>
+          <nav class="proposal-breadcrumbs" aria-label="Breadcrumb"><button type="button" class="proposal-breadcrumbs__link" (click)="closed.emit()">LCAM</button><span class="material-symbols-rounded" aria-hidden="true">chevron_right</span><strong>{{ lead.gender === 'Female' ? 'Ms.' : 'Mr.' }} {{ lead.name }}</strong></nav>
+          <div class="lead-page-header__actions"><app-button *ngIf="routeTab !== 'applications' && !isConvertedApplication" label="Record Activity" [variant]="TdxButtonVariant.Primary" [emphasis]="TdxButtonEmphasis.Outline" [size]="TdxButtonSize.Small" ariaControls="lead-activity-drawer" (clicked)="activityRequested.emit()" /></div>
         </div>
-        <h1 id="proposal-lead-title">Mr. {{ lead.name }}</h1><small>Date Created: Jul 23, 2026 2:29 PM</small>
+        <h1 id="proposal-lead-title">{{ lead.gender === 'Female' ? 'Ms.' : 'Mr.' }} {{ lead.name }}</h1><small>Date Created: {{ lead.createdAt }}</small>
       </header>
 
       <nav class="profile-tabs" aria-label="Lead record sections">
@@ -134,7 +134,7 @@
             <p class="form-message"><span class="material-symbols-rounded" aria-hidden="true">info</span>Complete all details to proceed with the CSA/Sales process.</p>
             <fieldset class="form-section"><legend>Basic Information</legend><div class="form-grid">
               <label>First Name<input name="firstName" [(ngModel)]="firstName"></label><label class="compact-field">Title<select name="title" [(ngModel)]="title"><option>Mr.</option><option>Ms.</option></select></label>
-              <label>Middle Name<input value="No Middle Name" disabled></label><label>Gender<input name="gender" [(ngModel)]="gender" disabled></label>
+              <label>Middle Name<input [value]="noMiddleName ? 'No Middle Name' : middleName" disabled></label><label>Gender<input name="gender" [(ngModel)]="gender" disabled></label>
               <label class="checkbox-field"><input type="checkbox" name="noMiddleName" [(ngModel)]="noMiddleName">No Middle Name</label><span></span>
               <label>Last Name<input name="lastName" [(ngModel)]="lastName"></label><label>Birth Date<span class="date-field"><input name="birthDate" [(ngModel)]="birthDate"><span class="material-symbols-rounded" aria-hidden="true">calendar_today</span></span></label>
               <label>Suffix<select name="suffix" [(ngModel)]="suffix"><option>No suffix</option></select></label>
@@ -148,9 +148,9 @@
 
         <article class="proposal-card proposal-card--summary" *ngIf="routeTab !== 'applications' && stage === 'individual-summary'">
           <h2>Individual Information <button type="button" class="summary-more" aria-label="More information actions"><span class="material-symbols-rounded" aria-hidden="true">more_vert</span></button></h2>
-          <section><h3>Basic Information</h3><dl><div><dt>Full Name</dt><dd>Mr. John Mark Doe</dd></div><div><dt>Birthdate</dt><dd>January 1, 1989</dd></div><div><dt>Gender</dt><dd>Male</dd></div><div><dt>Age</dt><dd>37</dd></div></dl></section>
+          <section><h3>Basic Information</h3><dl><div><dt>Full Name</dt><dd>{{ lead.gender === 'Female' ? 'Ms.' : 'Mr.' }} {{ lead.name }}</dd></div><div><dt>Birthdate</dt><dd>January 1, 1989</dd></div><div><dt>Gender</dt><dd>{{ lead.gender }}</dd></div><div><dt>Age</dt><dd>37</dd></div></dl></section>
           <section><h3>Contact Information</h3><dl><div><dt>Mobile Number</dt><dd>+639 171234567</dd></div><div><dt>Email Address</dt><dd>test@email.com</dd></div></dl></section>
-          <section class="source-summary"><dl><div><dt>Source of Lead</dt><dd>Referral (Center of Influence)</dd></div></dl></section>
+          <section class="source-summary"><dl><div><dt>Product Interested</dt><dd>{{ lead.productInterested }}</dd></div><div><dt>Source of Lead</dt><dd>{{ lead.source }}</dd></div><div><dt>Referrer Name</dt><dd>{{ lead.referrer }}</dd></div></dl></section>
           <footer class="summary-actions"><div><button type="button" class="proposal-button proposal-button--primary" (click)="requestAddProfile()">Continue and Add Profile (CSA)</button><button type="button" class="proposal-button proposal-button--outline">Generate Draft Sales Illustration <small>New</small></button></div><button type="button" class="quick-quotes-link">or view all generated Quick Quotes</button></footer>
         </article>
 

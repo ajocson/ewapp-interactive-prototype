@@ -245,6 +245,10 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - Lead Overview values use regular font weight.
 - The Figma-matched Unable to Set Appointment state hides unrelated drawer actions while open, uses a 100px notes field, and provides equal-width Cancel/Save buttons. Cancel Appointment also uses equal-width action buttons.
 - Standard drawer notes fields are 20px taller than the earlier baseline.
+- New Lead Step 1 Continue is disabled until First Name and Last Name are filled.
+- New Lead Step 2 conditionally shows source-specific fields. Self-Generated Lead keeps Product Interested and Manual Source static; other sources show Product Interested, Referral Date, Referrer ID/Name, Store Name, and Store ID.
+- New Lead static fields retain their chevrons without rendering dropdown menus. Store Name uses the existing TDX field-control dropdown; Referrer Name and Store ID use the shared disabled-field styling.
+- Focused app-component tests pass: **1 file, 17 tests passing**.
 
 Verified on **2026-08-29**:
 
@@ -266,7 +270,7 @@ Verified on **2026-08-29**:
 - The component-style error budget is 20 kB so the current proposal styles remain deployable while the existing 8 kB warnings are still reported.
 - No backend, authentication, API calls, persistence, or real customer data. Reloading resets all state.
 - `LeadDetailComponent` exists and is tested but is not reachable from the root application flow.
-- Several visible controls remain prototype-only/no-op, including most navigation destinations, New Lead, sidebar Draft SI, global Search, Edit Lead Information, Proceed to Application, and some proposal actions. Applications navigation and its local filtering flow are implemented.
+- Several visible controls remain prototype-only/no-op, including most navigation destinations, sidebar Draft SI, global Search, Edit Lead Information, Proceed to Application, and some proposal actions. New Lead now supports the local conditional form flow and board insertion. Applications navigation and its local filtering flow are implemented.
 - In the contacted LCAM drawer, “Generate Full Proposal” is wired to the existing lead journey; application-context drawer actions route to their corresponding record pages.
 - Activity records and appointment/lead mutations are entirely in memory and reset on reload. Initial timelines are synthesized from sample stage/state data rather than loaded from a durable event source.
 - The filter UI offers `Re-endorsed`, but `LeadState` and the sample data do not currently represent that state, so the option cannot match a lead.
@@ -282,7 +286,7 @@ Verified on **2026-08-29**:
 
 There are no explicit `TODO`/`FIXME` markers in the inspected source. The following gaps are inferred directly from unhandled controls and current implementation:
 
-- Wire or intentionally remove global Search, Edit Lead Information, Proceed to Application, Convert to Application, New Lead, sidebar Draft SI, and other remaining presentation-only controls.
+- Wire or intentionally remove global Search, Edit Lead Information, Proceed to Application, Convert to Application, sidebar Draft SI, and other remaining presentation-only controls.
 - Complete product-picker category filtering plus the intended Rider and downstream proposal/application interactions if those are required beyond the current local walkthrough.
 - Reconcile the `Re-endorsed` filter option with the `LeadState` model or remove it if that state is not required.
 - Decide whether `LeadDetailComponent` should be connected or retired.

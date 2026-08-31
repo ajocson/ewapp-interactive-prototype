@@ -21,9 +21,24 @@ describe('ProposalFlowComponent', () => {
 
   it('starts with the Figma sample data prefilled', () => {
     expect(fixture.componentInstance.stage).toBe('individual-form');
-    expect(fixture.componentInstance.firstName).toBe('John Mark');
+    expect(fixture.componentInstance.firstName).toBe('John');
+    expect(fixture.componentInstance.middleName).toBe('Mark');
     expect(fixture.componentInstance.mobileNumber).toBe('171234567');
     expect(fixture.componentInstance.emailAddress).toBe('test@email.com');
+  });
+
+  it('hides Record Activity for converted application leads on every record tab', () => {
+    const component = fixture.componentInstance;
+    component.lead = {
+      ...component.lead,
+      activities: [{ id: 'application-created', category: 'sales', label: 'Application Created', dateLabel: 'Aug 31, 2026', timeLabel: '2:00 PM', occurredAtTimestamp: Date.now() }]
+    };
+
+    for (const tab of ['info', 'profile', 'proposals', 'applications'] as const) {
+      component.routeTab = tab;
+      fixture.detectChanges();
+      expect(fixture.nativeElement.textContent).not.toContain('Record Activity');
+    }
   });
 
   it('moves through the CSA stages to the risk result', () => {
@@ -111,6 +126,27 @@ describe('ProposalFlowComponent', () => {
     expect(component.productPickerOpen).toBe(false);
   });
 
+  it('allows a contacted lead without an appointment to create a proposal', () => {
+    const component = fixture.componentInstance;
+    component.lead = { ...component.lead, tags: [{ label: 'Contacted', tone: 'success' }] };
+    component.goTo('risk-profile');
+    component.openProductPicker();
+
+    expect(component.productPickerOpen).toBe(true);
+  });
+
+  it('does not allow a contacted lead without an appointment to convert to application', () => {
+    const component = fixture.componentInstance;
+    component.lead = { ...component.lead, tags: [{ label: 'Contacted', tone: 'success' }] };
+    let appointmentRequired = false;
+    component.appointmentRequired.subscribe(() => appointmentRequired = true);
+
+    component.convertToApplication();
+
+    expect(appointmentRequired).toBe(true);
+    expect(component.isTabEnabled('applications')).toBe(false);
+  });
+
   it('closes the product picker without leaving the current lead page', () => {
     const component = fixture.componentInstance;
     component.lead = { ...component.lead, tags: [{ label: 'Contacted', tone: 'success' }], appointment: { date: '2026-08-29', dateLabel: 'August 29, 2026', startMinutes: 840, endMinutes: 900, timeLabel: '2:00 PM-3:00 PM' } };
@@ -130,6 +166,7 @@ describe('ProposalFlowComponent', () => {
     component.lead = {
       ...component.lead,
       tags: [{ label: 'Appointment Scheduled', tone: 'success' }],
+      appointment: { date: '2026-08-29', dateLabel: 'August 29, 2026', startMinutes: 840, endMinutes: 900, timeLabel: '2:00 PM-3:00 PM' },
       activities: [{
         id: 'contacted',
         category: 'sales',
@@ -197,6 +234,7 @@ describe('ProposalFlowComponent', () => {
     component.lead = {
       ...component.lead,
       tags: [{ label: 'Appointment Scheduled', tone: 'success' }],
+      appointment: { date: '2026-08-29', dateLabel: 'August 29, 2026', startMinutes: 840, endMinutes: 900, timeLabel: '2:00 PM-3:00 PM' },
       activities: [{
         id: 'presentation-completed',
         category: 'sales',
@@ -260,6 +298,18 @@ describe('ProposalFlowComponent', () => {
       appointment: undefined,
       activities: [{ id: 'follow-up-canceled', category: 'sales', label: 'Appointment Canceled', dateLabel: 'Aug 29, 2026', timeLabel: '2:00 PM', occurredAtTimestamp: Date.now() }]
     };
+    component.appointmentRequired.subscribe(() => appointmentRequired = true);
+
+    component.convertToApplication();
+
+    expect(appointmentRequired).toBe(false);
+    expect(component.applicationOpen).toBe(true);
+  });
+
+  it('allows Follow-up conversion when no follow-up appointment is scheduled', () => {
+    const component = fixture.componentInstance;
+    let appointmentRequired = false;
+    component.lead = { ...component.lead, tags: [{ label: 'Follow-up', tone: 'success' }], appointment: undefined };
     component.appointmentRequired.subscribe(() => appointmentRequired = true);
 
     component.convertToApplication();
