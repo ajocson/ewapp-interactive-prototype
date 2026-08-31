@@ -248,6 +248,7 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - New Lead Step 1 Continue is disabled until First Name and Last Name are filled.
 - New Lead Step 2 conditionally shows source-specific fields. Self-Generated Lead keeps Product Interested and Manual Source static; other sources show Product Interested, Referral Date, Referrer ID/Name, Store Name, and Store ID.
 - New Lead static fields retain their chevrons without rendering dropdown menus. Store Name uses the existing TDX field-control dropdown; Referrer Name and Store ID use the shared disabled-field styling.
+- Successful New Lead creation shows the existing success toast with the exact message `Lead successfully created` and dismisses it after four seconds.
 - Focused app-component tests pass: **1 file, 17 tests passing**.
 
 Verified on **2026-08-29**:

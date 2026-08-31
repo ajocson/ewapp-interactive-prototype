@@ -298,6 +298,7 @@ export class AppComponent implements AfterViewInit {
     if (newLead) {
       this.dashboard?.highlightLeadCard(newLead.id);
       this.dashboard?.startHighlightTimer();
+      this.showActivityToast('Lead successfully created');
     }
     this.changeDetectorRef.markForCheck();
   }
