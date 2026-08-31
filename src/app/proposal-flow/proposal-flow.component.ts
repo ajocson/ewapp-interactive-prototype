@@ -182,6 +182,10 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
       this.contactRequired.emit();
       return;
     }
+    if (this.lead.tags[0]?.label === 'Contacted' && !this.lead.appointment) {
+      this.appointmentRequired.emit();
+      return;
+    }
     this.productPickerOpen = true;
     this.selectedProduct = '';
     this.productCategory = 'all';
@@ -190,6 +194,10 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
   createProposalFromRiskProfile(): void {
     if (!this.hasBeenContacted()) {
       this.contactRequired.emit();
+      return;
+    }
+    if (this.lead.tags[0]?.label === 'Contacted' && !this.lead.appointment) {
+      this.appointmentRequired.emit();
       return;
     }
     this.selectedProduct = 'Dream Builder';

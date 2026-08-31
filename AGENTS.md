@@ -170,6 +170,7 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - Contacted leads can record an unsuccessful scheduling attempt through the Figma-matched **Unable to Set Appointment** form. Saving keeps the lead in Contacted, records `Contacted - Unsuccessful Appointment` in Sales Activities, and shows the standard activity-recorded toast.
 - Follow-Up leads can proceed to application, schedule a follow-up appointment, or record updates. A scheduled follow-up presents an information banner, a follow-up appointment card, notes, and a Presentation Completed action. Completing that presentation restores the three follow-up actions, allowing repeated follow-up scheduling and update recording.
 - Follow-up conversion checks the current active appointment, not historical appointment records. A new appointment requires a newer Presentation Completed activity; clicking Convert to Application before that reopens the Follow-up drawer.
+- Contacted leads without an active appointment cannot create a proposal from the Risk Profile flow; this prerequisite is scoped only to that Contacted scenario.
 - Park and Drop are available across boards, use local state-specific SVG assets, require confirmation, append activities, and preserve the lead's board stage. Drop uses a fixed list of supported reasons. Parked leads can be reactivated across boards and use the `Reactivated` state; dropped leads do not expose reactivation.
 - Successful lifecycle actions keep the drawer open and show a responsive-width success message. Closing the drawer then highlights the affected card at the top of its board.
 - The timeline uses chronological Sales Activities and System Transactions. Initial sample histories reflect the required journey for their board/state, including the lead creation, contact, appointment/meeting/follow-up, park/drop/reactivate, and SI/CSA/proposal system records that apply to that lead.
@@ -191,6 +192,7 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - Risk Profile can open a product-picker overlay. A selected product opens the local Dream Builder proposal draft: the Figma-matched Info tab includes proposal, lead, and insured information, while Benefits includes premium-calculation fields. Save Proposal is enabled, confirms before saving, then shows the Figma-matched saved-proposal summary and a success toast that auto-hides after four seconds.
 - The saved-proposal summary exposes Generate Sales Illustration. That action opens a dedicated viewer with Back to Proposal, a download link, and the local `assets/si-page-1.png` Dream Builder sample rendered at the source document width; returning restores the summary.
 - Application-context Proposal pages treat the proposal and sales illustration as already converted and hide Generate Sales Illustration and Convert to Application. Application record pages open in For Upload and hide Record Activity and Submit to Underwriting.
+- Application summary cards use the `In Progress` status label.
 - The product picker presents seven local sample products, permits exactly one selection, and uses the secondary/magenta selection treatment. Its category tabs currently change only the active visual state; they do not filter the product grid.
 - Record Activity side drawer with shared TDX tab, tag, button, stepper, section-message, and action-card components.
 - Responsive layouts for narrower viewports.
@@ -221,7 +223,7 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 
 ## Current Project State
 
-- Verified on **2026-08-29** after the latest Applications/Follow-up conversion updates.
+- Verified on **2026-08-31** after the latest Applications/Follow-up conversion updates.
 
 ### Latest EWApp prototype update — 2026-08-29
 

@@ -70,7 +70,7 @@ describe('ProposalFlowComponent', () => {
 
   it('uses the Figma product-selection flow before showing a proposal', () => {
     const component = fixture.componentInstance;
-    component.lead = { ...component.lead, tags: [{ label: 'Contacted', tone: 'success' }] };
+    component.lead = { ...component.lead, tags: [{ label: 'Contacted', tone: 'success' }], appointment: { date: '2026-08-29', dateLabel: 'August 29, 2026', startMinutes: 840, endMinutes: 900, timeLabel: '2:00 PM-3:00 PM' } };
 
     component.goTo('risk-profile');
     component.openProductPicker();
@@ -113,7 +113,7 @@ describe('ProposalFlowComponent', () => {
 
   it('closes the product picker without leaving the current lead page', () => {
     const component = fixture.componentInstance;
-    component.lead = { ...component.lead, tags: [{ label: 'Contacted', tone: 'success' }] };
+    component.lead = { ...component.lead, tags: [{ label: 'Contacted', tone: 'success' }], appointment: { date: '2026-08-29', dateLabel: 'August 29, 2026', startMinutes: 840, endMinutes: 900, timeLabel: '2:00 PM-3:00 PM' } };
     component.goTo('risk-profile');
     component.openProductPicker();
     fixture.detectChanges();
