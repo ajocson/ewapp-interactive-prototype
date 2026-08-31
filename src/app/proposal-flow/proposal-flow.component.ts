@@ -182,7 +182,7 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
       this.contactRequired.emit();
       return;
     }
-    if (this.lead.tags[0]?.label === 'Contacted' && !this.lead.appointment) {
+    if (this.requiresAppointmentBeforeProposal) {
       this.appointmentRequired.emit();
       return;
     }
@@ -196,7 +196,7 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
       this.contactRequired.emit();
       return;
     }
-    if (this.lead.tags[0]?.label === 'Contacted' && !this.lead.appointment) {
+    if (this.requiresAppointmentBeforeProposal) {
       this.appointmentRequired.emit();
       return;
     }
@@ -271,7 +271,13 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
     const latestAppointment = this.latestActivityTimestamp('Appointment Scheduled');
     const latestPresentation = this.latestActivityTimestamp('Presentation Completed');
     const hasAppointment = Boolean(this.lead.appointment);
-    return hasAppointment ? latestPresentation >= latestAppointment : true;
+    return hasAppointment
+      ? latestPresentation >= latestAppointment
+      : this.lead.tags[0]?.label !== 'Appointment Canceled';
+  }
+
+  private get requiresAppointmentBeforeProposal(): boolean {
+    return this.lead.tags[0]?.label === 'Contacted' && !this.lead.appointment;
   }
 
   private latestActivityTimestamp(label: string): number {

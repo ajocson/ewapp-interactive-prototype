@@ -1,8 +1,24 @@
-<button type="button" class="lead-card" [class.lead-card--highlighted]="highlighted" (click)="selected.emit(lead)">
+<button type="button" class="lead-card" [class.lead-card--highlighted]="highlighted" [class.lead-card--not-contacted-48-hours]="lead.notContactedFor48Hours" (click)="selected.emit(lead)">
   <span class="lead-card__identity">
     <small class="lead-card__id">{{ lead.leadId }}</small>
     <strong>{{ displayName }}</strong>
     <small>{{ lead.createdAt }}</small>
+  </span>
+
+  <span *ngIf="lead.notContactedFor48Hours" class="lead-card__contact-alert" aria-label="Not contacted within 48 hours">
+    <span class="material-symbols-rounded" aria-hidden="true">person_alert</span>
+  </span>
+
+  <span *ngIf="lead.notContactedFor30Days" class="lead-card__contact-alert lead-card__contact-alert--error" aria-label="Not contacted within 30 days">
+    <span class="material-symbols-rounded" aria-hidden="true">person_cancel</span>
+  </span>
+
+  <span *ngIf="lead.autoDroppedAfter90Days" class="lead-card__contact-alert lead-card__contact-alert--neutral" aria-label="Auto-dropped after 90 days without progress">
+    <span class="material-symbols-rounded" aria-hidden="true">person_off</span>
+  </span>
+
+  <span *ngIf="lead.autoParkedAfter30Days" class="lead-card__auto-parked-indicator" aria-label="Auto-parked after 30 days without an appointment">
+    <span class="material-symbols-rounded" aria-hidden="true">person_alert</span>
   </span>
 
   <span class="lead-card__tags" *ngIf="visibleTags.length">

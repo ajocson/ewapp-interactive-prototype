@@ -145,6 +145,10 @@ describe('DashboardComponent sidebar', () => {
     const cancelled = component.cancelLeadAppointment('contacted-1');
     expect(cancelled?.tags).toEqual([{ label: 'Appointment Canceled', tone: 'danger' }]);
 
+    const scheduledAgain = component.scheduleLeadAppointment('contacted-1', appointment);
+    expect(scheduledAgain?.tags[0]).toEqual({ label: 'Appointment Scheduled', tone: 'success' });
+    expect(scheduledAgain?.appointment).toEqual(appointment);
+
     const rescheduledAgain = component.rescheduleLeadAppointment('contacted-1', appointment);
     const meeting = component.completeLeadAppointment('contacted-1', 'Client attended.');
     expect(meeting?.tags).toEqual([{ label: 'Meeting', tone: 'success' }]);
@@ -226,7 +230,7 @@ describe('DashboardComponent sidebar', () => {
     expect(lead.activities.find((activity) => activity.label === 'Appointment Scheduled')?.timeLabel).toBe('2:00-3:00 PM');
   });
 
-  it('provides one parked and one dropped lead on every board with the board status tag', () => {
+  it('provides parked and dropped leads on every board with the board status tag', () => {
     const expectedStatusByBoard: Record<string, string> = {
       lead: 'New Lead',
       contacted: 'Contacted',
@@ -238,10 +242,37 @@ describe('DashboardComponent sidebar', () => {
     for (const board of fixture.componentInstance.boards) {
       const parked = board.leads.filter((lead) => lead.leadType === 'Parked');
       const dropped = board.leads.filter((lead) => lead.leadType === 'Dropped');
-      expect(parked).toHaveLength(1);
-      expect(dropped).toHaveLength(1);
-      expect(parked[0].tags[0].label).toBe(expectedStatusByBoard[board.id]);
+      expect(parked).toHaveLength(['lead', 'contacted'].includes(board.id) ? 2 : 1);
+      expect(dropped).toHaveLength(['meetings', 'follow-up'].includes(board.id) ? 2 : 1);
+      expect(parked.every((lead) => lead.tags[0].label === expectedStatusByBoard[board.id])).toBe(true);
       expect(dropped[0].tags[0].label).toBe(expectedStatusByBoard[board.id]);
+    }
+  });
+
+  it('includes the contacted lead auto-parked after 30 days without an appointment', () => {
+    const contactedBoard = fixture.componentInstance.boards.find((board) => board.id === 'contacted');
+    const autoParkedLead = contactedBoard?.leads.find((lead) => lead.autoParkedAfter30Days);
+
+    expect(autoParkedLead).toMatchObject({
+      leadType: 'Parked',
+      aging: '1d',
+      tatAging: '30d',
+      tags: [{ label: 'Contacted', tone: 'success' }]
+    });
+  });
+
+  it('includes the Lead-board sample not contacted for 30 days and parked', () => {
+    const leadBoard = fixture.componentInstance.boards.find((board) => board.id === 'lead');
+    const lead = leadBoard?.leads.find((candidate) => candidate.notContactedFor30Days);
+
+    expect(lead).toMatchObject({ leadType: 'Parked', aging: '30d', tatAging: '30d' });
+  });
+
+  it('includes auto-dropped 90-day samples in Meetings and Follow-Up', () => {
+    for (const boardId of ['meetings', 'follow-up']) {
+      const board = fixture.componentInstance.boards.find((candidate) => candidate.id === boardId);
+      const lead = board?.leads.find((candidate) => candidate.autoDroppedAfter90Days);
+      expect(lead).toMatchObject({ leadType: 'Dropped', aging: '1d', tatAging: '91d' });
     }
   });
 

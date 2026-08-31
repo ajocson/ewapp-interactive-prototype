@@ -104,4 +104,30 @@ describe('LeadCardComponent', () => {
     expect(fixture.nativeElement.querySelector('.lead-card__tags').textContent).toContain('Appointment Scheduled');
     expect(fixture.nativeElement.querySelector('.lead-card__tags').textContent).not.toContain('Aug 24, 2026');
   });
+
+  it('shows the parked lead indicator for a lead auto-parked after 30 days', () => {
+    fixture.componentRef.setInput('lead', {
+      ...fixture.componentInstance.lead,
+      leadType: 'Parked',
+      autoParkedAfter30Days: true
+    });
+    fixture.detectChanges();
+
+    const indicator = fixture.nativeElement.querySelector('.lead-card__auto-parked-indicator') as HTMLElement;
+    expect(indicator.getAttribute('aria-label')).toBe('Auto-parked after 30 days without an appointment');
+    expect(indicator.querySelector('.material-symbols-rounded')?.textContent?.trim()).toBe('person_alert');
+  });
+
+  it('shows the error person-cancel indicator for a lead not contacted for 30 days', () => {
+    fixture.componentRef.setInput('lead', {
+      ...fixture.componentInstance.lead,
+      leadType: 'Parked',
+      notContactedFor30Days: true
+    });
+    fixture.detectChanges();
+
+    const indicator = fixture.nativeElement.querySelector('.lead-card__contact-alert--error') as HTMLElement;
+    expect(indicator.getAttribute('aria-label')).toBe('Not contacted within 30 days');
+    expect(indicator.querySelector('.material-symbols-rounded')?.textContent?.trim()).toBe('person_cancel');
+  });
 });

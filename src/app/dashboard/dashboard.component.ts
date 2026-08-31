@@ -316,9 +316,12 @@ export class DashboardComponent implements OnDestroy {
   scheduleLeadAppointment(leadId: string, appointment: LeadAppointment): LeadCardData | null {
     const contactedBoard = this.boards.find((board) => board.id === 'contacted');
     const appointmentsBoard = this.boards.find((board) => board.id === 'appointments');
-    const lead = contactedBoard?.leads.find((candidate) => candidate.id === leadId);
+    const contactedLead = contactedBoard?.leads.find((candidate) => candidate.id === leadId);
+    const appointmentBoardLead = appointmentsBoard?.leads.find((candidate) => candidate.id === leadId && candidate.tags[0]?.label === 'Appointment Canceled');
+    const sourceBoard = contactedLead ? contactedBoard : appointmentBoardLead ? appointmentsBoard : undefined;
+    const lead = contactedLead ?? appointmentBoardLead;
 
-    if (!contactedBoard || !appointmentsBoard || !lead) return null;
+    if (!contactedBoard || !appointmentsBoard || !sourceBoard || !lead) return null;
 
     const activityDate = new Date();
     const scheduledLead: LeadCardData = {
@@ -343,8 +346,8 @@ export class DashboardComponent implements OnDestroy {
       ]
     };
 
-    contactedBoard.leads = contactedBoard.leads.filter((candidate) => candidate.id !== leadId);
-    appointmentsBoard.leads = [scheduledLead, ...appointmentsBoard.leads];
+    sourceBoard.leads = sourceBoard.leads.filter((candidate) => candidate.id !== leadId);
+    appointmentsBoard.leads = [scheduledLead, ...appointmentsBoard.leads.filter((candidate) => candidate.id !== leadId)];
     this.selectedLead = scheduledLead;
     this.changeDetectorRef.markForCheck();
     return scheduledLead;
@@ -634,7 +637,11 @@ export class DashboardComponent implements OnDestroy {
       createdAt: Date,
       productInterested = 'Dream Builder',
       referrer = referrers[id.split('').reduce((total, character) => total + character.charCodeAt(0), 0) % referrers.length],
-      appointmentDetails?: LeadAppointment
+      appointmentDetails?: LeadAppointment,
+      notContactedFor48Hours = false,
+      notContactedFor30Days = false,
+      autoParkedAfter30Days = false,
+      autoDroppedAfter90Days = false
     ): LeadCardData => {
       const leadType = typeof state === 'boolean' ? (state ? 'Active' : 'Inactive') : state;
 
@@ -647,8 +654,12 @@ export class DashboardComponent implements OnDestroy {
         createdAtTimestamp: createdAt.getTime(),
         lastActivityTimestamp: createdAt.getTime(),
         leadType,
-        aging: '1d',
-        tatAging: '3d',
+        aging: notContactedFor30Days ? '30d' : notContactedFor48Hours ? '2d' : '1d',
+        tatAging: autoDroppedAfter90Days ? '91d' : notContactedFor30Days || autoParkedAfter30Days ? '30d' : '3d',
+        notContactedFor48Hours,
+        notContactedFor30Days,
+        autoParkedAfter30Days,
+        autoDroppedAfter90Days,
         source,
         referrer,
         productInterested,
@@ -666,6 +677,8 @@ export class DashboardComponent implements OnDestroy {
           lead('lead-1', 'John Mark Doe', 'Male', false, 'Leads from store', [newLead], createdOn(3, 9, 15), 'Dream Builder', 'Maxwell Anderson'),
           lead('lead-2', 'Alice Johnson Smith', 'Female', false, 'Facebook ESTA', [newLead], createdOn(2, 13, 30)),
           lead('lead-3', 'Michael Lee Thompson', 'Male', false, 'EasyWay', [newLead], createdOn(1, 10, 45)),
+          lead('lead-48-hours', 'James Anderson', 'Male', false, 'Leads from store', [newLead], new Date(2026, 0, 30, 9, 15), 'Dream Builder', 'Maxwell Anderson', undefined, true),
+          lead('lead-30-days', 'John Mark Doe', 'Male', 'Parked', 'Leads from store', [newLead], new Date(2026, 0, 5, 9, 15), 'Dream Builder', 'Maxwell Anderson', undefined, false, true),
           lead('lead-parked', 'Patricia Anne Reyes', 'Female', 'Parked', 'Referral', [newLead], new Date(2026, 0, 31, 15)),
           lead('lead-dropped', 'Daniel Joseph Cruz', 'Male', 'Dropped', 'Digital', [newLead], new Date(2026, 0, 30, 10, 30))
         ]
@@ -675,6 +688,7 @@ export class DashboardComponent implements OnDestroy {
         title: 'Contacted',
         leads: [
           lead('contacted-1', 'Alex Morgan', 'Male', true, 'ESRA (NTB)', [contacted], createdOn(4, 11, 20)),
+          lead('contacted-auto-parked', 'John Mark Doe', 'Male', 'Parked', 'Leads from store', [contacted], new Date(2026, 0, 5, 9, 15), 'Dream Builder', 'Maxwell Anderson', undefined, false, false, true),
           lead('contacted-parked', 'Sophia Elaine Gomez', 'Female', 'Parked', 'Referral', [contacted], new Date(2026, 0, 31, 13, 15)),
           lead('contacted-dropped', 'Benjamin Luis Santos', 'Male', 'Dropped', 'Digital', [contacted], new Date(2026, 0, 30, 9, 45))
         ]
@@ -734,6 +748,7 @@ export class DashboardComponent implements OnDestroy {
             sampleAppointment
           ),
           lead('meeting-parked', 'Isabella Rose Mendoza', 'Female', 'Parked', 'Referral', [meeting], new Date(2026, 0, 31, 16, 15)),
+          lead('meeting-auto-dropped', 'John Mark Doe', 'Male', 'Dropped', 'Leads from store', [meeting], new Date(2026, 0, 5, 9, 15), 'Dream Builder', 'Maxwell Anderson', undefined, false, false, false, true),
           lead('meeting-dropped', 'Liam Anthony Garcia', 'Male', 'Dropped', 'Digital', [meeting], new Date(2026, 0, 30, 15, 30))
         ]
       },
@@ -743,6 +758,7 @@ export class DashboardComponent implements OnDestroy {
         leads: [
           lead('follow-up-1', 'Alex Morgan Smith', 'Male', true, 'Leads from store', [followUp], createdOn(8, 16)),
           lead('follow-up-2', 'Emily Jane Cooper', 'Female', true, 'EWA Social Media', [followUp], createdOn(7, 10, 30)),
+          lead('follow-up-auto-dropped', 'John Mark Doe', 'Male', 'Dropped', 'Leads from store', [followUp], new Date(2026, 0, 5, 9, 15), 'Dream Builder', 'Maxwell Anderson', undefined, false, false, false, true),
           lead('follow-up-3', 'Michael Lee Johnson', 'Male', true, 'CBG', [followUp], createdOn(6, 14, 15)),
           lead('follow-up-4', 'John Mark Doe', 'Male', true, 'CLC', [followUp], createdOn(5, 9)),
           lead('follow-up-7', 'Robert James Wilson', 'Male', true, 'Self-Generated Leads', [followUp], createdOn(4, 15, 45)),

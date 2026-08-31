@@ -44,6 +44,10 @@ export interface LeadCardData {
   leadType: LeadState;
   aging: string;
   tatAging?: string;
+  notContactedFor48Hours?: boolean;
+  notContactedFor30Days?: boolean;
+  autoParkedAfter30Days?: boolean;
+  autoDroppedAfter90Days?: boolean;
   source: string;
   referrer: string;
   productInterested: string;

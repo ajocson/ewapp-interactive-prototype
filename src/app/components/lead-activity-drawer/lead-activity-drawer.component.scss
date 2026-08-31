@@ -241,7 +241,20 @@
 }
 
 .drawer-appointment-action--cancel footer {
-  grid-template-columns: repeat(2, minmax(var(--space-none), 1fr));
+  display: flex;
+  align-items: center;
+}
+
+.drawer-appointment-action--cancel footer .drawer-action-button:last-child {
+  width: auto;
+  justify-self: end;
+  flex: 0 0 auto;
+}
+
+.drawer-appointment-action--cancel footer .drawer-action-button:first-child {
+  width: 100%;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .drawer-follow-up {

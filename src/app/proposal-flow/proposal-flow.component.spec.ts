@@ -234,6 +234,40 @@ describe('ProposalFlowComponent', () => {
     expect(component.applicationOpen).toBe(false);
   });
 
+  it('requires a new appointment before converting after an appointment is canceled', () => {
+    const component = fixture.componentInstance;
+    let appointmentRequired = false;
+    component.lead = {
+      ...component.lead,
+      tags: [{ label: 'Appointment Canceled', tone: 'danger' }],
+      appointment: undefined,
+      activities: [{ id: 'canceled', category: 'sales', label: 'Appointment Canceled', dateLabel: 'Aug 29, 2026', timeLabel: '2:00 PM', occurredAtTimestamp: Date.now() }]
+    };
+    component.appointmentRequired.subscribe(() => appointmentRequired = true);
+
+    component.convertToApplication();
+
+    expect(appointmentRequired).toBe(true);
+    expect(component.applicationOpen).toBe(false);
+  });
+
+  it('allows Follow-up conversion after its appointment is canceled', () => {
+    const component = fixture.componentInstance;
+    let appointmentRequired = false;
+    component.lead = {
+      ...component.lead,
+      tags: [{ label: 'Follow-up', tone: 'success' }],
+      appointment: undefined,
+      activities: [{ id: 'follow-up-canceled', category: 'sales', label: 'Appointment Canceled', dateLabel: 'Aug 29, 2026', timeLabel: '2:00 PM', occurredAtTimestamp: Date.now() }]
+    };
+    component.appointmentRequired.subscribe(() => appointmentRequired = true);
+
+    component.convertToApplication();
+
+    expect(appointmentRequired).toBe(false);
+    expect(component.applicationOpen).toBe(true);
+  });
+
   it('shows the Figma For Upload state after completing the demo application', () => {
     const component = fixture.componentInstance;
     component.applicationOpen = true;

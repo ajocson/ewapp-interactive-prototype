@@ -101,6 +101,24 @@
       </section>
 
       <section *ngIf="isLeadPaused && !actionMode" class="drawer-state-summary" aria-labelledby="paused-lead-title">
+        <app-section-message
+          *ngIf="lead.autoParkedAfter30Days"
+          appearance="warning"
+          icon="warning"
+          description="This lead was auto-parked after 30 days without an appointment. Reactivate to continue."
+        />
+        <app-section-message
+          *ngIf="lead.notContactedFor30Days"
+          appearance="error"
+          icon="warning"
+          description="This lead has not been contacted for 30 days. Contact the client as soon as possible."
+        />
+        <app-section-message
+          *ngIf="lead.autoDroppedAfter90Days"
+          appearance="error"
+          icon="warning"
+          description="This lead was auto-dropped after 90 days without progress. Reactivate the lead to continue."
+        />
         <img class="drawer-state-summary__icon" [src]="pausedStateIcon" alt="" aria-hidden="true" />
         <div class="drawer-state-summary__copy">
           <h3 id="paused-lead-title">{{ pausedStateTitle }}</h3>
@@ -180,6 +198,12 @@
           <app-stepper *ngIf="!followUpRecording" [steps]="activitySteps" [currentIndex]="currentStepIndex" orientation="horizontal" />
 
           <ng-container *ngIf="!isContacted && !isAppointmentSet && !isMeeting && !isFollowUp">
+            <app-section-message
+              *ngIf="lead.notContactedFor48Hours"
+              appearance="warning"
+              icon="warning"
+              description="This client has not been contacted within 48 hours. Contact the client and update the call outcome result."
+            />
             <label class="drawer-notes">
               <span>Notes (Optional)</span>
               <textarea rows="4" [(ngModel)]="activityNotes" placeholder="Add notes about your conversation"></textarea>

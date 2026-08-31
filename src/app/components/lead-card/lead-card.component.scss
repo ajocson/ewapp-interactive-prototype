@@ -4,6 +4,7 @@
 }
 
 .lead-card {
+  position: relative;
   display: flex;
   width: 100%;
   flex-direction: column;
@@ -21,6 +22,38 @@
     border-color var(--motion-duration-fast) var(--motion-easing-standard),
     box-shadow var(--motion-duration-fast) var(--motion-easing-standard),
     transform var(--motion-duration-fast) var(--motion-easing-standard);
+}
+
+.lead-card__contact-alert {
+  position: absolute;
+  top: var(--lead-card-padding);
+  right: var(--lead-card-padding);
+  display: grid;
+  width: 16px;
+  height: 16px;
+  place-items: center;
+  color: var(--stepper-icon-warning);
+}
+
+.lead-card__contact-alert .material-symbols-rounded { font-size: 16px; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20; }
+
+.lead-card__contact-alert--error { color: var(--color-red-600); }
+.lead-card__contact-alert--neutral { color: var(--text-neutral-primary); }
+
+.lead-card__auto-parked-indicator {
+  position: absolute;
+  top: var(--lead-card-padding);
+  right: var(--lead-card-padding);
+  display: grid;
+  width: 16px;
+  height: 16px;
+  place-items: center;
+  color: var(--stepper-icon-warning);
+}
+
+.lead-card__auto-parked-indicator .material-symbols-rounded {
+  font-size: 16px;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
 }
 
 .lead-card:hover {

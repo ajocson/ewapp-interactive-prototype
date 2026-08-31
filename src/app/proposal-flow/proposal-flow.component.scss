@@ -124,6 +124,7 @@
   cursor: pointer;
 }
 
+
 .application-summary-card__heading { display: flex; align-items: center; justify-content: space-between; }
 .application-summary-card__heading > strong { font-family: var(--typography-font-family-paragraph); font-size: var(--paragraph-md-text-size); font-weight: var(--font-weight-bold); line-height: var(--paragraph-md-line-height); }
 .application-summary-card__heading > span { display: flex; align-items: center; gap: var(--space-md); }

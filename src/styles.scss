@@ -233,6 +233,10 @@
   --section-message-icon-info: var(--color-cyan-600);
   --section-message-bg-success: var(--color-green-100);
   --section-message-icon-success: var(--color-green-800);
+  --section-message-bg-warning: #fdebd0;
+  --section-message-icon-warning: #b37112;
+  --section-message-bg-error: var(--color-red-100);
+  --section-message-icon-error: var(--color-red-700);
   --section-message-text: var(--text-neutral-primary);
   --search-field-height: var(--field-height);
   --search-field-content-gap: var(--space-sm);
@@ -935,6 +939,7 @@ select {
 .drawer-state-summary__copy p { font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
 .drawer-state-summary__button { display: block; width: calc(var(--space-7xl) * 3); max-width: 100%; }
 .drawer-state-summary__button .tdx-button { width: 100%; }
+.drawer-state-summary app-section-message { align-self: stretch; text-align: left; }
 .drawer-full-button { display: flex; width: 100%; }
 .drawer-full-button .tdx-button { width: 100%; }
 .drawer-contact__button .tdx-button, .drawer-action-button .tdx-button { width: 100%; }
