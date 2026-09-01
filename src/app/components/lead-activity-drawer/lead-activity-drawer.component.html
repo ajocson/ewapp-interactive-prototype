@@ -49,8 +49,8 @@
         </dl>
 
         <div *ngIf="isApplicationLead" class="drawer-lead-actions drawer-lead-actions--application">
-          <app-button class="drawer-full-button" label="View Applications" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="viewApplication()" />
-          <app-button class="drawer-edit" label="Generate/View Full Proposal" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Transparent" [size]="buttonSize.Small" (clicked)="requestApplicationProposal()" />
+          <app-button class="drawer-full-button" label="View Applications" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="canOpenApplicationActions && viewApplication()" />
+          <app-button class="drawer-edit" label="Generate/View Full Proposal" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Transparent" [size]="buttonSize.Small" (clicked)="canOpenApplicationActions && requestApplicationProposal()" />
         </div>
         <div *ngIf="!isApplicationLead && !isLeadPaused" class="drawer-lead-actions">
           <app-button

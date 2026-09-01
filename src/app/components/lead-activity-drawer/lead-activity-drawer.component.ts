@@ -198,6 +198,10 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
       || (this.lead.activities?.some((activity) => activity.label === 'Application Created') ?? false);
   }
 
+  get canOpenApplicationActions(): boolean {
+    return !new Set(['Withdrawn', 'Postponed', 'Unapproved']).has(this.statusTag);
+  }
+
   get statusVariant(): TdxTagVariant {
     const tone = this.lead.tags[0]?.tone;
     return tone ? tone as TdxTagVariant : (this.statusTag === 'New Lead' ? TdxTagVariant.Primary : TdxTagVariant.Success);

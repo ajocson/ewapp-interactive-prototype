@@ -34,6 +34,29 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
     return this.submittedApplicationContext
       || (this.lead.activities?.some((activity) => activity.label === 'Application Created') ?? false);
   }
+
+  get isApplicationSubmitted(): boolean {
+    return this.lead.tags?.some((tag) => tag.label === 'Application Submitted') ?? false;
+  }
+
+  get applicationStatusLabel(): string {
+    const applicationStatus = this.lead.tags?.find((tag) => ['Conditionally Accepted', 'Approved'].includes(tag.label))?.label;
+    if (applicationStatus === 'Approved') return 'Accepted';
+    if (applicationStatus) return applicationStatus;
+    return this.isApplicationSubmitted || this.applicationUnderwritingSubmitted
+      ? 'Pending On Underwriting Handling'
+      : 'In Progress';
+  }
+
+  get applicationStatusVariant(): TdxTagVariant {
+    return this.applicationStatusLabel === 'Conditionally Accepted'
+      ? TdxTagVariant.Primary
+      : TdxTagVariant.Success;
+  }
+
+  get isPolicyReleased(): boolean {
+    return this.lead.tags?.some((tag) => tag.label === 'Policy Released') ?? false;
+  }
   @Output() closed = new EventEmitter<void>();
   @Output() routeTabChange = new EventEmitter<LeadRecordTab>();
   @Output() contactRequired = new EventEmitter<void>();

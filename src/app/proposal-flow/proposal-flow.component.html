@@ -14,7 +14,7 @@
       <ng-container *ngIf="applicationOpen && applicationDetailOpen; else proposalRecordWorkspace">
         <header class="application-page-header">
           <nav class="application-breadcrumbs" aria-label="Breadcrumb"><button type="button" class="proposal-breadcrumbs__link" (click)="closed.emit()">LCAM</button><span class="material-symbols-rounded" aria-hidden="true">chevron_right</span><button type="button" class="proposal-breadcrumbs__link" (click)="backToApplicationCard()">Mr. {{ lead.name }}</button><span class="material-symbols-rounded" aria-hidden="true">chevron_right</span><strong>Dream Builder</strong></nav>
-          <div class="application-page-header__summary"><h1>Dream Builder</h1><span>Application No. 810000106051</span><app-tag [label]="applicationUnderwritingSubmitted ? 'Pending On Underwriting Handling' : 'In Progress'" [variant]="TdxTagVariant.Success" [emphasis]="TdxTagEmphasis.Subtle" /></div>
+          <div class="application-page-header__summary"><h1>Dream Builder</h1><span>Application No. 810000106051</span><app-tag [label]="applicationStatusLabel" [variant]="applicationStatusVariant" [emphasis]="TdxTagEmphasis.Subtle" /></div>
         </header>
         <section class="application-workspace" [class.application-workspace--complete]="applicationComplete" aria-label="Dream Builder application">
           <aside class="application-progress" aria-label="Application steps">
@@ -69,9 +69,9 @@
       </nav>
 
       <div class="proposal-content">
-        <article class="application-summary-card" *ngIf="routeTab === 'applications'">
+        <article class="application-summary-card" *ngIf="routeTab === 'applications' && !isPolicyReleased">
           <button type="button" class="application-summary-card__link" (click)="openApplicationDetail()">
-          <span class="application-summary-card__heading"><strong>Dream Builder</strong><span><app-tag label="In Progress" [variant]="TdxTagVariant.Success" [emphasis]="TdxTagEmphasis.Subtle" /><span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span></span></span>
+          <span class="application-summary-card__heading"><strong>Dream Builder</strong><span><app-tag [label]="applicationStatusLabel" [variant]="applicationStatusVariant" [emphasis]="TdxTagEmphasis.Subtle" /><span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span></span></span>
             <span class="application-summary-card__details">
               <span><small>Policy Number</small><strong>810000106193</strong></span>
               <span><small>Years Payable</small><strong>10 years</strong></span>

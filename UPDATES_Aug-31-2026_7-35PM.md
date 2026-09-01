@@ -11,11 +11,13 @@
 - Product Interested is static; Store Name uses the existing TDX dropdown. Referrer Name and Store ID use the shared disabled-field appearance.
 - Existing confirmation, duplicate-lead, and board-add flows are unchanged.
 - Successful lead creation now shows the toast `Lead successfully created` for four seconds using the existing toast component.
+- In the Applications drawer, `Withdrawn`, `Postponed`, and `Unapproved` keep normal enabled-looking buttons, but their View Applications and Generate/View Full Proposal buttons no longer redirect or trigger actions.
 
 ## Validation
 
 - Focused app-component test run: **1 file, 17 tests passing**.
 - `git diff --check` passes.
+- Focused drawer/app-component test run: **2 files, 24 tests passing**.
 
 ## Files Updated
 
