@@ -13,6 +13,10 @@
 - Scoped Park Lead and Drop Lead actions to the Overview tab.
 - Updated Drop Lead activity details to include the selected reason, descriptions, and optional notes. Expanded drop notes preserve the requested line breaks and remain collapsed by default.
 - After a canceled Follow-Up receives a new update, its lead card and drawer tag return to `Follow-up`.
+- Updated Grace Kelly's Applications Activity Timeline with realistic, varied dates and times while preserving the existing activity sequence and flows.
+- For Grace Kelly, Appointment Canceled now uses the same scheduled appointment as Appointment Rescheduled because the canceled appointment is the one being rescheduled.
+- Removed Grace Kelly's sample Dropped Lead and Application Start activities from the timeline.
+- Kept Policy Released in System Transactions and placed it after Underwriting Ongoing as the final transaction.
 
 ## Verification
 

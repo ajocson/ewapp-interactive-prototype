@@ -240,6 +240,14 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 
 ## Current Project State
 
+### Latest Applications timeline update — 2026-09-01
+
+- Grace Kelly's Applications Activity Timeline uses varied, realistic sample dates and times; this is display-only sample data and does not change any user flow.
+- Grace Kelly's Appointment Canceled and Appointment Rescheduled records share the same scheduled appointment date/time.
+- Grace Kelly's timeline excludes the sample Dropped Lead and Application Start records.
+- Grace Kelly's System Transactions include Underwriting Ongoing immediately before Policy Released, with Policy Released as the final transaction.
+- Preserve these Applications timeline distinctions when editing the drawer; do not generalize Grace Kelly-only sample corrections to other leads without an explicit requirement.
+
 - Verified on **2026-09-01** after the latest timeline, proposal-navigation, Drop Lead, and drawer updates.
 
 ### Latest EWApp prototype update — 2026-08-29

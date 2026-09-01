@@ -676,31 +676,64 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
     const dateLabel = 'February 01, 2026';
     const timeLabel = '9:00 AM';
     const baseTimestamp = this.lead.createdAtTimestamp;
+    const graceKellyDates = [
+      '2026-02-01T08:30:00', '2026-02-01T09:10:00', '2026-02-01T10:00:00',
+      '2026-02-02T14:00:00', '2026-02-03T14:00:00', '2026-02-04T14:00:00',
+      '2026-02-05T11:30:00', '2026-02-09T15:30:00', '2026-02-10T10:15:00',
+      '2026-02-12T16:00:00', '2026-02-13T09:20:00', '2026-02-16T14:30:00',
+      '2026-02-20T15:45:00', '2026-02-21T11:00:00', '2026-03-05T09:30:00',
+      '2026-03-12T16:15:00', '2026-03-13T09:00:00', '2026-03-13T09:10:00',
+      '2026-03-13T09:15:00', '2026-03-13T10:30:00', '2026-03-14T14:00:00',
+      '2026-03-14T14:10:00', '2026-03-15T11:00:00', '2026-03-15T11:10:00',
+      '2026-03-15T11:15:00'
+    ];
+    const isGraceKelly = this.lead.name === 'Grace Kelly';
     const record = (id: string, category: LeadActivityRecord['category'], label: string, offset: number, extra: Partial<LeadActivityRecord> = {}): LeadActivityRecord => ({
       id: `generic-${this.lead.id}-${id}`,
       category,
       label,
-      dateLabel,
-      timeLabel,
-      occurredAtTimestamp: baseTimestamp + offset,
-      recordedDateLabel: dateLabel,
-      recordedTimeLabel: timeLabel,
+      dateLabel: isGraceKelly ? this.formatActivityDate(new Date(graceKellyDates[offset])) : dateLabel,
+      timeLabel: isGraceKelly ? this.formatActivityTime(new Date(graceKellyDates[offset])) : timeLabel,
+      occurredAtTimestamp: isGraceKelly ? new Date(graceKellyDates[offset]).getTime() : baseTimestamp + offset,
+      recordedDateLabel: isGraceKelly ? this.formatActivityDate(new Date(graceKellyDates[offset])) : dateLabel,
+      recordedTimeLabel: isGraceKelly ? this.formatActivityTime(new Date(graceKellyDates[offset])) : timeLabel,
       ...extra
     });
 
+    const appointmentDates = isGraceKelly
+      ? { initial: ['February 03, 2026', '2:00 - 3:00 PM'], rescheduled: ['February 04, 2026', '2:00 - 3:00 PM'], canceled: ['February 05, 2026', '2:00 - 3:00 PM'], presentation: ['February 09, 2026', '3:30 PM'], followUp: ['February 12, 2026', '4:00 - 5:00 PM'], followUpRescheduled: ['February 16, 2026', '2:30 - 3:30 PM'], followUpPresentation: ['February 20, 2026', '3:45 PM'] }
+      : { initial: ['February 02, 2026', '2:00 - 3:00 PM'], rescheduled: ['February 02, 2026', '2:00 - 3:00 PM'], canceled: ['February 02, 2026', '2:00 - 3:00 PM'], presentation: ['February 02, 2026', '3:30 PM'], followUp: ['February 02, 2026', '3:30 PM'], followUpRescheduled: ['February 02, 2026', '3:30 PM'], followUpPresentation: ['February 02, 2026', '3:30 PM'] };
+    const scheduled = (value: readonly string[]): Partial<LeadActivityRecord> => ({ scheduledDateLabel: value[0], scheduledTimeLabel: value[1] });
+
     return [
       record('new-lead', 'sales', 'New Lead Created', 0),
+      record('info-updated', 'sales', 'Leads Info Updated', 1),
       record('contacted', 'sales', 'Contacted', 1, { notes: 'Successfully connected with the client. Discussed their insurance needs.' }),
-      record('appointment', 'sales', 'Appointment Scheduled', 2, { scheduledDateLabel: 'February 02, 2026', scheduledTimeLabel: '2:00 - 3:00 PM' }),
-      record('meeting', 'sales', 'Meeting (Proposal Presented)', 3, { scheduledDateLabel: 'February 02, 2026', scheduledTimeLabel: '3:30 PM', notes: 'Presented the proposal and discussed the recommended coverage.' }),
-      record('application-start', 'system', 'Application Start', 4),
-      record('application-status', 'sales', this.rawStatusTag, 5),
-      record('draft-si', 'system', 'Draft SI Generated', 6),
-      record('csa', 'system', 'CSA Created', 7),
-      record('proposal', 'system', 'Proposal Created', 8),
-      record('si', 'system', 'SI Generated', 9),
-      record('converted', 'system', 'Converted to Application', 10),
-      record('submitted', 'system', 'Application Submitted', 11)
+      record('no-appointment', 'sales', 'Contacted- No Appointment', 2, scheduled(appointmentDates.initial)),
+      record('appointment', 'sales', 'Appointment Scheduled', 3, scheduled(appointmentDates.initial)),
+      record('appointment-rescheduled', 'sales', 'Appointment Rescheduled', 4, { ...scheduled(appointmentDates.rescheduled), notes: 'Client requested to reschedule due to a scheduling conflict. Appointment was rescheduled.' }),
+      record('appointment-canceled', 'sales', 'Appointment Canceled', 5, { ...scheduled(isGraceKelly ? appointmentDates.rescheduled : appointmentDates.canceled), notes: 'Client requested to cancel due to a scheduling conflict. Will reschedule.' }),
+      record('presentation', 'sales', 'Presentation Completed', 6, { ...scheduled(appointmentDates.presentation), notes: 'Presented the proposal and discussed the recommended coverage.' }),
+      record('follow-up', 'sales', 'Follow Up', 7, scheduled(appointmentDates.presentation)),
+      record('follow-up-scheduled', 'sales', 'Follow Up Scheduled', 8, scheduled(appointmentDates.followUp)),
+      record('follow-up-canceled', 'sales', 'Follow Up Canceled', 9, scheduled(appointmentDates.followUp)),
+      record('follow-up-rescheduled', 'sales', 'Follow Up Scheduled', 10, scheduled(appointmentDates.followUpRescheduled)),
+      record('follow-up-presentation', 'sales', 'Follow-up Presentation Completed', 11, scheduled(appointmentDates.followUpPresentation)),
+      record('parked', 'sales', 'Parked Lead', 12, { ...scheduled(appointmentDates.followUpPresentation), notes: 'Client is not ready to proceed at this time and requested to be contacted later.' }),
+      record('reactivated', 'sales', 'Reactivated Lead', 13, scheduled(appointmentDates.followUpPresentation)),
+      ...(isGraceKelly ? [] : [record('dropped', 'sales', 'Dropped Lead', 14, { ...scheduled(appointmentDates.followUpPresentation), notes: 'Client is no longer interested in proceeding with the application.' })]),
+      ...(isGraceKelly ? [] : [record('application-start', 'system', 'Application Start', 15)]),
+      ...(isGraceKelly ? [] : [record('application-status', 'system', this.rawStatusTag, 16)]),
+      record('draft-si', 'system', 'Draft SI Generated', 17),
+      record('csa', 'system', 'CSA Created', 18),
+      record('proposal', 'system', 'Proposal Created', 19),
+      record('si', 'system', 'SI Generated', 20),
+      record('converted', 'system', 'Converted to Application', 21),
+      record('submitted', 'system', 'Application Submitted', 22),
+      ...(isGraceKelly ? [
+        record('underwriting', 'system', 'Underwriting Ongoing', 23),
+        record('application-status', 'system', this.rawStatusTag, 24)
+      ] : [])
     ];
   }
 
@@ -749,6 +782,14 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
       day: '2-digit',
       year: 'numeric'
     });
+  }
+
+  private formatActivityDate(value: Date): string {
+    return value.toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' });
+  }
+
+  private formatActivityTime(value: Date): string {
+    return value.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   }
 
   private toIsoDate(value: Date): string {
