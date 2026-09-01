@@ -60,6 +60,7 @@ export interface LeadFollowUpRecordedEvent {
 export interface LeadFollowUpAppointmentScheduledEvent {
   lead: LeadCardData;
   appointment: LeadAppointment;
+  rescheduled?: boolean;
 }
 
 export interface LeadFollowUpAppointmentCancelledEvent {
@@ -145,6 +146,7 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
   appointmentNotes = '';
   unableToSetAppointmentOpen = false;
   parkNotes = '';
+  dropNotes = '';
   dropReason = '';
   selectedDate = '';
   selectedStartMinutes: number | null = null;
@@ -156,11 +158,11 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
     { label: 'Meeting', number: 3 }
   ];
   readonly dropReasonOptions: readonly TdxFieldControlOption[] = [
-    { label: 'No money', value: 'No money' },
-    { label: 'No time', value: 'No time' },
-    { label: 'Already has insurance', value: 'Already has insurance' },
-    { label: 'Uncontactable', value: 'Uncontactable' },
-    { label: 'Not interested', value: 'Not interested' }
+    { label: 'Affordability / Financial Constraints', value: 'Affordability / Financial Constraints', description: ['No/Lack of Funds', 'Premium Cost Too High'] },
+    { label: 'With Ample Coverage', value: 'With Ample Coverage', description: ['Existing Policy with Company', 'Existing Policy with Other Provider'] },
+    { label: 'No Need or Interest', value: 'No Need or Interest', description: ['Not Interested in Insurance', 'Not a Priority Currently'] },
+    { label: 'Product or Decision Concerns', value: 'Product or Decision Concerns', description: ['Product Does Not Meet Needs', 'Needs More Time to Decide'] },
+    { label: 'Unable to Proceed', value: 'Unable to Proceed', description: ['Uncontactable / No Response', 'Personal Circumstances (Busy, Abroad, Emergency, Health)'] }
   ];
 
   get schedulerTitle(): string {
@@ -189,38 +191,59 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
     return leadDisplayName(this.lead);
   }
 
-  get statusTag(): string {
+  get rawStatusTag(): string {
     return this.lead.tags[0]?.label ?? 'New Lead';
   }
 
+  get statusTag(): string {
+    const tag = this.rawStatusTag;
+    if (tag !== 'Follow-up') return tag;
+    const latestCancellation = this.lead.activities
+      .filter((activity) => activity.label === 'Follow Up Canceled')
+      .at(-1)?.occurredAtTimestamp ?? -Infinity;
+    const latestUpdate = this.lead.activities
+      .filter((activity) => activity.label === 'Follow-up')
+      .at(-1)?.occurredAtTimestamp ?? -Infinity;
+    if (latestCancellation > latestUpdate) return 'Follow-up Mtg. Cancelled';
+    if (this.lead.appointment && this.lead.activities.filter((activity) => activity.label === 'Follow Up Scheduled').length > 1) {
+      return 'Follow-up Mtg. Rescheduled';
+    }
+    if (this.lead.appointment) return 'Follow-up Mtg. Scheduled';
+    return this.lead.activities.some((activity) => activity.label === 'Follow-up Presentation Completed')
+      ? 'Follow-up Mtg. Completed'
+      : tag;
+  }
+
   get isApplicationLead(): boolean {
-    return APPLICATION_STATUS_TAGS.has(this.statusTag)
+    return APPLICATION_STATUS_TAGS.has(this.rawStatusTag)
       || (this.lead.activities?.some((activity) => activity.label === 'Application Created') ?? false);
   }
 
   get canOpenApplicationActions(): boolean {
-    return !new Set(['Withdrawn', 'Postponed', 'Unapproved']).has(this.statusTag);
+    return !new Set(['Withdrawn', 'Postponed', 'Unapproved']).has(this.rawStatusTag);
   }
 
   get statusVariant(): TdxTagVariant {
+    if (this.statusTag === 'Follow-up Mtg. Rescheduled') return TdxTagVariant.Primary;
+    if (this.statusTag === 'Follow-up Mtg. Cancelled') return TdxTagVariant.Danger;
     const tone = this.lead.tags[0]?.tone;
-    return tone ? tone as TdxTagVariant : (this.statusTag === 'New Lead' ? TdxTagVariant.Primary : TdxTagVariant.Success);
+    return tone ? tone as TdxTagVariant : (this.rawStatusTag === 'New Lead' ? TdxTagVariant.Primary : TdxTagVariant.Success);
   }
 
   get isContacted(): boolean {
-    return this.statusTag === 'Contacted';
+    return this.rawStatusTag === 'Contacted';
   }
 
   get isAppointmentSet(): boolean {
-    return APPOINTMENT_STATUS_TAGS.has(this.statusTag);
+    return APPOINTMENT_STATUS_TAGS.has(this.rawStatusTag);
   }
 
   get isMeeting(): boolean {
-    return this.statusTag === 'Meeting';
+    return this.rawStatusTag === 'Meeting';
   }
 
   get isFollowUp(): boolean {
-    return this.statusTag === 'Follow-up';
+    return this.rawStatusTag === 'Follow-up';
   }
 
   get hasFollowUpAppointment(): boolean {
@@ -347,6 +370,7 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
     this.followUpNotes = '';
     this.appointmentNotes = this.lead.appointment?.notes ?? '';
     this.parkNotes = '';
+    this.dropNotes = '';
     this.dropReason = '';
     this.selectedDate = this.lead.appointment?.date ?? '';
     this.selectedStartMinutes = this.lead.appointment?.startMinutes ?? null;
@@ -382,7 +406,7 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
   }
 
   requestPrimaryAction(): void {
-    if (this.statusTag === 'New Lead') {
+    if (this.rawStatusTag === 'New Lead') {
       this.draftSiRequested.emit();
       return;
     }
@@ -470,7 +494,7 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
     };
 
     if (this.schedulerMode === 'follow-up') {
-      this.followUpAppointmentScheduled.emit(event);
+      this.followUpAppointmentScheduled.emit({ ...event, rescheduled: this.rescheduling });
       return;
     }
 
@@ -567,6 +591,7 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
     this.followUpRecording = false;
     this.actionMode = mode;
     this.parkNotes = '';
+    this.dropNotes = '';
     this.dropReason = '';
   }
 
@@ -608,10 +633,20 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
 
     if (!this.actionMode || confirmation !== this.actionMode) return;
 
+    const selectedDropReason = confirmation === 'drop'
+      ? this.dropReasonOptions.find((option) => option.value === this.dropReason)
+      : undefined;
+    const dropReasonDetails = selectedDropReason?.description?.length
+      ? [this.dropReason, ...selectedDropReason.description.map((description) => `-${description}`)].join('\n')
+      : this.dropReason;
+    const dropDetails = this.dropNotes.trim()
+      ? `${dropReasonDetails}\n\n${this.dropNotes.trim()}`
+      : dropReasonDetails;
+
     this.leadStateChanged.emit({
       lead: this.lead,
       state: confirmation === 'park' ? 'Parked' : 'Dropped',
-      details: confirmation === 'park' ? this.parkNotes.trim() : this.dropReason
+      details: confirmation === 'park' ? this.parkNotes.trim() : dropDetails
     });
     this.stateConfirmation = null;
     this.changeDetectorRef.markForCheck();
@@ -658,8 +693,8 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
       record('contacted', 'sales', 'Contacted', 1, { notes: 'Successfully connected with the client. Discussed their insurance needs.' }),
       record('appointment', 'sales', 'Appointment Scheduled', 2, { scheduledDateLabel: 'February 02, 2026', scheduledTimeLabel: '2:00 - 3:00 PM' }),
       record('meeting', 'sales', 'Meeting (Proposal Presented)', 3, { scheduledDateLabel: 'February 02, 2026', scheduledTimeLabel: '3:30 PM', notes: 'Presented the proposal and discussed the recommended coverage.' }),
-      record('application-start', 'sales', 'Application Start', 4),
-      record('application-status', 'sales', this.statusTag, 5),
+      record('application-start', 'system', 'Application Start', 4),
+      record('application-status', 'sales', this.rawStatusTag, 5),
       record('draft-si', 'system', 'Draft SI Generated', 6),
       record('csa', 'system', 'CSA Created', 7),
       record('proposal', 'system', 'Proposal Created', 8),

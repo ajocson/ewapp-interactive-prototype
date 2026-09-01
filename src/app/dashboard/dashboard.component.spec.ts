@@ -177,7 +177,7 @@ describe('DashboardComponent sidebar', () => {
     expect(followUp?.tags).toEqual([{ label: 'Follow-up', tone: 'success' }]);
     expect(component.boards.find((board) => board.id === 'meetings')?.leads.some((lead) => lead.id === 'meeting-1')).toBe(false);
     expect(component.filteredBoards.find((board) => board.id === 'follow-up')?.leads[0]).toEqual(followUp);
-    expect(followUp?.activities.at(-1)).toMatchObject({ category: 'sales', label: 'Follow up created', notes: 'Call again next Tuesday.' });
+    expect(followUp?.activities.at(-1)).toMatchObject({ category: 'sales', label: 'Follow Up', notes: 'Call again next Tuesday.' });
   });
 
   it('keeps follow-up appointments and updates in the Follow-Up board', () => {
@@ -195,21 +195,21 @@ describe('DashboardComponent sidebar', () => {
     const scheduled = component.scheduleFollowUpAppointment(lead.id, appointment);
     expect(scheduled?.tags[0]).toEqual({ label: 'Follow-up', tone: 'success' });
     expect(component.boards.find((board) => board.id === 'follow-up')!.leads[0].id).toBe(lead.id);
-    expect(scheduled?.activities.at(-1)).toMatchObject({ label: 'Appointment Scheduled', notes: appointment.notes });
+    expect(scheduled?.activities.at(-1)).toMatchObject({ label: 'Follow Up Scheduled', notes: appointment.notes });
 
     const cancelled = component.cancelFollowUpAppointment(lead.id, 'Client requested a later date.');
     expect(cancelled?.appointment).toBeUndefined();
     expect(cancelled?.tags).toEqual([{ label: 'Follow-up', tone: 'success' }]);
-    expect(cancelled?.activities.at(-1)).toMatchObject({ label: 'Appointment Canceled', notes: 'Client requested a later date.' });
+    expect(cancelled?.activities.at(-1)).toMatchObject({ label: 'Follow Up Canceled', notes: 'Client requested a later date.' });
 
     component.scheduleFollowUpAppointment(lead.id, appointment);
     const completed = component.completeFollowUpAppointment(lead.id, 'Appointment result recorded.');
     expect(completed?.appointment).toBeUndefined();
     expect(completed?.tags).toEqual([{ label: 'Follow-up', tone: 'success' }]);
-    expect(completed?.activities.at(-1)).toMatchObject({ label: 'Presentation Completed', notes: 'Appointment result recorded.' });
+    expect(completed?.activities.at(-1)).toMatchObject({ label: 'Follow-up Presentation Completed', notes: 'Appointment result recorded.' });
 
     const updated = component.recordLeadUpdate(lead.id, 'Client prefers an afternoon call.');
-    expect(updated?.activities.at(-1)).toMatchObject({ label: 'Follow up updated', notes: 'Client prefers an afternoon call.' });
+    expect(updated?.activities.at(-1)).toMatchObject({ label: 'Follow-up', notes: 'Client prefers an afternoon call.' });
   });
 
   it('seeds Follow-Up leads with an appointment awaiting presentation completion', () => {
@@ -219,13 +219,13 @@ describe('DashboardComponent sidebar', () => {
       'New Lead Created',
       'Contacted',
       'Appointment Scheduled',
-      'Follow up created'
+      'Follow Up'
     ]);
     expect(lead.activities.filter((activity) => activity.category === 'system').map((activity) => activity.label)).toEqual([
       'Draft SI Generated',
       'CSA Created',
-      'SI Generated',
-      'Proposal Created'
+      'Proposal Created',
+      'SI Generated'
     ]);
     expect(lead.activities.find((activity) => activity.label === 'Appointment Scheduled')?.timeLabel).toBe('2:00-3:00 PM');
   });
@@ -276,10 +276,22 @@ describe('DashboardComponent sidebar', () => {
     }
   });
 
+  it('records lead information updates in Sales Activities', () => {
+    const dashboard = fixture.componentInstance;
+    const lead = dashboard.boards.find((board) => board.id === 'lead')!.leads[0];
+    const updated = dashboard.recordLeadInfoUpdated(lead.leadId);
+    expect(updated?.activities.at(-1)).toMatchObject({ category: 'sales', label: 'Leads Info Updated' });
+  });
+
   it('includes each seeded parked or dropped state in the activity timeline', () => {
     for (const board of fixture.componentInstance.boards) {
       for (const lead of board.leads.filter((candidate) => candidate.leadType === 'Parked' || candidate.leadType === 'Dropped')) {
-        expect(lead.activities.some((activity) => activity.label === `${lead.leadType} Lead`)).toBe(true);
+        const expectedActivity = lead.autoParkedAfter30Days
+          ? 'Automatic Parked Lead'
+          : lead.autoDroppedAfter90Days
+            ? 'Automatic Dropped Lead'
+            : `${lead.leadType} Lead`;
+        expect(lead.activities.some((activity) => activity.label === expectedActivity)).toBe(true);
       }
     }
   });

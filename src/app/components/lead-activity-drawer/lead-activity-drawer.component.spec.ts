@@ -49,11 +49,11 @@ describe('LeadActivityDrawerComponent', () => {
 
   it('offers only the supported drop reasons', () => {
     expect(fixture.componentInstance.dropReasonOptions.map((option) => option.value)).toEqual([
-      'No money',
-      'No time',
-      'Already has insurance',
-      'Uncontactable',
-      'Not interested'
+      'Affordability / Financial Constraints',
+      'With Ample Coverage',
+      'No Need or Interest',
+      'Product or Decision Concerns',
+      'Unable to Proceed'
     ]);
     expect(fixture.componentInstance.dropReasonOptions.some((option) => option.value === 'Others')).toBe(false);
   });

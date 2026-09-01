@@ -253,6 +253,14 @@ export class DashboardComponent implements OnDestroy {
     }));
   }
 
+  get pageSearchHasNoMatches(): boolean {
+    return this.searchTerm.trim().length > 0 && this.filteredBoards.every((board) => board.leads.length === 0);
+  }
+
+  clearPageSearch(): void {
+    this.searchTerm = '';
+  }
+
   trackBoard(index: number, board: LeadBoardData): string {
     return board.id;
   }
@@ -485,7 +493,7 @@ export class DashboardComponent implements OnDestroy {
       tags: [{ label: 'Follow-up', tone: 'success' }],
       activities: [
         ...lead.activities.filter((activity) => activity.label !== 'Presentation Completed'),
-        this.createActivity('sales', 'Follow up created', new Date(), notes)
+        this.createActivity('sales', 'Follow Up', new Date(), notes)
       ]
     };
 
@@ -496,12 +504,13 @@ export class DashboardComponent implements OnDestroy {
     return followUpLead;
   }
 
-  scheduleFollowUpAppointment(leadId: string, appointment: LeadAppointment): LeadCardData | null {
+  scheduleFollowUpAppointment(leadId: string, appointment: LeadAppointment, rescheduled = false): LeadCardData | null {
     const followUpBoard = this.boards.find((board) => board.id === 'follow-up');
     const lead = followUpBoard?.leads.find((candidate) => candidate.id === leadId);
     if (!followUpBoard || !lead) return null;
 
     const activityDate = new Date();
+    const wasAlreadyScheduled = rescheduled || Boolean(lead.appointment);
     const updatedLead: LeadCardData = {
       ...lead,
       lastActivityTimestamp: activityDate.getTime(),
@@ -514,7 +523,7 @@ export class DashboardComponent implements OnDestroy {
         ...lead.activities,
         this.createActivity(
           'sales',
-          'Appointment Scheduled',
+          'Follow Up Scheduled',
           activityDate,
           appointment.notes,
           this.dateFromAppointment(appointment),
@@ -540,7 +549,7 @@ export class DashboardComponent implements OnDestroy {
       ...leadWithoutAppointment,
       lastActivityTimestamp: activityDate.getTime(),
       tags: [{ label: 'Follow-up', tone: 'success' }],
-      activities: [...lead.activities, this.createActivity('sales', 'Appointment Canceled', activityDate, notes)]
+      activities: [...lead.activities, this.createActivity('sales', 'Follow Up Canceled', activityDate, notes)]
     };
 
     followUpBoard.leads = [updatedLead, ...followUpBoard.leads.filter((candidate) => candidate.id !== leadId)];
@@ -560,7 +569,7 @@ export class DashboardComponent implements OnDestroy {
       ...leadWithoutAppointment,
       lastActivityTimestamp: activityDate.getTime(),
       tags: [{ label: 'Follow-up', tone: 'success' }],
-      activities: [...lead.activities, this.createActivity('sales', 'Presentation Completed', activityDate, notes)]
+      activities: [...lead.activities, this.createActivity('sales', 'Follow-up Presentation Completed', activityDate, notes)]
     };
 
     followUpBoard.leads = [updatedLead, ...followUpBoard.leads.filter((candidate) => candidate.id !== leadId)];
@@ -578,7 +587,7 @@ export class DashboardComponent implements OnDestroy {
     const updatedLead: LeadCardData = {
       ...lead,
       lastActivityTimestamp: activityDate.getTime(),
-      activities: [...lead.activities, this.createActivity('sales', 'Follow up updated', activityDate, notes)]
+      activities: [...lead.activities, this.createActivity('sales', 'Follow-up', activityDate, notes)]
     };
 
     followUpBoard.leads = [updatedLead, ...followUpBoard.leads.filter((candidate) => candidate.id !== leadId)];
@@ -588,17 +597,33 @@ export class DashboardComponent implements OnDestroy {
   }
 
   recordUnableToSetAppointment(leadId: string, notes = ''): LeadCardData | null {
-    const board = this.boards.find((candidate) => candidate.id === 'contacted');
-    const lead = board?.leads.find((candidate) => candidate.id === leadId);
+    const board = this.boards.find((candidate) => candidate.leads.some((lead) => lead.id === leadId || lead.leadId === leadId));
+    const lead = board?.leads.find((candidate) => candidate.id === leadId || candidate.leadId === leadId);
     if (!board || !lead) return null;
 
     const activityDate = new Date();
     const updatedLead: LeadCardData = {
       ...lead,
       lastActivityTimestamp: activityDate.getTime(),
-      activities: [...lead.activities, this.createActivity('sales', 'Contacted - Unsuccessful Appointment', activityDate, notes)]
+      activities: [...lead.activities, this.createActivity('sales', 'Contacted- No Appointment', activityDate, notes)]
     };
     board.leads = [updatedLead, ...board.leads.filter((candidate) => candidate.id !== leadId)];
+    this.selectedLead = updatedLead;
+    this.changeDetectorRef.markForCheck();
+    return updatedLead;
+  }
+
+  recordLeadInfoUpdated(leadId: string): LeadCardData | null {
+    const board = this.boards.find((candidate) => candidate.leads.some((lead) => lead.leadId === leadId));
+    const lead = board?.leads.find((candidate) => candidate.leadId === leadId);
+    if (!board || !lead) return null;
+    const activityDate = new Date();
+    const updatedLead = {
+      ...lead,
+      lastActivityTimestamp: activityDate.getTime(),
+      activities: [...lead.activities, this.createActivity('sales', 'Leads Info Updated', activityDate)]
+    };
+    board.leads = [updatedLead, ...board.leads.filter((candidate) => candidate.leadId !== leadId)];
     this.selectedLead = updatedLead;
     this.changeDetectorRef.markForCheck();
     return updatedLead;
@@ -683,6 +708,9 @@ export class DashboardComponent implements OnDestroy {
       autoDroppedAfter90Days = false
     ): LeadCardData => {
       const leadType = typeof state === 'boolean' ? (state ? 'Active' : 'Inactive') : state;
+      const automaticActivityDate = new Date(createdAt);
+      automaticActivityDate.setDate(automaticActivityDate.getDate() + 3);
+      automaticActivityDate.setHours(17, 0, 0, 0);
 
       return {
         id,
@@ -704,7 +732,17 @@ export class DashboardComponent implements OnDestroy {
         productInterested,
         tags,
         appointment: appointmentDetails,
-        activities: this.initialActivities(tags[0]?.label ?? 'New Lead', createdAt, leadType, appointmentDetails)
+        activities: [
+          ...this.initialActivities(tags[0]?.label ?? 'New Lead', createdAt, leadType, appointmentDetails)
+            .filter((activity) => !(autoParkedAfter30Days && activity.label === 'Parked Lead'))
+            .filter((activity) => !(autoDroppedAfter90Days && activity.label === 'Dropped Lead')),
+          ...(autoParkedAfter30Days
+            ? [this.createActivity('sales', 'Automatic Parked Lead', automaticActivityDate)]
+            : []),
+          ...(autoDroppedAfter90Days
+            ? [this.createActivity('sales', 'Automatic Dropped Lead', automaticActivityDate)]
+            : [])
+        ]
       };
     };
 
@@ -876,8 +914,8 @@ export class DashboardComponent implements OnDestroy {
       activities.push(
         this.createActivity('system', 'Draft SI Generated', activityDate(0, 9)),
         this.createActivity('system', 'CSA Created', activityDate(0, 15, 30)),
-        this.createActivity('system', 'SI Generated', activityDate(1, 9)),
-        this.createActivity('system', 'Proposal Created', activityDate(1, 9, 30))
+        this.createActivity('system', 'Proposal Created', activityDate(1, 9)),
+        this.createActivity('system', 'SI Generated', activityDate(1, 9, 30))
       );
     }
     if (hasReachedMeeting && !hasReachedFollowUp) {
@@ -886,7 +924,7 @@ export class DashboardComponent implements OnDestroy {
       );
     }
     if (hasReachedFollowUp) {
-      activities.push(this.createActivity('sales', 'Follow up created', activityDate(2, 10)));
+      activities.push(this.createActivity('sales', 'Follow Up', activityDate(2, 10)));
     }
     if (leadState === 'Parked') {
       activities.push(this.createActivity('sales', 'Parked Lead', hasReachedMeeting ? activityDate(1, 16) : hasReachedAppointment ? activityDate(1, 15) : activityDate(0, 10)));

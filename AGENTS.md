@@ -224,9 +224,23 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - Proposal save-toast timers are cleared before replacement and on component destruction. Preserve `markForCheck()` after the timeout because the proposal flow uses `OnPush` change detection.
 - The Figma-specific proposal panels are local walkthrough states, not a durable proposal or sales-illustration integration. Keep their transitions explicit: draft → save confirmation → saved proposal → generated-SI viewer → saved proposal.
 
+## Recent Timeline and Flow Updates
+
+- Sales Activities use the final wording `Contacted- No Appointment`, `Follow Up`, `Follow Up Scheduled`, `Follow-up Presentation Completed`, `Follow Up Canceled`, and `Follow-up` for follow-up updates.
+- Appointment-board presentation completion remains `Presentation Completed`; Follow-Up-board presentation completion is `Follow-up Presentation Completed`.
+- Saving Lead Information records `Leads Info Updated` in Sales Activities.
+- Automatic timeline records are seeded for 30-day auto-parked leads and 90-day auto-dropped leads. These automatic records appear after the lead's other activities; manual `Parked Lead`/`Dropped Lead` records remain for manual actions.
+- `Application Start` is a System Transaction. `Application Created` is displayed and recorded as `Converted to Application`.
+- System Transactions are ordered Draft SI Generated, CSA Created, Proposal Created, then SI Generated.
+- Creating a proposal through product selection and Continue navigates to the Proposals tab; saving does not duplicate the Proposal Created transaction.
+- Unable to Set Appointment Save resolves the lead on its current board and preserves the existing lifecycle behavior.
+- Park Lead and Drop Lead action buttons render only on the drawer Overview tab, not Activity Timeline.
+- Drop Lead supports optional notes. Its timeline details include the selected reason, each dropdown description prefixed with `-`, a blank line, and the optional note. Drop notes are collapsed by default and expand on click with preserved line breaks.
+- After a Follow-Up cancellation, recording a new `Follow-up` update changes the displayed lead card and drawer tag back to `Follow-up`; the cancellation activity remains in the timeline.
+
 ## Current Project State
 
-- Verified on **2026-08-31** after the latest Applications/Follow-up conversion updates.
+- Verified on **2026-09-01** after the latest timeline, proposal-navigation, Drop Lead, and drawer updates.
 
 ### Latest EWApp prototype update — 2026-08-29
 

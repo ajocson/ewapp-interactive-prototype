@@ -79,7 +79,7 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
       [description]="activityToastMessage"
     />
     <lam-draft-si-flow *ngIf="selectedLead && draftSiOpen" [lead]="selectedLead" (closed)="closeDraftSi()" (draftSiGenerated)="recordDraftSiGenerated()" (proposalRequested)="openDraftProposalInfo()" (activityRequested)="openContactDrawer()" (contactRequired)="openContactDrawer()" (appointmentRequired)="openContactDrawer()" />
-    <lam-proposal-flow *ngIf="selectedLead && proposalOpen" [lead]="selectedLead" [routeTab]="activeRecordTab" [editMode]="leadInfoEditMode" [submittedApplicationContext]="applicationLeadContext" (routeTabChange)="navigateToRecordTab($event)" (csaCreated)="recordCsaCreated()" (siGenerated)="recordSiGenerated()" (proposalSaved)="recordProposalCreated()" (applicationConverted)="recordApplicationConverted()" (contactRequired)="openContactDrawer()" (appointmentRequired)="openContactDrawer()" (activityRequested)="openContactDrawer()" (underwritingSubmitted)="viewSubmittedApplication($event)" (closed)="closeLead()" />
+    <lam-proposal-flow *ngIf="selectedLead && proposalOpen" [lead]="selectedLead" [routeTab]="activeRecordTab" [editMode]="leadInfoEditMode" [submittedApplicationContext]="applicationLeadContext" (routeTabChange)="navigateToRecordTab($event)" (leadInfoSaved)="recordLeadInfoUpdated()" (csaCreated)="recordCsaCreated()" (siGenerated)="recordSiGenerated()" (proposalSaved)="recordProposalCreated()" (applicationConverted)="recordApplicationConverted()" (contactRequired)="openContactDrawer()" (appointmentRequired)="openContactDrawer()" (activityRequested)="openContactDrawer()" (underwritingSubmitted)="viewSubmittedApplication($event)" (closed)="closeLead()" />
     <section *ngIf="newLeadOpen" class="new-lead-modal" role="dialog" aria-modal="true" aria-labelledby="new-lead-title">
       <div class="new-lead-modal__backdrop" aria-hidden="true"></div>
       <div class="new-lead-modal__panel">
@@ -370,12 +370,19 @@ export class AppComponent implements AfterViewInit {
   recordProposalCreated(): void {
     if (!this.selectedLead) return;
     this.selectedLead = this.dashboard?.recordSystemActivity(this.selectedLead.leadId, 'Proposal Created') ?? this.selectedLead;
+    this.navigateToRecordTab('proposals');
+    this.changeDetectorRef.markForCheck();
+  }
+
+  recordLeadInfoUpdated(): void {
+    if (!this.selectedLead) return;
+    this.selectedLead = this.dashboard?.recordLeadInfoUpdated(this.selectedLead.leadId) ?? this.selectedLead;
     this.changeDetectorRef.markForCheck();
   }
 
   recordApplicationConverted(): void {
     if (!this.selectedLead) return;
-    this.selectedLead = this.dashboard?.recordSystemActivity(this.selectedLead.leadId, 'Application Created') ?? this.selectedLead;
+    this.selectedLead = this.dashboard?.recordSystemActivity(this.selectedLead.leadId, 'Converted to Application') ?? this.selectedLead;
     this.showActivityToast('Proposal Converted to Application');
     this.changeDetectorRef.markForCheck();
   }
@@ -572,7 +579,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   scheduleFollowUpAppointment(event: LeadFollowUpAppointmentScheduledEvent): void {
-    const updatedLead = this.dashboard?.scheduleFollowUpAppointment(event.lead.id, event.appointment);
+    const updatedLead = this.dashboard?.scheduleFollowUpAppointment(event.lead.id, event.appointment, event.rescheduled);
     if (!updatedLead) return;
 
     this.finishBoardActivity(updatedLead, 'Follow-up appointment has been scheduled.');

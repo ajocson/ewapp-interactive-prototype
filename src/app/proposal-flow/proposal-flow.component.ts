@@ -32,7 +32,7 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
 
   get isConvertedApplication(): boolean {
     return this.submittedApplicationContext
-      || (this.lead.activities?.some((activity) => activity.label === 'Application Created') ?? false);
+      || (this.lead.activities?.some((activity) => activity.label === 'Converted to Application') ?? false);
   }
 
   get isApplicationSubmitted(): boolean {
@@ -65,6 +65,7 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
   @Output() csaCreated = new EventEmitter<void>();
   @Output() siGenerated = new EventEmitter<void>();
   @Output() proposalSaved = new EventEmitter<void>();
+  @Output() leadInfoSaved = new EventEmitter<void>();
   @Output() applicationConverted = new EventEmitter<void>();
   @Output() underwritingSubmitted = new EventEmitter<LeadCardData>();
 
@@ -72,6 +73,7 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
   productPickerOpen = false;
   proposalDraftOpen = false;
   proposalCreated = false;
+  private proposalActivityRecorded = false;
   selectedProduct = '';
   productCategory = 'all';
   proposalTab: 'info' | 'benefits' = 'info';
@@ -197,6 +199,7 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
     this.journeyState.saveInfo(this.lead.leadId, { firstName: this.firstName, middleName: this.middleName, title: this.title, noMiddleName: this.noMiddleName, lastName: this.lastName, gender: this.gender, birthDate: this.birthDate, suffix: this.suffix, mobileNumber: this.mobileNumber, emailAddress: this.emailAddress, sourceOfLead: this.sourceOfLead });
     this.editMode = false;
     this.stage = 'individual-summary';
+    this.leadInfoSaved.emit();
     this.changeDetectorRef.markForCheck();
   }
 
@@ -261,6 +264,11 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
     this.proposalCreated = false;
     this.salesIllustrationGenerated = false;
     this.hasGeneratedSalesIllustration = false;
+    if (!this.proposalActivityRecorded) {
+      this.proposalSaved.emit();
+      this.proposalActivityRecorded = true;
+    }
+    this.routeTabChange.emit('proposals');
   }
 
   generateSalesIllustration(): void {
@@ -362,7 +370,11 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
     this.proposalSaveConfirmation = false;
     this.proposalDraftOpen = false;
     this.proposalCreated = true;
-    if (!wasProposalCreated) this.proposalSaved.emit();
+    if (!wasProposalCreated && !this.proposalActivityRecorded) {
+      this.proposalSaved.emit();
+      this.proposalActivityRecorded = true;
+      this.routeTabChange.emit('proposals');
+    }
     this.salesIllustrationGenerated = false;
     this.hasGeneratedSalesIllustration = false;
     this.proposalToastMessage = 'Proposal saved successfully.';

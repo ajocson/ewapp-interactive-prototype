@@ -64,6 +64,10 @@
       [showTatAging]="board.id !== 'lead'"
       (selected)="leadSelected.emit($event)"
     />
+    <div *ngIf="searchTerm.trim() && visibleLeads.length === 0" class="lead-board__empty-state" role="status">
+      <img src="assets/icons/icon-user-not-found.svg" alt="" aria-hidden="true">
+      <p>No matches were found</p>
+    </div>
   </div>
 
   <form

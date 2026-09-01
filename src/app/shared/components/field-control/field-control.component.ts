@@ -17,6 +17,7 @@ import { TdxButtonSize, TdxButtonVariant } from '../button/button.model';
 export interface TdxFieldControlOption {
   label: string;
   value: string;
+  description?: readonly string[];
 }
 
 const FIELD_CONTROL_OPEN_EVENT = 'tdx-field-control-open';
@@ -51,6 +52,7 @@ export class FieldControlComponent implements AfterViewInit, OnDestroy {
   @Input() resetDisabled = false;
   @Input() applyDisabled = false;
   @Input() disabled = false;
+  @Input() showOptionDividers = false;
   @Output() valueChange = new EventEmitter<string>();
   @Output() selectedValuesChange = new EventEmitter<readonly string[]>();
   @Output() activated = new EventEmitter<void>();

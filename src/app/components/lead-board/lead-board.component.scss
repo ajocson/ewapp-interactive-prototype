@@ -35,6 +35,10 @@
   padding: var(--board-header-padding);
 }
 
+.lead-board__empty-state { display: flex; flex: 1 1 auto; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-xs); color: var(--text-neutral-primary); text-align: center; }
+.lead-board__empty-state img { width: 36px; height: 36px; }
+.lead-board__empty-state p { margin: var(--space-none); font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
+
 .lead-board__heading,
 .lead-board__actions {
   display: flex;

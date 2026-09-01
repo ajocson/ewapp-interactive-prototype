@@ -398,6 +398,8 @@
   white-space: normal;
 }
 
+.activity-group__notes--drop-lead.is-expanded { white-space: pre-line; }
+
 .activity-group__notes:focus-visible {
   outline: var(--focus-ring-width) solid var(--focus-ring-color);
   outline-offset: var(--space-2xs);

@@ -81,7 +81,7 @@
 
         <div *ngIf="actionMode === 'drop'" class="drawer-drop-fields">
           <label class="drawer-drop-reason">
-            <span>Reason for Dropping</span>
+            <span>Reason for dropping</span>
             <app-field-control
               label="Select a reason"
               ariaLabel="Reason for Dropping"
@@ -89,8 +89,13 @@
               [options]="dropReasonOptions"
               trailingIcon="keyboard_arrow_down"
               [fluid]="true"
+              [showOptionDividers]="true"
               (valueChange)="dropReasonChanged($event)"
             />
+          </label>
+          <label class="drawer-notes">
+            <span>Notes (Optional)</span>
+            <textarea rows="4" [(ngModel)]="dropNotes" placeholder="Add additional details"></textarea>
           </label>
         </div>
 
@@ -314,15 +319,16 @@
         </section>
       </ng-template>
 
-      <section *ngIf="!scheduling && !cancellingAppointment && !followUpRecording" class="drawer-actions" [class.drawer-actions--hidden]="unableToSetAppointmentOpen">
-        <h3>Lead Actions</h3>
-        <div>
-          <app-button class="drawer-action-button" label="Park Lead" leftIcon="pause_circle" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="openLeadAction('park')" />
-          <app-button class="drawer-action-button" label="Drop Lead" leftIcon="stop_circle" [variant]="buttonVariant.Danger" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="openLeadAction('drop')" />
-        </div>
-      </section>
       </ng-container>
     </ng-container>
+
+    <section *ngIf="activeTab === 'overview' && !actionMode && !scheduling && !cancellingAppointment && !followUpRecording && !isLeadPaused && (!isApplicationLead || isMeeting || isFollowUp)" class="drawer-actions" [class.drawer-actions--hidden]="unableToSetAppointmentOpen">
+      <h3>Lead Actions</h3>
+      <div>
+        <app-button class="drawer-action-button" label="Park Lead" leftIcon="pause_circle" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="openLeadAction('park')" />
+        <app-button class="drawer-action-button" label="Drop Lead" leftIcon="stop_circle" [variant]="buttonVariant.Danger" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="openLeadAction('drop')" />
+      </div>
+    </section>
 
     <section *ngIf="activeTab === 'timeline'" class="drawer-timeline" aria-live="polite">
       <ng-container *ngIf="hasActivities; else emptyTimeline">
@@ -340,7 +346,7 @@
                   <span class="material-symbols-rounded" aria-hidden="true">schedule</span>
                   <span>{{ activity.scheduledTimeLabel }}</span>
                 </span>
-                <button *ngIf="activity.notes" type="button" class="activity-group__notes" [class.is-expanded]="isActivityNoteExpanded(activity.id)" [attr.aria-expanded]="isActivityNoteExpanded(activity.id)" [attr.aria-label]="isActivityNoteExpanded(activity.id) ? 'Collapse activity note' : 'Expand activity note'" (click)="toggleActivityNote(activity.id)">{{ activity.notes }}</button>
+                <button *ngIf="activity.notes" type="button" class="activity-group__notes" [class.is-expanded]="isActivityNoteExpanded(activity.id)" [class.activity-group__notes--drop-lead]="activity.label === 'Dropped Lead'" [attr.aria-expanded]="isActivityNoteExpanded(activity.id)" [attr.aria-label]="isActivityNoteExpanded(activity.id) ? 'Collapse activity note' : 'Expand activity note'" (click)="toggleActivityNote(activity.id)">{{ activity.notes }}</button>
                 <span class="activity-group__recorded">Recorded on {{ activity.recordedDateLabel ?? activity.dateLabel }} at {{ activity.recordedTimeLabel ?? activity.timeLabel }}</span>
               </div>
             </li>

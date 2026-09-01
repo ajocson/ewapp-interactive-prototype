@@ -82,7 +82,7 @@ describe('LeadBoardComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('.lead-card__aging')).toHaveLength(2);
   });
 
-  it('leaves the board blank when a search has no matches', () => {
+  it('shows the no-match state when a search has no matches', () => {
     (fixture.nativeElement.querySelector('button[aria-label="Search Follow-Up"]') as HTMLButtonElement).click();
     fixture.detectChanges();
 
@@ -92,7 +92,7 @@ describe('LeadBoardComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelectorAll('lam-lead-card')).toHaveLength(0);
-    expect(fixture.nativeElement.querySelector('.lead-board__empty-state')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.lead-board__empty-state')?.textContent).toContain('No matches were found');
   });
 
   it('uses the TDX checkbox dropdown for lead-state filters', () => {

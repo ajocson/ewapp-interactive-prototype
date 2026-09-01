@@ -36,6 +36,7 @@
     class="tdx-field-control__menu"
     [class.tdx-field-control__menu--checkboxes]="multiple"
     [class.tdx-field-control__menu--fit-content]="menuFitContent"
+    [class.tdx-field-control__menu--dividers]="showOptionDividers"
     role="listbox"
     [attr.aria-multiselectable]="multiple || null"
     [style.left.px]="menuPosition?.left"
@@ -57,7 +58,10 @@
           [class.is-selected]="isSelected(option.value)"
           [attr.aria-selected]="isSelected(option.value)"
           (click)="updateValue(option.value)"
-        >{{ option.label }}</button>
+        >
+          <span>{{ option.label }}</span>
+          <small *ngFor="let line of option.description">{{ line }}</small>
+        </button>
       </ng-template>
     </ng-container>
     <footer *ngIf="multiple && showMenuActions" class="tdx-field-control__menu-actions">

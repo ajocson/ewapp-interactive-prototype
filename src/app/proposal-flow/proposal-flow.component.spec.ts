@@ -31,7 +31,7 @@ describe('ProposalFlowComponent', () => {
     const component = fixture.componentInstance;
     component.lead = {
       ...component.lead,
-      activities: [{ id: 'application-created', category: 'sales', label: 'Application Created', dateLabel: 'Aug 31, 2026', timeLabel: '2:00 PM', occurredAtTimestamp: Date.now() }]
+      activities: [{ id: 'application-created', category: 'system', label: 'Converted to Application', dateLabel: 'Aug 31, 2026', timeLabel: '2:00 PM', occurredAtTimestamp: Date.now() }]
     };
 
     for (const tab of ['info', 'profile', 'proposals', 'applications'] as const) {
@@ -92,6 +92,8 @@ describe('ProposalFlowComponent', () => {
     expect(component.productPickerOpen).toBe(true);
     expect(component.proposalCreated).toBe(false);
 
+    let proposalSaved = false;
+    component.proposalSaved.subscribe(() => proposalSaved = true);
     component.selectProduct('Dream Builder');
     component.createProposal();
     fixture.detectChanges();
@@ -106,8 +108,6 @@ describe('ProposalFlowComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Premium Calculation');
     expect(fixture.nativeElement.textContent).toContain('Minimum basic sum insured: ₱250,000');
     component.requestSaveProposal();
-    let proposalSaved = false;
-    component.proposalSaved.subscribe(() => proposalSaved = true);
     component.confirmSaveProposal();
     fixture.detectChanges();
     expect(component.proposalCreated).toBe(true);

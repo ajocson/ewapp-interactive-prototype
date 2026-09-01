@@ -126,8 +126,8 @@
         </div>
       </div>
 
-      <div class="board-viewport" tabindex="0" aria-label="Lead pipeline boards">
-        <div class="board-track">
+      <div class="board-viewport" [class.board-viewport--page-empty]="pageSearchHasNoMatches" tabindex="0" aria-label="Lead pipeline boards">
+        <div class="board-track" [class.board-track--page-empty]="pageSearchHasNoMatches">
           <lam-lead-board
             *ngFor="let board of filteredBoards; trackBy: trackBoard"
             [board]="board"
@@ -135,6 +135,15 @@
             (leadSelected)="selectLead($event)"
           />
         </div>
+        <section *ngIf="pageSearchHasNoMatches" class="page-search-empty-state" aria-live="polite">
+          <div class="page-search-empty-state__content">
+            <img src="assets/icons/icon-user-not-found.svg" alt="" aria-hidden="true">
+            <h2>No matches were found</h2>
+            <p>We couldn’t find any leads matching “{{ searchTerm.trim() }}”.</p>
+            <p>Try a different lead name or ID.</p>
+            <app-button label="Clear Search" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="clearPageSearch()" />
+          </div>
+        </section>
       </div>
     </section>
   </div>
