@@ -113,7 +113,7 @@
           description="This lead was auto-parked after 30 days without an appointment. Reactivate to continue."
         />
         <app-section-message
-          *ngIf="lead.notContactedFor30Days"
+          *ngIf="lead.notContactedFor30Days && !lead.autoParkedAfter30Days"
           appearance="error"
           icon="warning"
           description="This lead has not been contacted for 30 days. Contact the client as soon as possible."

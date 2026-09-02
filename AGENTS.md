@@ -240,6 +240,11 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 
 ## Current Project State
 
+### Latest canceled appointment sample correction — 2026-09-02
+
+- Lead `71207` (`Mr. John Mark Doe`) is represented as a canceled appointment sample: it has no active appointment/calendar tag, displays `Appointment Canceled`, and records `Appointment Canceled` in its timeline.
+- Preserve the existing appointment scheduling, rescheduling, cancellation, and board movement flows when maintaining this sample.
+
 ### Latest Follow-Up tag correction — 2026-09-02
 
 - The Follow-Up lead card and activity drawer derive appointment tags from the appointment history, distinguishing a new booking after cancellation from a true reschedule.

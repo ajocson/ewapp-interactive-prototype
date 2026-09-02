@@ -163,10 +163,7 @@ describe('DashboardComponent sidebar', () => {
       .find((board) => board.id === 'appointments')?.leads
       .find((lead) => lead.id === 'appointment-past-due');
 
-    expect(pastDueLead?.tags).toEqual([
-      { label: 'Appointment Scheduled', tone: 'success' },
-      { label: 'Feb 3, 2026 · 2:00-3:00 PM', tone: 'danger' }
-    ]);
+    expect(pastDueLead?.tags).toEqual([{ label: 'Appointment Canceled', tone: 'danger' }]);
   });
 
   it('moves a meeting to Follow-Up and records the supplied notes', () => {
@@ -286,7 +283,9 @@ describe('DashboardComponent sidebar', () => {
   it('includes each seeded parked or dropped state in the activity timeline', () => {
     for (const board of fixture.componentInstance.boards) {
       for (const lead of board.leads.filter((candidate) => candidate.leadType === 'Parked' || candidate.leadType === 'Dropped')) {
-        const expectedActivity = lead.autoParkedAfter30Days
+        const expectedActivity = lead.id === 'lead-30-days'
+          ? 'Automatic Parked Lead'
+          : lead.autoParkedAfter30Days
           ? 'Automatic Parked Lead'
           : lead.autoDroppedAfter90Days
             ? 'Automatic Dropped Lead'

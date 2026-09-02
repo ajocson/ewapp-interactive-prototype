@@ -677,6 +677,7 @@ export class DashboardComponent implements OnDestroy {
     const newLead: LeadTag = { label: 'New Lead', tone: 'primary' };
     const contacted: LeadTag = { label: 'Contacted', tone: 'success' };
     const appointmentScheduled: LeadTag = { label: 'Appointment Scheduled', tone: 'success' };
+    const appointmentCanceled: LeadTag = { label: 'Appointment Canceled', tone: 'danger' };
     const meeting: LeadTag = { label: 'Meeting', tone: 'success' };
     const followUp: LeadTag = { label: 'Follow-up', tone: 'success' };
     const appointment: LeadTag = { label: 'Feb 2, 2026 · 2:00-3:00 PM', tone: 'info' };
@@ -734,6 +735,9 @@ export class DashboardComponent implements OnDestroy {
         appointment: appointmentDetails,
         activities: [
           ...this.initialActivities(tags[0]?.label ?? 'New Lead', createdAt, leadType, appointmentDetails)
+            .map((activity) => id === 'lead-30-days' && activity.label === 'Parked Lead'
+              ? { ...activity, label: 'Automatic Parked Lead' }
+              : activity)
             .filter((activity) => !(autoParkedAfter30Days && activity.label === 'Parked Lead'))
             .filter((activity) => !(autoDroppedAfter90Days && activity.label === 'Dropped Lead')),
           ...(autoParkedAfter30Days
@@ -792,17 +796,11 @@ export class DashboardComponent implements OnDestroy {
             'Male',
             true,
             'Leads from store',
-            [appointmentScheduled, pastDueAppointment],
+            [appointmentCanceled],
             createdOn(1, 15),
             'Dream Builder',
             'Maxwell Anderson',
-            {
-              date: '2026-02-03',
-              dateLabel: 'February 03, 2026',
-              startMinutes: 14 * 60,
-              endMinutes: 15 * 60,
-              timeLabel: '2:00-3:00 PM'
-            }
+            undefined
           ),
           lead('appointment-parked', 'Olivia Mae Navarro', 'Female', 'Parked', 'Branch', [appointmentScheduled], new Date(2026, 0, 31, 14, 30)),
           lead('appointment-dropped', 'Ethan Gabriel Ramos', 'Male', 'Dropped', 'Event', [appointmentScheduled], new Date(2026, 0, 30, 11))
@@ -902,7 +900,7 @@ export class DashboardComponent implements OnDestroy {
       activities.push(
         this.createActivity(
           'sales',
-          'Appointment Scheduled',
+          status === 'Appointment Canceled' ? 'Appointment Canceled' : 'Appointment Scheduled',
           scheduledAt,
           '',
           scheduledAt,
