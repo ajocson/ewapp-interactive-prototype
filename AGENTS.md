@@ -240,6 +240,12 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 
 ## Current Project State
 
+### Latest Follow-Up tag correction — 2026-09-02
+
+- The Follow-Up lead card and activity drawer derive appointment tags from the appointment history, distinguishing a new booking after cancellation from a true reschedule.
+- A new follow-up booking after cancellation displays `Follow-up Mtg. Scheduled`; a true reschedule of an active appointment displays `Follow-up Mtg. Rescheduled`.
+- This correction is presentation/state-label logic only. Preserve all existing scheduling, cancellation, board movement, activity recording, and navigation flows.
+
 ### Latest Applications timeline update — 2026-09-01
 
 - Grace Kelly's Applications Activity Timeline uses varied, realistic sample dates and times; this is display-only sample data and does not change any user flow.

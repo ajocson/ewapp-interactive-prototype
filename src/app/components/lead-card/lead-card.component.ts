@@ -35,15 +35,18 @@ export class LeadCardComponent implements OnDestroy {
     const followUpCompleted = activities.some((activity) => activity.label === 'Follow-up Presentation Completed');
     return tags.map((tag, index) => {
       if (index !== 0 || tag.label !== 'Follow-up') return tag;
-      const followUpRescheduled = this.lead.activities.filter((activity) => activity.label === 'Follow Up Scheduled').length > 1;
+      const scheduledActivities = this.lead.activities.filter((activity) => activity.label === 'Follow Up Scheduled');
       const latestCancellation = activities
         .filter((activity) => activity.label === 'Follow Up Canceled')
         .at(-1)?.occurredAtTimestamp ?? -Infinity;
       const latestUpdate = activities
         .filter((activity) => activity.label === 'Follow-up')
         .at(-1)?.occurredAtTimestamp ?? -Infinity;
-      const followUpCancelled = latestCancellation > latestUpdate;
-      if (this.lead.appointment && followUpRescheduled) return { ...tag, label: 'Follow-up Mtg. Rescheduled', tone: 'primary' as const };
+      const latestScheduled = scheduledActivities.at(-1)?.occurredAtTimestamp ?? -Infinity;
+      const previousScheduled = scheduledActivities.at(-2)?.occurredAtTimestamp ?? -Infinity;
+      const followUpCancelled = latestCancellation > latestUpdate && latestCancellation > latestScheduled;
+      const appointmentWasCanceledBeforeNewBooking = latestCancellation > previousScheduled && latestCancellation < latestScheduled;
+      if (this.lead.appointment && scheduledActivities.length > 1 && !appointmentWasCanceledBeforeNewBooking) return { ...tag, label: 'Follow-up Mtg. Rescheduled', tone: 'primary' as const };
       if (this.lead.appointment) return { ...tag, label: 'Follow-up Mtg. Scheduled' };
       if (followUpCancelled) return { ...tag, label: 'Follow-up Mtg. Cancelled', tone: 'danger' as const };
       if (followUpCompleted) return { ...tag, label: 'Follow-up Mtg. Completed' };

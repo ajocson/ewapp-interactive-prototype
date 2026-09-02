@@ -204,8 +204,12 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
     const latestUpdate = this.lead.activities
       .filter((activity) => activity.label === 'Follow-up')
       .at(-1)?.occurredAtTimestamp ?? -Infinity;
-    if (latestCancellation > latestUpdate) return 'Follow-up Mtg. Cancelled';
-    if (this.lead.appointment && this.lead.activities.filter((activity) => activity.label === 'Follow Up Scheduled').length > 1) {
+    const scheduledActivities = this.lead.activities.filter((activity) => activity.label === 'Follow Up Scheduled');
+    const latestScheduled = scheduledActivities.at(-1)?.occurredAtTimestamp ?? -Infinity;
+    const previousScheduled = scheduledActivities.at(-2)?.occurredAtTimestamp ?? -Infinity;
+    if (latestCancellation > latestUpdate && latestCancellation > latestScheduled) return 'Follow-up Mtg. Cancelled';
+    const appointmentWasCanceledBeforeNewBooking = latestCancellation > previousScheduled && latestCancellation < latestScheduled;
+    if (this.lead.appointment && scheduledActivities.length > 1 && !appointmentWasCanceledBeforeNewBooking) {
       return 'Follow-up Mtg. Rescheduled';
     }
     if (this.lead.appointment) return 'Follow-up Mtg. Scheduled';
