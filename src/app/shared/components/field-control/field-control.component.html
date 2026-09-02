@@ -5,10 +5,11 @@
   [class.tdx-field-control--open]="isOpen"
   [class.tdx-field-control--compact]="compact"
   [class.tdx-field-control--fluid]="fluid"
+  [class.tdx-field-control--invalid]="invalid"
   [style.width.px]="fluid ? null : width"
 >
   <button
-    *ngIf="options.length; else actionControl"
+    *ngIf="options.length; else inputOrActionControl"
     type="button"
     class="tdx-field-control__trigger"
     [disabled]="disabled"
@@ -21,6 +22,27 @@
     <span class="tdx-field-control__value">{{ displayValue }}</span>
     <span *ngIf="trailingIcon" class="material-symbols-rounded tdx-field-control__trailing" aria-hidden="true">{{ trailingIcon }}</span>
   </button>
+
+  <ng-template #inputOrActionControl>
+    <div *ngIf="inputType; else actionControl" class="tdx-field-control__input-wrap">
+      <span *ngIf="inputPrefix" class="tdx-field-control__prefix" aria-hidden="true">{{ inputPrefix }}</span>
+      <input
+        class="tdx-field-control__input"
+        [type]="formatThousands ? 'text' : inputType"
+        [value]="formatThousands ? formatThousandsValue(inputValue) + (!inputFocused && inputValue ? inputSuffix : '') : inputValue"
+        [attr.inputmode]="formatThousands ? 'decimal' : null"
+        [attr.placeholder]="inputPlaceholder || null"
+        [attr.min]="min ?? null"
+        [attr.step]="step ?? null"
+        [attr.aria-label]="ariaLabel || label"
+        [attr.aria-invalid]="invalid || null"
+        [disabled]="disabled"
+        (focus)="onInputFocus($event)"
+        (blur)="onInputBlur($event)"
+        (input)="onInputValueChanged($any($event.target).value)"
+      />
+    </div>
+  </ng-template>
 
   <ng-template #actionControl>
     <button type="button" class="tdx-field-control__trigger" [disabled]="disabled" [attr.aria-label]="ariaLabel || label" (click)="activate($event)">

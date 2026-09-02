@@ -2,9 +2,15 @@
 .tdx-field-control { position: relative; box-sizing: border-box; display: flex; height: var(--field-height); align-items: stretch; padding: var(--space-none); border: var(--field-border-width) solid var(--field-border-default); border-radius: var(--field-radius); background: var(--field-bg); transition: border-color var(--motion-duration-fast) var(--motion-easing-standard), background-color var(--motion-duration-fast) var(--motion-easing-standard), box-shadow var(--motion-duration-fast) var(--motion-easing-standard); }
 .tdx-field-control--fluid { width: 100%; }
 .tdx-field-control--compact { height: var(--field-height-compact); }
+.tdx-field-control--invalid { border-width: var(--border-width-xs-2); border-color: var(--color-red-600); }
 .tdx-field-control:not(.tdx-field-control--disabled):hover { border-color: var(--field-border-hover); background: var(--field-bg-hover); }
 .tdx-field-control:focus-within { border-color: var(--field-border-focus); box-shadow: var(--field-focus-shadow); }
+.tdx-field-control--invalid:focus-within { border-color: var(--color-red-600); box-shadow: none; }
 .tdx-field-control__trigger { display: flex; min-width: var(--space-none); height: 100%; flex: 1 1 auto; align-items: center; gap: var(--field-content-gap); overflow: hidden; padding: var(--field-padding); border: var(--border-width-none); outline: var(--space-none); background: transparent; color: var(--field-text); font-family: var(--typography-font-family-paragraph); font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); text-align: left; white-space: nowrap; cursor: pointer; }
+.tdx-field-control__input-wrap { display: flex; min-width: var(--space-none); height: 100%; flex: 1 1 auto; align-items: center; gap: var(--field-content-gap); padding: var(--field-padding); }
+.tdx-field-control__prefix { color: var(--field-text); font-family: var(--typography-font-family-paragraph); font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
+.tdx-field-control__input { width: 100%; min-width: var(--space-none); padding: var(--space-none); border: var(--border-width-none); outline: var(--space-none); appearance: textfield; background: transparent; color: var(--field-text); font: inherit; }
+.tdx-field-control__input::-webkit-inner-spin-button, .tdx-field-control__input::-webkit-outer-spin-button { margin: var(--space-none); appearance: none; }
 .tdx-field-control__value { min-width: var(--space-none); overflow: hidden; flex: 1 1 auto; text-overflow: ellipsis; }
 .tdx-field-control .material-symbols-rounded { flex: none; color: var(--field-icon); font-size: var(--field-icon-size); font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
 .tdx-field-control__trailing { align-self: center; margin-left: auto; line-height: 1; }

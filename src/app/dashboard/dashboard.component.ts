@@ -387,7 +387,8 @@ export class DashboardComponent implements OnDestroy {
           activityDate,
           appointment.notes,
           this.dateFromAppointment(appointment),
-          appointment.timeLabel
+          appointment.timeLabel,
+          { afypDeclaration: appointment.afypDeclaration, potentialCaseCount: appointment.potentialCaseCount }
         )
       ]
     };
@@ -423,7 +424,8 @@ export class DashboardComponent implements OnDestroy {
           activityDate,
           appointment.notes,
           this.dateFromAppointment(appointment),
-          appointment.timeLabel
+          appointment.timeLabel,
+          { afypDeclaration: appointment.afypDeclaration, potentialCaseCount: appointment.potentialCaseCount }
         )
       ]
     };
@@ -687,7 +689,9 @@ export class DashboardComponent implements OnDestroy {
       dateLabel: 'February 02, 2026',
       startMinutes: 14 * 60,
       endMinutes: 15 * 60,
-      timeLabel: '2:00-3:00 PM'
+      timeLabel: '2:00-3:00 PM',
+      afypDeclaration: 100000,
+      potentialCaseCount: 1
     };
     const referrers = this.referrerOptions;
     const createdOn = (day: number, hour: number, minute = 0): Date =>
@@ -904,7 +908,10 @@ export class DashboardComponent implements OnDestroy {
           scheduledAt,
           '',
           scheduledAt,
-          appointment?.timeLabel ?? '2:00-3:00 PM'
+          appointment?.timeLabel ?? '2:00-3:00 PM',
+          status === 'Appointment Scheduled'
+            ? { afypDeclaration: appointment?.afypDeclaration ?? 100000, potentialCaseCount: appointment?.potentialCaseCount ?? 1 }
+            : {}
         )
       );
     }
@@ -943,7 +950,8 @@ export class DashboardComponent implements OnDestroy {
     recordedAt: Date,
     notes = '',
     scheduledAt?: Date,
-    scheduledTimeLabel?: string
+    scheduledTimeLabel?: string,
+    details: Pick<LeadActivityRecord, 'afypDeclaration' | 'potentialCaseCount'> = {}
   ): LeadActivityRecord {
     const recordedDateLabel = recordedAt.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     const recordedTimeLabel = recordedAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
@@ -962,7 +970,8 @@ export class DashboardComponent implements OnDestroy {
       recordedDateLabel,
       recordedTimeLabel,
       ...(scheduledDateLabel && resolvedScheduledTimeLabel ? { scheduledDateLabel, scheduledTimeLabel: resolvedScheduledTimeLabel } : {}),
-      ...(notes.trim() ? { notes: notes.trim() } : {})
+      ...(notes.trim() ? { notes: notes.trim() } : {}),
+      ...details
     };
   }
 

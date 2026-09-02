@@ -58,6 +58,14 @@ describe('LeadActivityDrawerComponent', () => {
     expect(fixture.componentInstance.dropReasonOptions.some((option) => option.value === 'Others')).toBe(false);
   });
 
+  it('shows the same required error state for both appointment metrics', () => {
+    fixture.componentInstance.openScheduler();
+    fixture.componentInstance.scheduleAppointment();
+
+    expect(fixture.componentInstance.afypDeclarationError).toBe(true);
+    expect(fixture.componentInstance.potentialCaseCountError).toBe(true);
+  });
+
   it('allows reactivation for parked leads but not dropped leads', () => {
     fixture.componentRef.setInput('lead', { ...createLead(), leadType: 'Parked' });
     fixture.detectChanges();
@@ -141,6 +149,8 @@ describe('LeadActivityDrawerComponent', () => {
 
     fixture.componentInstance.openFollowUpScheduler();
     expect(fixture.componentInstance.schedulerTitle).toBe('Schedule Follow-up Appointment');
+    fixture.componentInstance.afypDeclaration = 500000;
+    fixture.componentInstance.potentialCaseCount = 1;
     fixture.componentInstance.scheduleAppointment();
     expect(scheduled).toHaveLength(1);
 

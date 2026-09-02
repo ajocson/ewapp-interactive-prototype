@@ -21,6 +21,8 @@ export interface LeadActivityRecord {
   recordedTimeLabel?: string;
   scheduledDateLabel?: string;
   scheduledTimeLabel?: string;
+  afypDeclaration?: number;
+  potentialCaseCount?: number;
   notes?: string;
 }
 
@@ -31,6 +33,8 @@ export interface LeadAppointment {
   endMinutes: number;
   timeLabel: string;
   notes?: string;
+  afypDeclaration?: number;
+  potentialCaseCount?: number;
 }
 
 export interface LeadCardData {

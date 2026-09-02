@@ -36,6 +36,15 @@ export class FieldControlComponent implements AfterViewInit, OnDestroy {
   @Input() ariaLabel = '';
   @Input() name = 'field-control';
   @Input() value = '';
+  @Input() inputValue = '';
+  @Input() inputType: 'number' | '' = '';
+  @Input() inputPrefix = '';
+  @Input() inputSuffix = '';
+  @Input() inputPlaceholder = '';
+  @Input() formatThousands = false;
+  @Input() min?: number;
+  @Input() step?: number;
+  @Input() invalid = false;
   @Input() selectedValues: readonly string[] = [];
   @Input() options: readonly TdxFieldControlOption[] = [];
   @Input() leadingIcon = '';
@@ -54,12 +63,14 @@ export class FieldControlComponent implements AfterViewInit, OnDestroy {
   @Input() disabled = false;
   @Input() showOptionDividers = false;
   @Output() valueChange = new EventEmitter<string>();
+  @Output() inputValueChange = new EventEmitter<string>();
   @Output() selectedValuesChange = new EventEmitter<readonly string[]>();
   @Output() activated = new EventEmitter<void>();
   @Output() openChange = new EventEmitter<boolean>();
   @Output() resetRequested = new EventEmitter<void>();
   @Output() applyRequested = new EventEmitter<void>();
   isOpen = false;
+  inputFocused = false;
   menuPosition: { left: number; top: number; width: number; maxHeight: number } | null = null;
   private removeDocumentClickCaptureListener?: () => void;
 
@@ -85,6 +96,32 @@ export class FieldControlComponent implements AfterViewInit, OnDestroy {
   updateValue(value: string): void {
     this.valueChange.emit(value);
     this.closeMenu();
+  }
+
+  onInputValueChanged(value: string): void {
+    this.inputValueChange.emit(this.formatThousands ? this.formatThousandsValue(value) : value);
+  }
+
+  onInputFocus(event: Event): void {
+    this.inputFocused = true;
+    if (this.formatThousands) {
+      (event.target as HTMLInputElement).value = this.formatThousandsValue(this.inputValue);
+    }
+  }
+
+  onInputBlur(event: Event): void {
+    this.inputFocused = false;
+    if (this.formatThousands && this.inputValue && this.inputSuffix) {
+      (event.target as HTMLInputElement).value = `${this.formatThousandsValue(this.inputValue)}${this.inputSuffix}`;
+    }
+  }
+
+  formatThousandsValue(value: string): string {
+    const normalized = value.replaceAll(',', '');
+    if (!normalized) return '';
+    const [whole] = normalized.split('.');
+    const formattedWhole = whole.replaceAll(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return formattedWhole;
   }
 
   toggleValue(value: string): void {

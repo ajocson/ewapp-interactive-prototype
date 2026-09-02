@@ -17,6 +17,10 @@
   border-bottom: var(--border-width-xs-1) solid var(--border-neutral-subtle);
 }
 
+.drawer-scheduler {
+  padding-bottom: 60px;
+}
+
 .drawer-contact header h3,
 .drawer-actions h3,
 .drawer-timeline h3,
@@ -105,6 +109,27 @@
 
 .drawer-notes textarea::placeholder { color: var(--text-neutral-secondary); }
 
+.drawer-scheduler__required-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-lg);
+}
+
+.drawer-scheduler__required-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  color: var(--text-neutral-primary);
+  font-size: var(--paragraph-sm-text-size);
+  line-height: var(--paragraph-sm-line-height);
+}
+
+.drawer-scheduler__error {
+  color: var(--color-red-600);
+  font-size: 12px;
+  line-height: var(--paragraph-sm-line-height);
+}
+
 .drawer-notes textarea:focus-visible,
 .drawer-scheduler__fields input:focus-visible,
 .drawer-scheduler__fields select:focus-visible {
@@ -155,10 +180,18 @@
 }
 
 .drawer-scheduler__actions {
-  grid-template-columns: minmax(var(--space-none), 1fr) max-content;
+  grid-template-columns: repeat(2, minmax(var(--space-none), 1fr));
 }
 
 .drawer-scheduler__actions .drawer-action-button:last-child {
+  width: 100%;
+}
+
+.drawer-scheduler--follow-up .drawer-scheduler__actions {
+  grid-template-columns: minmax(var(--space-none), 1fr) max-content;
+}
+
+.drawer-scheduler--follow-up .drawer-scheduler__actions .drawer-action-button:last-child {
   width: auto;
 }
 
@@ -202,7 +235,7 @@
   line-height: var(--paragraph-sm-line-height);
 }
 
-.drawer-scheduler__actions { margin-top: calc(var(--space-lg) - var(--space-xl)); }
+.drawer-scheduler__actions { margin-top: var(--space-md); }
 
 .drawer-appointment-action {
   align-items: stretch;
@@ -241,20 +274,31 @@
 }
 
 .drawer-appointment-action--cancel footer {
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(var(--space-none), 1fr));
 }
 
 .drawer-appointment-action--cancel footer .drawer-action-button:last-child {
-  width: auto;
-  justify-self: end;
-  flex: 0 0 auto;
+  width: 100%;
 }
 
 .drawer-appointment-action--cancel footer .drawer-action-button:first-child {
   width: 100%;
-  min-width: 0;
+}
+
+.drawer-appointment-action--cancel-follow-up footer {
+  display: flex;
+  align-items: stretch;
+}
+
+.drawer-appointment-action--cancel-follow-up footer .drawer-action-button:first-child {
   flex: 1 1 auto;
+  min-width: var(--space-none);
+}
+
+.drawer-appointment-action--cancel-follow-up footer .drawer-action-button:last-child {
+  flex: 0 0 auto;
+  width: auto;
 }
 
 .drawer-follow-up {
@@ -367,6 +411,20 @@
 .activity-group__scheduled-divider {
   margin-inline: var(--space-xs);
   color: var(--text-neutral-secondary);
+}
+
+.activity-group__appointment-details {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+  color: var(--text-neutral-primary);
+  font-size: var(--caption-text-size);
+  line-height: var(--caption-line-height);
+}
+
+.activity-group__appointment-details-divider {
+  color: var(--text-neutral-disabled);
 }
 
 .activity-group__notes {

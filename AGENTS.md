@@ -251,6 +251,13 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - A new follow-up booking after cancellation displays `Follow-up Mtg. Scheduled`; a true reschedule of an active appointment displays `Follow-up Mtg. Rescheduled`.
 - This correction is presentation/state-label logic only. Preserve all existing scheduling, cancellation, board movement, activity recording, and navigation flows.
 
+### Latest Follow-Up cancellation footer correction — 2026-09-02
+
+- The Cancel Follow-up Appointment confirmation footer uses a scoped layout exception: the regular Cancel button fills the remaining width, while the longer Cancel Follow-up Appointment button remains hug-content and does not overlap.
+- The regular Cancel Appointment footer remains 50/50 as previously requested.
+- This is a presentation-only correction. Preserve all scheduling, cancellation, rescheduling, board movement, activity recording, and navigation flows.
+- Verified with the lead activity drawer tests: **8 tests passing**.
+
 ### Latest Applications timeline update — 2026-09-01
 
 - Grace Kelly's Applications Activity Timeline uses varied, realistic sample dates and times; this is display-only sample data and does not change any user flow.

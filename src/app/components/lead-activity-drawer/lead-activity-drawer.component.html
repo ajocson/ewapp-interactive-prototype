@@ -134,7 +134,7 @@
 
       <ng-container *ngIf="!isApplicationLead && !actionMode && !isLeadPaused">
 
-      <section *ngIf="scheduling; else appointmentActionState" class="drawer-scheduler" aria-labelledby="scheduler-title">
+      <section *ngIf="scheduling; else appointmentActionState" class="drawer-scheduler" [class.drawer-scheduler--follow-up]="schedulerMode === 'follow-up'" aria-labelledby="scheduler-title">
         <header class="drawer-scheduler__title">
           <span class="drawer-scheduler__icon material-symbols-rounded" aria-hidden="true">calendar_month</span>
           <h3 id="scheduler-title">{{ schedulerTitle }}</h3>
@@ -164,6 +164,42 @@
           <textarea rows="3" [(ngModel)]="appointmentNotes" [placeholder]="schedulerNotesPlaceholder"></textarea>
         </label>
 
+        <div *ngIf="schedulerMode === 'appointment'" class="drawer-scheduler__required-fields">
+          <label>
+            <span>AFYP Declaration</span>
+            <tdx-field-control
+              ariaLabel="AFYP Declaration"
+              inputType="number"
+              [formatThousands]="true"
+              inputPrefix="₱"
+              inputSuffix=".00"
+              inputPlaceholder="0.00"
+              [inputValue]="afypDeclaration === null ? '' : afypDeclaration.toString()"
+              [min]="0"
+              [step]="0.01"
+              [invalid]="afypDeclarationError"
+              [fluid]="true"
+              (inputValueChange)="updateAfypDeclaration($event)"
+            />
+            <small *ngIf="afypDeclarationError" class="drawer-scheduler__error">This field is required.</small>
+          </label>
+          <label>
+            <span>Potential Case Count</span>
+            <tdx-field-control
+              ariaLabel="Potential Case Count"
+              inputType="number"
+              inputPlaceholder="0"
+              [inputValue]="potentialCaseCount === null ? '' : potentialCaseCount.toString()"
+              [min]="0"
+              [step]="1"
+              [invalid]="potentialCaseCountError"
+              [fluid]="true"
+              (inputValueChange)="updatePotentialCaseCount($event)"
+            />
+            <small *ngIf="potentialCaseCountError" class="drawer-scheduler__error">This field is required.</small>
+          </label>
+        </div>
+
         <footer class="drawer-scheduler__actions">
           <app-button class="drawer-action-button" label="Cancel" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="cancelScheduler()" />
           <app-button class="drawer-action-button" [label]="schedulerTitle" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="scheduleAppointment()" />
@@ -171,7 +207,7 @@
       </section>
 
       <ng-template #appointmentActionState>
-        <section *ngIf="cancellingAppointment; else activityFlow" class="drawer-appointment-action drawer-appointment-action--cancel" aria-labelledby="cancel-appointment-title">
+        <section *ngIf="cancellingAppointment; else activityFlow" class="drawer-appointment-action drawer-appointment-action--cancel" [class.drawer-appointment-action--cancel-follow-up]="hasFollowUpAppointment" aria-labelledby="cancel-appointment-title">
           <div class="drawer-appointment-action__content">
             <span class="drawer-appointment-action__icon material-symbols-rounded" aria-hidden="true">delete</span>
             <h3 id="cancel-appointment-title">{{ cancelAppointmentTitle }}</h3>
@@ -345,6 +381,11 @@
                   <span class="activity-group__scheduled-divider" aria-hidden="true">|</span>
                   <span class="material-symbols-rounded" aria-hidden="true">schedule</span>
                   <span>{{ activity.scheduledTimeLabel }}</span>
+                </span>
+                <span *ngIf="(activity.label === 'Appointment Scheduled' || activity.label === 'Appointment Rescheduled') && activity.afypDeclaration !== undefined && activity.potentialCaseCount !== undefined" class="activity-group__appointment-details">
+                  <span>AFYP: ₱{{ activity.afypDeclaration | number:'1.0-2' }}</span>
+                  <span class="activity-group__appointment-details-divider" aria-hidden="true">|</span>
+                  <span>Potential Case Count: {{ activity.potentialCaseCount }}</span>
                 </span>
                 <button *ngIf="activity.notes" type="button" class="activity-group__notes" [class.is-expanded]="isActivityNoteExpanded(activity.id)" [class.activity-group__notes--drop-lead]="activity.label === 'Dropped Lead'" [attr.aria-expanded]="isActivityNoteExpanded(activity.id)" [attr.aria-label]="isActivityNoteExpanded(activity.id) ? 'Collapse activity note' : 'Expand activity note'" (click)="toggleActivityNote(activity.id)">{{ activity.notes }}</button>
                 <span class="activity-group__recorded">Recorded on {{ activity.recordedDateLabel ?? activity.dateLabel }} at {{ activity.recordedTimeLabel ?? activity.timeLabel }}</span>

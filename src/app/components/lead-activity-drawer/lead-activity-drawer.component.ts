@@ -144,6 +144,10 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
   activityNotes = '';
   followUpNotes = '';
   appointmentNotes = '';
+  afypDeclaration: number | null = null;
+  potentialCaseCount: number | null = null;
+  afypDeclarationError = false;
+  potentialCaseCountError = false;
   unableToSetAppointmentOpen = false;
   parkNotes = '';
   dropNotes = '';
@@ -373,6 +377,8 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
     this.activityNotes = '';
     this.followUpNotes = '';
     this.appointmentNotes = this.lead.appointment?.notes ?? '';
+    this.afypDeclaration = this.lead.appointment?.afypDeclaration ?? null;
+    this.potentialCaseCount = this.lead.appointment?.potentialCaseCount ?? null;
     this.parkNotes = '';
     this.dropNotes = '';
     this.dropReason = '';
@@ -459,6 +465,8 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
     this.selectedStartMinutes = this.lead.appointment?.startMinutes ?? this.firstAvailableStart(now);
     this.selectedEndMinutes = this.lead.appointment?.endMinutes ?? this.nextEndTime(this.selectedStartMinutes);
     this.appointmentNotes = this.lead.appointment?.notes ?? '';
+    this.afypDeclarationError = false;
+    this.potentialCaseCountError = false;
   }
 
   cancelScheduler(): void {
@@ -482,8 +490,24 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
     }
   }
 
+  updateAfypDeclaration(value: string): void {
+    const normalized = value.replaceAll(',', '');
+    this.afypDeclaration = normalized === '' ? null : Number(normalized);
+    this.afypDeclarationError = false;
+  }
+
+  updatePotentialCaseCount(value: string): void {
+    this.potentialCaseCount = value === '' ? null : Number(value);
+    this.potentialCaseCountError = false;
+  }
+
   scheduleAppointment(): void {
     if (!this.selectedDate || this.selectedStartMinutes === null || this.selectedEndMinutes === null) return;
+    if (this.schedulerMode === 'appointment') {
+      this.afypDeclarationError = !this.afypDeclaration || this.afypDeclaration <= 0;
+      this.potentialCaseCountError = !this.potentialCaseCount || this.potentialCaseCount <= 0;
+      if (this.afypDeclarationError || this.potentialCaseCountError) return;
+    }
 
     const event: LeadAppointmentScheduledEvent = {
       lead: this.lead,
@@ -493,7 +517,11 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
         startMinutes: this.selectedStartMinutes,
         endMinutes: this.selectedEndMinutes,
         timeLabel: this.formatTimeRange(this.selectedStartMinutes, this.selectedEndMinutes),
-        ...(this.appointmentNotes.trim() ? { notes: this.appointmentNotes.trim() } : {})
+        ...(this.appointmentNotes.trim() ? { notes: this.appointmentNotes.trim() } : {}),
+        ...(this.schedulerMode === 'appointment' ? {
+          afypDeclaration: this.afypDeclaration ?? undefined,
+          potentialCaseCount: this.potentialCaseCount ?? undefined
+        } : {})
       }
     };
 
