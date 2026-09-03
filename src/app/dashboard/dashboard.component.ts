@@ -51,6 +51,7 @@ export class DashboardComponent implements OnDestroy {
   @Output() draftSiRequested = new EventEmitter<void>();
   @Output() loggedOut = new EventEmitter<void>();
   searchTerm = '';
+  pendingSearchTerm = '';
   pendingSources: readonly string[] = ['All'];
   appliedSources: readonly string[] = ['All'];
   selectedLead: LeadCardData | null = null;
@@ -251,7 +252,9 @@ export class DashboardComponent implements OnDestroy {
     return this.boards.map((board) => ({
       ...board,
       leads: board.leads.filter((lead) => {
-        const matchesName = !query || lead.name.toLocaleLowerCase().includes(query);
+        const matchesName = !query
+          || lead.name.toLocaleLowerCase().includes(query)
+          || lead.leadId.toLocaleLowerCase().includes(query);
         const matchesSource = this.appliedSources.includes('All') || this.appliedSources.includes(lead.source);
         const selectedStatuses = this.appliedLeadStatuses.map((status) => this.normalizeStatus(status));
         const matchesStatus = this.appliedLeadStatuses.includes('All')
@@ -278,6 +281,11 @@ export class DashboardComponent implements OnDestroy {
 
   clearPageSearch(): void {
     this.searchTerm = '';
+    this.pendingSearchTerm = '';
+  }
+
+  applyPageSearch(): void {
+    this.searchTerm = this.pendingSearchTerm;
   }
 
   trackBoard(index: number, board: LeadBoardData): string {

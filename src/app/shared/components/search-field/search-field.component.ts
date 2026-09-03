@@ -19,6 +19,7 @@ export class SearchFieldComponent {
   @Input() disabled = false;
   @Input() readonly = false;
   @Output() valueChange = new EventEmitter<string>();
+  @Output() cleared = new EventEmitter<void>();
   @Output() focused = new EventEmitter<void>();
 
   updateValue(value: string): void {
@@ -27,5 +28,6 @@ export class SearchFieldComponent {
 
   clear(): void {
     this.valueChange.emit('');
+    this.cleared.emit();
   }
 }

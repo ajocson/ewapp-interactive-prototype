@@ -83,7 +83,8 @@ export class LeadBoardComponent {
     const searchTerms = query.split(/\s+/).filter(Boolean);
     let leads = this.board.leads.filter((lead) => {
       const normalizedName = lead.name.toLocaleLowerCase();
-      const matchesSearch = searchTerms.every((term) => normalizedName.includes(term));
+      const normalizedLeadId = lead.id.toLocaleLowerCase();
+      const matchesSearch = searchTerms.every((term) => normalizedName.includes(term) || normalizedLeadId.includes(term));
       const matchesFilter = this.filterByTag
         ? !this.appliedFilters.leadStates.length || lead.tags.some(tag => this.appliedFilters.leadStates.some(value => value === tag.label))
         :

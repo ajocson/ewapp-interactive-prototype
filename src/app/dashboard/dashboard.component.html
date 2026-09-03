@@ -14,7 +14,7 @@
 
     <section class="priorities" aria-label="Lead priorities">
       <div class="filters" role="search">
-        <app-search-field class="filters__search" name="lead-search" placeholder="Search by lead name or ID" ariaLabel="Search by lead name or ID" [readonly]="apiErrorVisible" [(value)]="searchTerm" />
+        <app-search-field class="filters__search" name="lead-search" placeholder="Search by lead name or ID" ariaLabel="Search by lead name or ID" [readonly]="apiErrorVisible" [value]="pendingSearchTerm" (valueChange)="pendingSearchTerm = $event" (cleared)="clearPageSearch()" (keydown.enter)="applyPageSearch()" />
         <tdx-field-control
           name="lead-source"
           ariaLabel="Source of lead"
