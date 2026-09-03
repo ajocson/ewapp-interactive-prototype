@@ -68,6 +68,7 @@ export class LeadBoardComponent {
   private loadMoreTimer?: ReturnType<typeof setTimeout>;
   isFilterOpen = false;
   searchTerm = '';
+  pendingSearchTerm = '';
   appliedFilters: LeadBoardFilters = this.emptyFilters();
   draftFilters: LeadBoardFilters = this.emptyFilters();
 
@@ -83,7 +84,7 @@ export class LeadBoardComponent {
     const searchTerms = query.split(/\s+/).filter(Boolean);
     let leads = this.board.leads.filter((lead) => {
       const normalizedName = lead.name.toLocaleLowerCase();
-      const normalizedLeadId = lead.id.toLocaleLowerCase();
+      const normalizedLeadId = lead.leadId.toLocaleLowerCase();
       const matchesSearch = searchTerms.every((term) => normalizedName.includes(term) || normalizedLeadId.includes(term));
       const matchesFilter = this.filterByTag
         ? !this.appliedFilters.leadStates.length || lead.tags.some(tag => this.appliedFilters.leadStates.some(value => value === tag.label))
@@ -118,7 +119,11 @@ export class LeadBoardComponent {
     return this.board.id === 'follow-up' ? leads.slice(0, this.loadedLeadCount) : leads;
   }
 
-  get hasMoreLeads(): boolean { return this.board.id === 'follow-up' && this.loadedLeadCount < this.board.leads.length; }
+  get hasMoreLeads(): boolean {
+    return this.board.id === 'follow-up'
+      && !this.searchTerm.trim()
+      && this.loadedLeadCount < this.board.leads.length;
+  }
 
   loadMore(): void {
     if (!this.hasMoreLeads || this.isLoadingMore) return;
@@ -160,17 +165,23 @@ export class LeadBoardComponent {
 
   openSearch(): void {
     this.isSearchOpen = true;
+    this.pendingSearchTerm = this.searchTerm;
     this.isFilterOpen = false;
     setTimeout(() => this.searchInput?.nativeElement.focus());
   }
 
   closeSearch(): void {
     this.searchTerm = '';
+    this.pendingSearchTerm = '';
     this.isSearchOpen = false;
   }
 
   updateSearch(value: string): void {
-    this.searchTerm = value;
+    this.pendingSearchTerm = value;
+  }
+
+  applySearch(): void {
+    this.searchTerm = this.pendingSearchTerm;
   }
 
   toggleFilterMenu(): void {

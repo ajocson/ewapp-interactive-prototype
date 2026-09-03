@@ -870,12 +870,22 @@ export class DashboardComponent implements OnDestroy {
             ['follow-up-10', 'Nathaniel Scott', 'Male', 9, 8, 15],
             ['follow-up-11', 'Isabelle Grace Morris', 'Female', 9, 11, 30],
             ['follow-up-12', 'Daniel Thomas Rivera', 'Male', 8, 14, 45],
+          ] as const).map(([id, name, gender, day, hour, minute]) =>
+            lead(id, name, gender, true, 'Referral', [followUp], createdOn(day, hour, minute))
+          ),
+          // Keep the auto-dropped demo lead as the fourth sample card.
+          lead('follow-up-auto-dropped', 'John Mark Doe', 'Male', 'Dropped', 'Leads from store', [followUp], new Date(2026, 0, 5, 9, 15), 'Dream Builder', 'Maxwell Anderson', undefined, false, false, false, true),
+          ...([
             ['follow-up-13', 'Charlotte Anne Hughes', 'Female', 8, 9, 20],
             ['follow-up-14', 'Matthew Joseph Clark', 'Male', 7, 16, 10],
             ['follow-up-15', 'Sophia Claire Bennett', 'Female', 7, 13, 5],
             ['follow-up-16', 'Anthony Gabriel Lewis', 'Male', 6, 10, 40],
             ['follow-up-17', 'Amelia Rose Walker', 'Female', 6, 15, 25],
             ['follow-up-18', 'William Andrew Hall', 'Male', 5, 8, 50],
+          ] as const).map(([id, name, gender, day, hour, minute]) =>
+            lead(id, name, gender, true, 'Referral', [followUp], createdOn(day, hour, minute))
+          ),
+          ...([
             ['follow-up-19', 'Mia Elizabeth Young', 'Female', 5, 12, 35],
             ['follow-up-20', 'Benjamin Charles King', 'Male', 4, 17, 15],
             ['follow-up-21', 'Evelyn Marie Wright', 'Female', 4, 10, 5],
@@ -892,7 +902,6 @@ export class DashboardComponent implements OnDestroy {
           ),
           lead('follow-up-1', 'Alex Morgan Smith', 'Male', true, 'Leads from store', [followUp], createdOn(8, 16)),
           lead('follow-up-2', 'Emily Jane Cooper', 'Female', true, 'EWA Social Media', [followUp], createdOn(7, 10, 30)),
-          lead('follow-up-auto-dropped', 'John Mark Doe', 'Male', 'Dropped', 'Leads from store', [followUp], new Date(2026, 0, 5, 9, 15), 'Dream Builder', 'Maxwell Anderson', undefined, false, false, false, true),
           lead('follow-up-3', 'Michael Lee Johnson', 'Male', true, 'CBG', [followUp], createdOn(6, 14, 15)),
           lead('follow-up-4', 'John Mark Doe', 'Male', true, 'CLC', [followUp], createdOn(5, 9)),
           lead('follow-up-7', 'Robert James Wilson', 'Male', true, 'Self-Generated Leads', [followUp], createdOn(4, 15, 45)),

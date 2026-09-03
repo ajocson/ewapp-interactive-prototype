@@ -56,7 +56,7 @@ describe('LeadBoardComponent', () => {
     fixture.detectChanges();
   });
 
-  it('filters the board immediately while searching by lead name', () => {
+  it('filters the board on Enter while searching by lead name', () => {
     const searchButton = fixture.nativeElement.querySelector(
       'button[aria-label="Search Follow-Up"]'
     ) as HTMLButtonElement;
@@ -66,6 +66,11 @@ describe('LeadBoardComponent', () => {
     const input = fixture.nativeElement.querySelector('input[type="search"]') as HTMLInputElement;
     input.value = 'John Doe';
     input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('lam-lead-card')).toHaveLength(2);
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     fixture.detectChanges();
 
     const cards = fixture.nativeElement.querySelectorAll('lam-lead-card');
@@ -91,8 +96,27 @@ describe('LeadBoardComponent', () => {
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    fixture.detectChanges();
+
     expect(fixture.nativeElement.querySelectorAll('lam-lead-card')).toHaveLength(0);
     expect(fixture.nativeElement.querySelector('.lead-board__empty-state')?.textContent).toContain('No matches were found');
+  });
+
+  it('matches the displayed Lead ID after pressing Enter', () => {
+    const searchButton = fixture.nativeElement.querySelector(
+      'button[aria-label="Search Follow-Up"]'
+    ) as HTMLButtonElement;
+    searchButton.click();
+    fixture.detectChanges();
+
+    const input = fixture.nativeElement.querySelector('input[type="search"]') as HTMLInputElement;
+    input.value = '22742';
+    input.dispatchEvent(new Event('input'));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.visibleLeads.map((lead) => lead.leadId)).toEqual(['22742']);
   });
 
   it('uses the TDX checkbox dropdown for lead-state filters', () => {

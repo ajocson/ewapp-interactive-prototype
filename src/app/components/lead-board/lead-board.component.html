@@ -19,8 +19,9 @@
         #searchInput
         type="search"
         placeholder="Search"
-        [value]="searchTerm"
+        [value]="pendingSearchTerm"
         (input)="updateSearch($any($event.target).value)"
+        (keydown.enter)="applySearch()"
       >
     </label>
 

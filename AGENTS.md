@@ -275,6 +275,13 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - Grace Kelly's System Transactions include Underwriting Ongoing immediately before Policy Released, with Policy Released as the final transaction.
 - Preserve these Applications timeline distinctions when editing the drawer; do not generalize Grace Kelly-only sample corrections to other leads without an explicit requirement.
 
+### Latest LCAM search and Follow-Up demo update — 2026-09-03
+
+- Per-board LCAM searches match the displayed `leadId` and lead name, but apply only on Enter; typing remains pending until submitted.
+- Closing a per-board search clears both pending and applied search state immediately.
+- Follow-Up `Load More` is hidden while an applied board search is active, so a searched result does not incorrectly show pagination controls.
+- The auto-dropped John Mark Doe Follow-Up demo lead keeps Lead ID `50824` and is positioned as the fourth entry within the initial 10 sample leads. This is sample ordering only; preserve all lifecycle behavior and the existing activity/timeline data.
+
 - Verified on **2026-09-01** after the latest timeline, proposal-navigation, Drop Lead, and drawer updates.
 
 ### Latest EWApp prototype update — 2026-08-29
