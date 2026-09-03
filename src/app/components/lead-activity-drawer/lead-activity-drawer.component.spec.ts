@@ -66,6 +66,14 @@ describe('LeadActivityDrawerComponent', () => {
     expect(fixture.componentInstance.potentialCaseCountError).toBe(true);
   });
 
+  it('hides Banca financial segmentation for manually created leads', () => {
+    fixture.componentRef.setInput('userType', 'Banca');
+    fixture.componentRef.setInput('lead', { ...createLead(), id: 'manual-test-lead' });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).not.toContain('EWB Client Financial Segmentation');
+  });
+
   it('allows reactivation for parked leads but not dropped leads', () => {
     fixture.componentRef.setInput('lead', { ...createLead(), leadType: 'Parked' });
     fixture.detectChanges();

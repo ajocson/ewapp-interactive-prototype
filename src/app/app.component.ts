@@ -104,10 +104,20 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
         <ng-template #sourceStep>
           <p class="new-lead-modal__intro">Step 2: Please input source of lead</p>
           <p class="new-lead-modal__required"><span class="material-symbols-rounded" aria-hidden="true">info</span>All fields are required unless stated “Optional”</p>
+          <ng-container *ngIf="userType === 'Agency'; else bancaSourceFields">
+            <label class="new-lead-source new-lead-source--readonly"><span>Source of Lead</span><input class="new-lead-source__input" [value]="newLeadSource" disabled /></label>
+            <label class="new-lead-source new-lead-source--readonly"><span>Product Interested</span><tdx-field-control name="new-lead-product" ariaLabel="Product Interested" [label]="newLeadProduct" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
+            <label class="new-lead-source"><span>Store Name</span><tdx-field-control name="new-lead-store" ariaLabel="Store Name" [label]="agencyStoreName" [value]="agencyStoreName" [options]="agencyStoreOptions" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
+            <label class="new-lead-source new-lead-source--readonly"><span>Store ID</span><input class="new-lead-source__input" [value]="agencyStoreId" disabled /></label>
+            <label class="new-lead-source new-lead-source--readonly"><span>Unit Name</span><input class="new-lead-source__input" [value]="agencyUnitName" disabled /></label>
+          </ng-container>
+          <ng-template #bancaSourceFields>
           <label class="new-lead-source"><span>Source of Lead</span><tdx-field-control name="new-lead-source" ariaLabel="Source of Lead" label="Select your source of lead" [value]="newLeadSource" [options]="newLeadSourceOptions" trailingIcon="keyboard_arrow_down" [fluid]="true" (valueChange)="newLeadSource = $event" /></label>
           <ng-container *ngIf="newLeadSource === 'Self-Generated Lead'">
             <label class="new-lead-source new-lead-source--readonly"><span>Product Interested</span><tdx-field-control name="new-lead-product" ariaLabel="Product Interested" [label]="newLeadProduct" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
             <label class="new-lead-source new-lead-source--readonly"><span>Manual Source</span><tdx-field-control name="new-lead-manual-source" ariaLabel="Manual Source" [label]="newLeadManualSource" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
+            <label class="new-lead-source"><span>Store Name</span><tdx-field-control name="new-lead-store" ariaLabel="Store Name" [label]="newLeadStoreName" [value]="newLeadStoreName" [options]="newLeadStoreOptions" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
+            <label class="new-lead-source new-lead-source--readonly"><span>Store ID</span><input class="new-lead-source__input" [value]="newLeadStoreId" disabled /></label>
           </ng-container>
           <ng-container *ngIf="newLeadSource !== 'Self-Generated Lead'">
             <label class="new-lead-source new-lead-source--readonly"><span>Product Interested</span><tdx-field-control name="new-lead-product" ariaLabel="Product Interested" [label]="newLeadProduct" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
@@ -117,6 +127,7 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
             <label class="new-lead-source"><span>Store Name</span><tdx-field-control name="new-lead-store" ariaLabel="Store Name" [label]="newLeadStoreName" [value]="newLeadStoreName" [options]="newLeadStoreOptions" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
             <label class="new-lead-source new-lead-source--readonly"><span>Store ID</span><input class="new-lead-source__input" [value]="newLeadStoreId" disabled /></label>
           </ng-container>
+          </ng-template>
           <footer class="new-lead-modal__step-actions"><app-button label="Back" leftIcon="chevron_left" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Medium" (clicked)="newLeadStep = 1" /><app-button label="Create Lead" rightIcon="chevron_right" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" [disabled]="!newLeadSource" (clicked)="openNewLeadConfirmation()" /></footer>
         </ng-template>
       </div>
@@ -181,12 +192,15 @@ export class AppComponent implements AfterViewInit {
   newLeadEmailAddress = 'client@email.com';
   newLeadSource = 'Self-Generated Lead';
   newLeadProduct = 'Dream Builder';
-  newLeadManualSource = 'Self-Generated Lead';
+  newLeadManualSource = 'Family and Friends';
   newLeadReferralDate = new Date().toISOString().slice(0, 10);
   newLeadReferrerId = '54321';
   newLeadReferrerName = 'Juan Dela Cruz';
-  newLeadStoreName = '198 G. ARANETA AVENUE';
-  newLeadStoreId = '384768653';
+  newLeadStoreName = '595 THE FORT-BGC CORPORATE CENTER';
+  newLeadStoreId = 'RBG0380';
+  readonly agencyStoreName = '198 G. ARANETA AVENUE';
+  readonly agencyStoreId = '384768653';
+  readonly agencyUnitName = 'PURPLE BLAZE_JDELACRUZ';
   readonly newLeadSourceOptions: readonly TdxFieldControlOption[] = [
     'Alternative Distribution', 'CBG (Consumer Banking Group)', 'CLC (Consumer Lending Cluster)',
     'PBG (Partnership Banking Group)', 'Self-Generated Lead'
@@ -195,9 +209,12 @@ export class AppComponent implements AfterViewInit {
     { label: 'Dream Builder', value: 'Dream Builder' }
   ];
   readonly newLeadManualSourceOptions: readonly TdxFieldControlOption[] = [
-    'Self-Generated Lead', 'Referral', 'Digital'
+    'Family and Friends', 'Referral', 'Digital'
   ].map((label) => ({ label, value: label }));
   readonly newLeadStoreOptions: readonly TdxFieldControlOption[] = [
+    { label: '595 THE FORT-BGC CORPORATE CENTER', value: '595 THE FORT-BGC CORPORATE CENTER' }
+  ];
+  readonly agencyStoreOptions: readonly TdxFieldControlOption[] = [
     { label: '198 G. ARANETA AVENUE', value: '198 G. ARANETA AVENUE' }
   ];
   draftSiOpen = false;

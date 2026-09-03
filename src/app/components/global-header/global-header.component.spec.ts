@@ -20,7 +20,7 @@ describe('GlobalHeaderComponent', () => {
     expect(searchButton.classList.contains('tdx-button--small')).toBe(true);
     expect(searchButton.classList.contains('tdx-button--filled-icons')).toBe(true);
     expect(fixture.nativeElement.querySelector('[aria-label="Notifications"]')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('[aria-label="Open EA profile"]')?.textContent).toBe('EA');
+    expect(fixture.nativeElement.querySelector('[aria-label="Open EA profile"]')?.textContent).toBe('BA');
   });
 
   it('updates the shared state when navigation is toggled', () => {

@@ -258,6 +258,15 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - This is a presentation-only correction. Preserve all scheduling, cancellation, rescheduling, board movement, activity recording, and navigation flows.
 - Verified with the lead activity drawer tests: **8 tests passing**.
 
+### Latest Agency New Lead source fields correction — 2026-09-03
+
+- Agency users now see the Agency-specific New Lead Step 2 fields: Source of Lead, Product Interested, Store Name, Store ID, and Unit Name.
+- Agency defaults are `Self-Generated Lead`, `Dream Builder`, `198 G. ARANETA AVENUE`, `384768653`, and `PURPLE BLAZE_JDELACRUZ` respectively.
+- Agency Source of Lead, Store ID, and Unit Name are standard non-editable fields; Store Name remains a dropdown using the existing field-control component.
+- Banca users retain their separate source-specific fields and defaults, including `Family and Friends` for the manually created lead's Manual Source.
+- This is a scoped presentation/input-state correction. Preserve the existing New Lead creation, navigation, and lifecycle flows.
+- Verified with the app component tests: **17 tests passing**.
+
 ### Latest Applications timeline update — 2026-09-01
 
 - Grace Kelly's Applications Activity Timeline uses varied, realistic sample dates and times; this is display-only sample data and does not change any user flow.

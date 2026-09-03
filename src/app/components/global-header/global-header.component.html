@@ -36,7 +36,7 @@
         [filled]="true"
       />
       <div class="global-header__profile-menu">
-        <button type="button" class="avatar" aria-label="Open EA profile" [attr.aria-expanded]="profileMenuOpen" (click)="toggleProfileMenu($event)">EA</button>
+        <button type="button" class="avatar" aria-label="Open EA profile" [attr.aria-expanded]="profileMenuOpen" (click)="toggleProfileMenu($event)">{{ avatarInitials }}</button>
         <div *ngIf="profileMenuOpen" class="profile-menu" role="menu">
           <div class="profile-menu__user">{{ userType }} User</div>
           <button type="button" role="menuitem">Change password</button>

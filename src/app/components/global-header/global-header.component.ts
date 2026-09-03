@@ -17,6 +17,10 @@ export class GlobalHeaderComponent {
   readonly buttonSize = TdxButtonSize;
   readonly buttonVariant = TdxButtonVariant;
 
+  get avatarInitials(): string {
+    return this.userType === 'Agency' ? 'AG' : 'BA';
+  }
+
   constructor(readonly navigation: AppNavigationStateService) {}
 
   toggleProfileMenu(event: Event): void {

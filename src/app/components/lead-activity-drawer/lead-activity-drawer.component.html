@@ -31,7 +31,7 @@
           <div><dt>Email</dt><dd>client@email.com</dd></div>
           <div><dt>Mobile Number</dt><dd>+63 9226789012</dd></div>
           <div><dt>Product Interested</dt><dd>{{ lead.productInterested }}</dd></div>
-          <div *ngIf="userType === 'Banca'"><dt>EWB Client Financial Segmentation</dt><dd>Mid</dd></div>
+          <div *ngIf="userType === 'Banca' && !isManuallyCreatedLead"><dt>EWB Client Financial Segmentation</dt><dd>Mid</dd></div>
           <div><dt>Source of Lead</dt><dd>{{ userType === 'Agency' ? 'Self-Generated Lead' : lead.source }}</dd></div>
           <ng-container *ngIf="userType === 'Agency'; else bancaLeadInfo">
             <div><dt>Store/Branch Name</dt><dd>595 THE FORT - BGC CORPORATE CENTER</dd></div>
@@ -42,7 +42,7 @@
             <div><dt>Referrer Name</dt><dd>{{ lead.referrer }}</dd></div>
             <div><dt>Referrer ID</dt><dd>100234</dd></div>
             <div><dt>Referral Date</dt><dd>February 03, 2026</dd></div>
-            <div *ngIf="lead.source === 'Self-Generated Lead'"><dt>Manual Source</dt><dd>Self-Generated Lead</dd></div>
+            <div *ngIf="lead.source === 'Self-Generated Lead'"><dt>Manual Source</dt><dd>{{ isManuallyCreatedLead ? 'Family and Friends' : 'Self-Generated Lead' }}</dd></div>
             <div><dt>Store/Branch Name</dt><dd>595 THE FORT - BGC CORPORATE CENTER</dd></div>
             <div><dt>Store/Branch ID</dt><dd>RBG0380</dd></div>
           </ng-template>

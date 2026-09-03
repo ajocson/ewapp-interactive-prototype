@@ -254,6 +254,10 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
     return this.rawStatusTag === 'Follow-up';
   }
 
+  get isManuallyCreatedLead(): boolean {
+    return this.lead.id.startsWith('manual-');
+  }
+
   get hasFollowUpAppointment(): boolean {
     return this.isFollowUp && Boolean(this.lead.appointment);
   }
