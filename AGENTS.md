@@ -343,6 +343,7 @@ Verified on **2026-08-29**:
 - The API error illustration is stored at `src/assets/api-error-illustration.png`.
 - Follow-Up pagination keeps the currently visible 10 lead cards rendered while the next 10 cards load through skeleton placeholders; the existing cards must not disappear during Load More.
 - The LCAM page search matches both the displayed `leadId` and lead name, applies results on Enter, and clears pending/applied search state through the clear icon.
+- The `/lcam/api` error state uses lead-specific copy: `Can’t display leads right now`, followed by the lead-data loading message and support contact message.
 
 - Production build emits component-style budget warnings:
   - `draft-si-flow.component.scss`: about 12.61 kB vs. 8 kB warning budget.
