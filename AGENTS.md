@@ -324,6 +324,14 @@ Verified on **2026-08-29**:
 
 ## Known Issues and Limitations
 
+### Latest API error demo update — 2026-09-03
+
+- `/lcam/api` is a demo-only route that shows a two-second lead-board skeleton before displaying the API error state.
+- The API error state reuses the existing LCAM search-empty page structure and styling rather than maintaining a separate empty-state container implementation.
+- API mode keeps the board header minimum-width behavior, hides horizontal overflow like the search-empty state, and preserves the lower container’s light border, rounded corners, white background, padding, and full available height.
+- The page search field is read-only in API mode but is not disabled visually; normal LCAM search behavior is unchanged.
+- The API error illustration is stored at `src/assets/api-error-illustration.png`.
+
 - Production build emits component-style budget warnings:
   - `draft-si-flow.component.scss`: about 12.61 kB vs. 8 kB warning budget.
   - `proposal-flow.component.scss`: about 14.54 kB vs. 8 kB warning budget.

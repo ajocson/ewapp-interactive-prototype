@@ -20,6 +20,7 @@ export class ButtonComponent {
   @Input() rightIcon: TdxButtonIcon = null;
   @Input() filledIcons = false;
   @Input() ariaLabel?: string;
+  @Input() title = '';
   @Input() ariaExpanded?: boolean;
   @Input() ariaControls?: string;
   @Output() clicked = new EventEmitter<MouseEvent>();

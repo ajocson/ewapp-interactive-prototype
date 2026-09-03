@@ -98,7 +98,17 @@ export class FieldControlComponent implements AfterViewInit, OnDestroy {
     this.closeMenu();
   }
 
-  onInputValueChanged(value: string): void {
+  onInputValueChanged(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+    if (this.inputType === 'number') {
+      value = value.replace(/[^0-9.]/g, '');
+      const decimalIndex = value.indexOf('.');
+      if (decimalIndex >= 0) {
+        value = value.slice(0, decimalIndex + 1) + value.slice(decimalIndex + 1).replaceAll('.', '');
+      }
+      input.value = value;
+    }
     this.inputValueChange.emit(this.formatThousands ? this.formatThousandsValue(value) : value);
   }
 

@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
@@ -10,7 +11,7 @@ import {
 } from '@angular/core';
 
 import { LeadBoardData, LeadCardData } from '../../lead-board.model';
-import { TdxButtonSize, TdxButtonVariant } from '../../shared/components/button/button.model';
+import { TdxButtonEmphasis, TdxButtonSize, TdxButtonVariant } from '../../shared/components/button/button.model';
 import { TdxFieldControlOption } from '../../shared/components/field-control/field-control.component';
 import {
   BoardLeadStateFilter,
@@ -38,6 +39,7 @@ export class LeadBoardComponent {
   @ViewChild('searchInput') private searchInput?: ElementRef<HTMLInputElement>;
 
   readonly buttonVariant = TdxButtonVariant;
+  readonly buttonEmphasis = TdxButtonEmphasis;
   readonly buttonSize = TdxButtonSize;
   readonly leadStateOptions: readonly TdxFieldControlOption[] = [
     { label: 'All', value: 'All' },
@@ -60,12 +62,21 @@ export class LeadBoardComponent {
   ];
 
   isSearchOpen = false;
+  isInitialLoading = true;
+  loadedLeadCount = 10;
+  isLoadingMore = false;
+  private loadMoreTimer?: ReturnType<typeof setTimeout>;
   isFilterOpen = false;
   searchTerm = '';
   appliedFilters: LeadBoardFilters = this.emptyFilters();
   draftFilters: LeadBoardFilters = this.emptyFilters();
 
-  constructor(private readonly elementRef: ElementRef<HTMLElement>) {}
+  constructor(private readonly elementRef: ElementRef<HTMLElement>, private readonly changeDetectorRef: ChangeDetectorRef) {
+    setTimeout(() => {
+      this.isInitialLoading = false;
+      this.changeDetectorRef.markForCheck();
+    }, 2000);
+  }
 
   get visibleLeads(): readonly LeadCardData[] {
     const query = this.searchTerm.trim().toLocaleLowerCase();
@@ -103,8 +114,22 @@ export class LeadBoardComponent {
         break;
     }
 
-    return leads;
+    return this.board.id === 'follow-up' ? leads.slice(0, this.loadedLeadCount) : leads;
   }
+
+  get hasMoreLeads(): boolean { return this.board.id === 'follow-up' && this.loadedLeadCount < this.board.leads.length; }
+
+  loadMore(): void {
+    if (!this.hasMoreLeads || this.isLoadingMore) return;
+    this.isLoadingMore = true;
+    this.loadMoreTimer = setTimeout(() => {
+      this.loadedLeadCount += 10;
+      this.isLoadingMore = false;
+      this.changeDetectorRef.markForCheck();
+    }, 2000);
+  }
+
+  ngOnDestroy(): void { if (this.loadMoreTimer) clearTimeout(this.loadMoreTimer); }
 
   get displayCount(): number {
     return this.count ?? this.board.leads.length;

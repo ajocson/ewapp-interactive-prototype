@@ -141,6 +141,7 @@
 
 .lead-board__cards {
   display: flex;
+  position: relative;
   min-height: var(--space-none);
   flex: 1 1 auto;
   flex-direction: column;
@@ -154,6 +155,13 @@
   touch-action: pan-x pan-y;
   -webkit-overflow-scrolling: touch;
 }
+
+.lead-board__skeletons { position: absolute; z-index: 1; top: var(--board-card-padding-top); right: var(--board-card-padding-x); left: var(--board-card-padding-x); display: grid; gap: var(--space-md); }
+.lead-board__cards > app-button { align-self: center; }
+lam-lead-card[hidden] { display: none !important; }
+.lead-board__skeleton { min-height: 128px; border-radius: var(--radius-md); background: linear-gradient(90deg, var(--color-grey-100) 25%, var(--color-grey-200) 50%, var(--color-grey-100) 75%); background-size: 200% 100%; animation: lead-skeleton-loading 1.2s ease-in-out infinite; }
+
+@keyframes lead-skeleton-loading { to { background-position: -200% 0; } }
 
 .lead-board__cards::-webkit-scrollbar {
   width: var(--scrollbar-width);

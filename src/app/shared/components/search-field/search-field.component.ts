@@ -17,6 +17,7 @@ export class SearchFieldComponent {
   @Input() size: TdxSearchFieldSize = 'medium';
   @Input() compact = false;
   @Input() disabled = false;
+  @Input() readonly = false;
   @Output() valueChange = new EventEmitter<string>();
   @Output() focused = new EventEmitter<void>();
 

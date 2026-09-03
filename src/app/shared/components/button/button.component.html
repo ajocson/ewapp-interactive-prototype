@@ -1,5 +1,5 @@
 <button type="button" class="tdx-button" [ngClass]="buttonClasses" [disabled]="isInteractionDisabled"
-  [attr.aria-busy]="isLoading ? 'true' : null" [attr.aria-label]="ariaLabel || null"
+  [attr.aria-busy]="isLoading ? 'true' : null" [attr.aria-label]="ariaLabel || null" [attr.title]="title || null"
   [attr.aria-expanded]="ariaExpanded ?? null" [attr.aria-controls]="ariaControls || null"
   [attr.data-variant]="variant" [attr.data-emphasis]="resolvedEmphasis" [attr.data-size]="size"
   (click)="handleClick($event)">

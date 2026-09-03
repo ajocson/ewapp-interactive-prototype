@@ -35,7 +35,7 @@
 
 .drawer-contact header p {
   margin: var(--space-none);
-  color: var(--text-neutral-secondary);
+  color: var(--text-neutral-primary);
   font-size: var(--caption-text-size);
   line-height: var(--caption-line-height);
 }
@@ -140,6 +140,54 @@
 .drawer-contact__button,
 .drawer-action-button { width: 100%; }
 
+.drawer-contact__button--demo-disabled {
+  position: relative;
+}
+
+.drawer-contact__button--demo-disabled ::ng-deep .tdx-button {
+  opacity: var(--opacity-disabled);
+}
+
+.drawer-contact__button--demo-disabled::after {
+  position: absolute;
+  z-index: var(--layer-tooltip);
+  bottom: calc(100% + var(--space-xs));
+  right: 0;
+  left: 0;
+  width: max-content;
+  max-width: 280px;
+  margin: auto;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-xs);
+  background: var(--color-grey-700);
+  color: var(--text-neutral-inverse);
+  content: attr(data-tooltip);
+  font-size: var(--caption-text-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--caption-line-height);
+  opacity: 0;
+  pointer-events: none;
+  text-align: center;
+  transform: translateY(var(--space-xs));
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.drawer-contact__button--demo-disabled:hover::after,
+.drawer-contact__button--demo-disabled:focus-within::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.appointment-completion-message {
+  display: block;
+  margin-top: var(--space-2xs);
+  color: var(--text-neutral-primary);
+  font-size: var(--caption-text-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--caption-line-height);
+  text-align: center;
+}
+
 .drawer-contact > .drawer-notes + .drawer-contact__button {
   margin-top: calc(var(--space-lg) - var(--space-xl));
 }
@@ -234,6 +282,14 @@
   font-size: var(--paragraph-sm-text-size);
   line-height: var(--paragraph-sm-line-height);
 }
+.drawer-scheduler__fields select { padding-right: var(--space-4xl); }
+.drawer-select-input { position: relative; }
+.drawer-select-input select { appearance: none; -webkit-appearance: none; padding-right: var(--space-3xl); }
+.drawer-select-input__icon { position: absolute; top: 50%; right: var(--space-sm); color: var(--field-text); font-size: var(--space-xl); pointer-events: none; transform: translateY(-50%); }
+.drawer-date-input { position: relative; }
+.drawer-date-input input { position: relative; z-index: 1; font-size: var(--paragraph-sm-text-size); font-weight: var(--font-weight-regular); line-height: var(--paragraph-sm-line-height); }
+.drawer-date-input input.is-empty { color: var(--text-neutral-secondary); }
+.drawer-date-input input.is-invalid { border: 2px solid var(--color-red-600); }
 
 .drawer-scheduler__actions { margin-top: var(--space-md); }
 

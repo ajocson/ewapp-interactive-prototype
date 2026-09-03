@@ -29,7 +29,7 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
   template: `
     <router-outlet />
     <div *ngIf="loggedIn && !showApplications" class="app-dashboard-host" [attr.inert]="selectedLead ? '' : null" [attr.aria-hidden]="selectedLead ? true : null">
-      <lam-dashboard [userType]="userType" (leadOpened)="openLead($event)" (newLeadRequested)="openNewLead()" (draftSiRequested)="openDraftSiQuickQuote()" (loggedOut)="logOut()" />
+      <lam-dashboard [userType]="userType" [apiErrorMode]="apiErrorMode" (leadOpened)="openLead($event)" (newLeadRequested)="openNewLead()" (draftSiRequested)="openDraftSiQuickQuote()" (loggedOut)="logOut()" />
     </div>
     <lam-applications *ngIf="loggedIn && showApplications" [userType]="userType" (leadSelected)="openApplicationLead($event)" (loggedOut)="logOut()" />
     <lam-lead-activity-drawer
@@ -189,6 +189,7 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
   standalone: false
 })
 export class AppComponent implements AfterViewInit {
+  apiErrorMode = false;
   readonly buttonVariant = TdxButtonVariant;
   readonly buttonEmphasis = TdxButtonEmphasis;
   readonly buttonSize = TdxButtonSize;
@@ -768,6 +769,17 @@ export class AppComponent implements AfterViewInit {
 
   private openRoute(url: string): void {
     const path = url.split(/[?#]/, 1)[0];
+    if (path === '/lcam/api') {
+      this.apiErrorMode = true;
+      this.selectedLead = null;
+      this.draftSiOpen = false;
+      this.proposalOpen = false;
+      this.contactDrawerOpen = false;
+      this.navigation.activeDestination.set('lcam-board');
+      this.changeDetectorRef.markForCheck();
+      return;
+    }
+    this.apiErrorMode = false;
     const match = /^\/lcam(?:\/([^/]+)(?:\/(profile|proposals|applications))?)?\/?$/.exec(path);
     if (!match) return;
 

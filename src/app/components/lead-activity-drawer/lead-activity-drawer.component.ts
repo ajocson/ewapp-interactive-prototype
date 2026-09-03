@@ -148,6 +148,8 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
   potentialCaseCount: number | null = null;
   afypDeclarationError = false;
   potentialCaseCountError = false;
+  appointmentDateError = false;
+  appointmentTimeError = false;
   unableToSetAppointmentOpen = false;
   parkNotes = '';
   dropNotes = '';
@@ -244,6 +246,15 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
 
   get isAppointmentSet(): boolean {
     return APPOINTMENT_STATUS_TAGS.has(this.rawStatusTag);
+  }
+
+  get appointmentCompletionAvailable(): boolean {
+    const appointment = this.lead.appointment;
+    if (!appointment) return false;
+    const [year, month, day] = appointment.date.split('-').map(Number);
+    const appointmentEnd = new Date(year, month - 1, day);
+    appointmentEnd.setMinutes(appointment.endMinutes);
+    return new Date() >= appointmentEnd;
   }
 
   get isMeeting(): boolean {
@@ -465,12 +476,14 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
     this.rescheduling = rescheduling;
     this.schedulerMode = schedulerMode;
     this.cancellingAppointment = false;
-    this.selectedDate = this.lead.appointment?.date ?? this.toIsoDate(now);
+    this.selectedDate = rescheduling ? (this.lead.appointment?.date ?? '') : '';
     this.selectedStartMinutes = this.lead.appointment?.startMinutes ?? this.firstAvailableStart(now);
     this.selectedEndMinutes = this.lead.appointment?.endMinutes ?? this.nextEndTime(this.selectedStartMinutes);
     this.appointmentNotes = this.lead.appointment?.notes ?? '';
     this.afypDeclarationError = false;
     this.potentialCaseCountError = false;
+    this.appointmentDateError = false;
+    this.appointmentTimeError = false;
   }
 
   cancelScheduler(): void {
@@ -480,6 +493,7 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
   }
 
   dateChanged(): void {
+    this.appointmentDateError = !!this.selectedDate && this.selectedDate < this.minimumDate;
     const options = this.startTimeOptions;
     if (!options.some((option) => option.value === this.selectedStartMinutes)) {
       this.selectedStartMinutes = options[0]?.value ?? null;
@@ -495,23 +509,25 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
   }
 
   updateAfypDeclaration(value: string): void {
-    const normalized = value.replaceAll(',', '');
+    const normalized = value.replaceAll(',', '').replace(/[^0-9.]/g, '');
     this.afypDeclaration = normalized === '' ? null : Number(normalized);
     this.afypDeclarationError = false;
   }
 
   updatePotentialCaseCount(value: string): void {
-    this.potentialCaseCount = value === '' ? null : Number(value);
+    const normalized = value.replace(/[^0-9]/g, '');
+    this.potentialCaseCount = normalized === '' ? null : Number(normalized);
     this.potentialCaseCountError = false;
   }
 
   scheduleAppointment(): void {
-    if (!this.selectedDate || this.selectedStartMinutes === null || this.selectedEndMinutes === null) return;
+    this.appointmentDateError = !this.selectedDate || this.selectedDate < this.minimumDate;
+    this.appointmentTimeError = this.selectedStartMinutes !== null && this.selectedEndMinutes !== null && this.selectedEndMinutes <= this.selectedStartMinutes;
     if (this.schedulerMode === 'appointment') {
       this.afypDeclarationError = !this.afypDeclaration || this.afypDeclaration <= 0;
       this.potentialCaseCountError = !this.potentialCaseCount || this.potentialCaseCount <= 0;
-      if (this.afypDeclarationError || this.potentialCaseCountError) return;
     }
+    if (!this.selectedDate || this.selectedStartMinutes === null || this.selectedEndMinutes === null || this.appointmentDateError || this.appointmentTimeError || this.afypDeclarationError || this.potentialCaseCountError) return;
 
     const event: LeadAppointmentScheduledEvent = {
       lead: this.lead,

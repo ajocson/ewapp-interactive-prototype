@@ -14,7 +14,7 @@
 
     <section class="priorities" aria-label="Lead priorities">
       <div class="filters" role="search">
-        <app-search-field class="filters__search" name="lead-search" placeholder="Search by lead name or ID" ariaLabel="Search by lead name or ID" [(value)]="searchTerm" />
+        <app-search-field class="filters__search" name="lead-search" placeholder="Search by lead name or ID" ariaLabel="Search by lead name or ID" [readonly]="apiErrorVisible" [(value)]="searchTerm" />
         <tdx-field-control
           name="lead-source"
           ariaLabel="Source of lead"
@@ -126,10 +126,10 @@
         </div>
       </div>
 
-      <div class="board-viewport" [class.board-viewport--page-empty]="pageSearchHasNoMatches" tabindex="0" aria-label="Lead pipeline boards">
-        <div class="board-track" [class.board-track--page-empty]="pageSearchHasNoMatches">
+      <div class="board-viewport" [class.board-viewport--page-empty]="pageSearchHasNoMatches || apiErrorVisible" tabindex="0" aria-label="Lead pipeline boards">
+        <div class="board-track" [class.board-track--page-empty]="pageSearchHasNoMatches || apiErrorVisible">
           <lam-lead-board
-            *ngFor="let board of filteredBoards; trackBy: trackBoard"
+            *ngFor="let board of (apiErrorVisible ? apiErrorBoards : filteredBoards); trackBy: trackBoard"
             [board]="board"
             [highlightedLeadId]="highlightedLeadId"
             (leadSelected)="selectLead($event)"
@@ -142,6 +142,14 @@
             <p>We couldn’t find any leads matching “{{ searchTerm.trim() }}”.</p>
             <p>Try a different lead name or ID.</p>
             <app-button label="Clear Search" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="clearPageSearch()" />
+          </div>
+        </section>
+        <section *ngIf="apiErrorVisible" class="page-search-empty-state" role="alert" aria-labelledby="api-error-title">
+          <div class="page-search-empty-state__content">
+            <img src="assets/api-error-illustration.png" alt="" aria-hidden="true">
+            <h2 id="api-error-title">Can’t display details right now</h2>
+            <p>We couldn’t load the policy details at the moment. Please try again later.</p>
+            <p>If issue persists, contact EWATechServices@ewageas.com.ph.</p>
           </div>
         </section>
       </div>

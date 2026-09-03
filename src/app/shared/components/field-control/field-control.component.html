@@ -39,7 +39,7 @@
         [disabled]="disabled"
         (focus)="onInputFocus($event)"
         (blur)="onInputBlur($event)"
-        (input)="onInputValueChanged($any($event.target).value)"
+        (input)="onInputValueChanged($event)"
       />
     </div>
   </ng-template>

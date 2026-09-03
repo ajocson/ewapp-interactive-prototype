@@ -59,11 +59,14 @@
   <div class="lead-board__cards">
     <lam-lead-card
       *ngFor="let lead of visibleLeads; trackBy: trackLead"
+      [hidden]="isInitialLoading || isLoadingMore"
       [lead]="lead"
       [highlighted]="lead.id === highlightedLeadId"
       [showTatAging]="board.id !== 'lead'"
       (selected)="leadSelected.emit($event)"
     />
+    <div *ngIf="isInitialLoading || isLoadingMore" class="lead-board__skeletons" aria-label="Loading leads"><div *ngFor="let skeleton of [1,2,3,4,5,6,7,8,9,10]" class="lead-board__skeleton"></div></div>
+    <app-button *ngIf="hasMoreLeads && !isLoadingMore" label="Load More" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Transparent" [size]="buttonSize.Small" (clicked)="loadMore()" />
     <div *ngIf="searchTerm.trim() && visibleLeads.length === 0" class="lead-board__empty-state" role="status">
       <img src="assets/icons/icon-user-not-found.svg" alt="" aria-hidden="true">
       <p>No matches were found</p>

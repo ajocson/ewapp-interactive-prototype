@@ -143,19 +143,21 @@
         <div class="drawer-scheduler__fields">
           <label>
             <span>Date</span>
-            <input type="date" [min]="minimumDate" [(ngModel)]="selectedDate" (ngModelChange)="dateChanged()" />
+            <div class="drawer-date-input"><input lang="en-GB" type="date" [class.is-empty]="!selectedDate" [class.is-invalid]="appointmentDateError" [min]="minimumDate" [(ngModel)]="selectedDate" (ngModelChange)="dateChanged()" /></div>
+            <small *ngIf="appointmentDateError" class="drawer-scheduler__error">{{ selectedDate ? 'Select today or a future date.' : 'This field is required.' }}</small>
           </label>
           <label>
             <span>Start Time</span>
-            <select [(ngModel)]="selectedStartMinutes" (ngModelChange)="startTimeChanged()">
+            <div class="drawer-select-input"><select [(ngModel)]="selectedStartMinutes" (ngModelChange)="startTimeChanged()">
               <option *ngFor="let option of startTimeOptions" [ngValue]="option.value">{{ option.label }}</option>
-            </select>
+            </select><span class="material-symbols-rounded drawer-select-input__icon" aria-hidden="true">keyboard_arrow_down</span></div>
           </label>
           <label>
             <span>End Time</span>
-            <select [(ngModel)]="selectedEndMinutes">
+            <div class="drawer-select-input"><select [(ngModel)]="selectedEndMinutes">
               <option *ngFor="let option of endTimeOptions" [ngValue]="option.value">{{ option.label }}</option>
-            </select>
+            </select><span class="material-symbols-rounded drawer-select-input__icon" aria-hidden="true">keyboard_arrow_down</span></div>
+            <small *ngIf="appointmentTimeError" class="drawer-scheduler__error">End Time must be later than Start Time.</small>
           </label>
         </div>
 
@@ -273,7 +275,8 @@
               <span>Notes (Optional)</span>
               <textarea rows="4" [(ngModel)]="activityNotes" placeholder="Add notes about your conversation"></textarea>
             </label>
-            <app-button class="drawer-contact__button" label="Presentation Completed" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="completeAppointment()" />
+            <app-button class="drawer-contact__button drawer-contact__button--demo-disabled" data-tooltip="For demo purposes, this button remains clickable to proceed to the next step." label="Presentation Completed" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" [attr.aria-disabled]="!appointmentCompletionAvailable" (clicked)="completeAppointment()" />
+            <small *ngIf="!appointmentCompletionAvailable" class="appointment-completion-message">To mark as Presentation Completed, wait until the appointment ends.</small>
           </ng-container>
 
           <ng-container *ngIf="isAppointmentSet && !lead.appointment">
@@ -326,7 +329,8 @@
                 <span>Notes (Optional)</span>
                 <textarea rows="4" [(ngModel)]="followUpNotes" placeholder="Add notes about your conversation"></textarea>
               </label>
-              <app-button class="drawer-contact__button" label="Presentation Completed" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="completeFollowUpAppointment()" />
+              <app-button class="drawer-contact__button drawer-contact__button--demo-disabled" data-tooltip="For demo purposes, this button remains clickable to proceed to the next step." label="Presentation Completed" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" [attr.aria-disabled]="!appointmentCompletionAvailable" (clicked)="completeFollowUpAppointment()" />
+              <small *ngIf="!appointmentCompletionAvailable" class="appointment-completion-message">To mark as Presentation Completed, wait until the appointment ends.</small>
             </div>
           </ng-container>
 

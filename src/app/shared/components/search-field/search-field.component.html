@@ -7,6 +7,7 @@
     [value]="value"
     [placeholder]="placeholder"
     [disabled]="disabled"
+    [readOnly]="readonly"
     [attr.aria-label]="ariaLabel"
     (focus)="focused.emit()"
     (input)="updateValue($any($event.target).value)"

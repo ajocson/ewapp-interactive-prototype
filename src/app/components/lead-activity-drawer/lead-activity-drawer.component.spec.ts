@@ -60,6 +60,7 @@ describe('LeadActivityDrawerComponent', () => {
 
   it('shows the same required error state for both appointment metrics', () => {
     fixture.componentInstance.openScheduler();
+    fixture.componentInstance.selectedDate = fixture.componentInstance.minimumDate;
     fixture.componentInstance.scheduleAppointment();
 
     expect(fixture.componentInstance.afypDeclarationError).toBe(true);
@@ -157,6 +158,7 @@ describe('LeadActivityDrawerComponent', () => {
 
     fixture.componentInstance.openFollowUpScheduler();
     expect(fixture.componentInstance.schedulerTitle).toBe('Schedule Follow-up Appointment');
+    fixture.componentInstance.selectedDate = fixture.componentInstance.minimumDate;
     fixture.componentInstance.afypDeclaration = 500000;
     fixture.componentInstance.potentialCaseCount = 1;
     fixture.componentInstance.scheduleAppointment();

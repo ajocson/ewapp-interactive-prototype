@@ -5,6 +5,7 @@ import { LcamRouteComponent } from './lcam-route.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'lcam' },
+  { path: 'lcam/api', pathMatch: 'full', component: LcamRouteComponent },
   { path: 'lcam', pathMatch: 'full', component: LcamRouteComponent },
   { path: 'lcam/:leadId', pathMatch: 'full', component: LcamRouteComponent },
   { path: 'lcam/:leadId/profile', pathMatch: 'full', component: LcamRouteComponent },

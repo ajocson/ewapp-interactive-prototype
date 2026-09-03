@@ -36,6 +36,16 @@ const DESKTOP_SIDEBAR_QUERY = '(min-width: 1024px)';
 })
 export class DashboardComponent implements OnDestroy {
   @Input() userType: 'Agency' | 'Banca' = 'Banca';
+  @Input() set apiErrorMode(value: boolean) {
+    if (this.apiErrorTimer) clearTimeout(this.apiErrorTimer);
+    this.apiErrorVisible = false;
+    if (value) {
+      this.apiErrorTimer = setTimeout(() => {
+        this.apiErrorVisible = true;
+        this.changeDetectorRef.markForCheck();
+      }, 2000);
+    }
+  }
   @Output() leadOpened = new EventEmitter<LeadCardData>();
   @Output() newLeadRequested = new EventEmitter<void>();
   @Output() draftSiRequested = new EventEmitter<void>();
@@ -89,6 +99,9 @@ export class DashboardComponent implements OnDestroy {
 
   private readonly desktopMediaQuery: MediaQueryList | null;
   private highlightTimer?: ReturnType<typeof setTimeout>;
+  private apiErrorTimer?: ReturnType<typeof setTimeout>;
+  apiErrorVisible = false;
+  readonly apiErrorBoardTitles = ['Lead', 'Contacted', 'Appointments', 'Meetings', 'Follow-Up'];
   private activitySequence = 0;
 
   constructor(
@@ -105,6 +118,7 @@ export class DashboardComponent implements OnDestroy {
   ngOnDestroy(): void {
     this.desktopMediaQuery?.removeEventListener('change', this.handleDesktopBreakpointChange);
     if (this.highlightTimer) clearTimeout(this.highlightTimer);
+    if (this.apiErrorTimer) clearTimeout(this.apiErrorTimer);
   }
 
   closeSidebarFromOverlay(): void {
@@ -252,6 +266,10 @@ export class DashboardComponent implements OnDestroy {
         return this.activityTimestamp(b) - this.activityTimestamp(a);
       })
     }));
+  }
+
+  get apiErrorBoards(): readonly LeadBoardData[] {
+    return this.boards.map((board) => ({ ...board, leads: [] }));
   }
 
   get pageSearchHasNoMatches(): boolean {
@@ -684,6 +702,7 @@ export class DashboardComponent implements OnDestroy {
     const meeting: LeadTag = { label: 'Meeting', tone: 'success' };
     const followUp: LeadTag = { label: 'Follow-up', tone: 'success' };
     const appointment: LeadTag = { label: 'Feb 2, 2026 · 2:00-3:00 PM', tone: 'info' };
+    const demoAppointment: LeadTag = { label: 'Dec 25, 2026 · 2:00-3:00 PM', tone: 'info' };
     const pastDueAppointment: LeadTag = { label: 'Feb 3, 2026 · 2:00-3:00 PM', tone: 'danger' };
     const sampleAppointment: LeadAppointment = {
       date: '2026-02-02',
@@ -743,6 +762,9 @@ export class DashboardComponent implements OnDestroy {
             .map((activity) => id === 'lead-30-days' && activity.label === 'Parked Lead'
               ? { ...activity, label: 'Automatic Parked Lead' }
               : activity)
+            .map((activity) => id === 'appointment-1' && activity.label === 'Appointment Scheduled' && appointmentDetails
+              ? { ...activity, scheduledDateLabel: appointmentDetails.dateLabel, scheduledTimeLabel: appointmentDetails.timeLabel }
+              : activity)
             .filter((activity) => !(autoParkedAfter30Days && activity.label === 'Parked Lead'))
             .filter((activity) => !(autoDroppedAfter90Days && activity.label === 'Dropped Lead')),
           ...(autoParkedAfter30Days
@@ -789,11 +811,11 @@ export class DashboardComponent implements OnDestroy {
             'Female',
             true,
             'LMS (ETB)',
-            [appointmentScheduled, appointment],
+            [appointmentScheduled, demoAppointment],
             createdOn(5, 14),
             'Dream Builder',
             'Maxwell Anderson',
-            sampleAppointment
+            { ...sampleAppointment, date: '2026-12-25', dateLabel: 'December 25, 2026' }
           ),
           lead(
             'appointment-past-due',
@@ -836,6 +858,30 @@ export class DashboardComponent implements OnDestroy {
         id: 'follow-up',
         title: 'Follow-Up',
         leads: [
+          ...([
+            ['follow-up-10', 'Nathaniel Scott', 'Male', 9, 8, 15],
+            ['follow-up-11', 'Isabelle Grace Morris', 'Female', 9, 11, 30],
+            ['follow-up-12', 'Daniel Thomas Rivera', 'Male', 8, 14, 45],
+            ['follow-up-13', 'Charlotte Anne Hughes', 'Female', 8, 9, 20],
+            ['follow-up-14', 'Matthew Joseph Clark', 'Male', 7, 16, 10],
+            ['follow-up-15', 'Sophia Claire Bennett', 'Female', 7, 13, 5],
+            ['follow-up-16', 'Anthony Gabriel Lewis', 'Male', 6, 10, 40],
+            ['follow-up-17', 'Amelia Rose Walker', 'Female', 6, 15, 25],
+            ['follow-up-18', 'William Andrew Hall', 'Male', 5, 8, 50],
+            ['follow-up-19', 'Mia Elizabeth Young', 'Female', 5, 12, 35],
+            ['follow-up-20', 'Benjamin Charles King', 'Male', 4, 17, 15],
+            ['follow-up-21', 'Evelyn Marie Wright', 'Female', 4, 10, 5],
+            ['follow-up-22', 'Samuel Lucas Green', 'Male', 3, 14, 20],
+            ['follow-up-23', 'Harper Nicole Adams', 'Female', 3, 9, 45],
+            ['follow-up-24', 'Andrew Miguel Torres', 'Male', 2, 16, 30],
+            ['follow-up-25', 'Grace Olivia Scott', 'Female', 2, 11, 10],
+            ['follow-up-26', 'Nicholas Ryan Evans', 'Male', 1, 15, 55],
+            ['follow-up-27', 'Lily Catherine Baker', 'Female', 1, 8, 25],
+            ['follow-up-28', 'Jonathan Mark Foster', 'Male', 0, 13, 40],
+            ['follow-up-29', 'Victoria Jane Collins', 'Female', 0, 10, 15]
+          ] as const).map(([id, name, gender, day, hour, minute]) =>
+            lead(id, name, gender, true, 'Referral', [followUp], createdOn(day, hour, minute))
+          ),
           lead('follow-up-1', 'Alex Morgan Smith', 'Male', true, 'Leads from store', [followUp], createdOn(8, 16)),
           lead('follow-up-2', 'Emily Jane Cooper', 'Female', true, 'EWA Social Media', [followUp], createdOn(7, 10, 30)),
           lead('follow-up-auto-dropped', 'John Mark Doe', 'Male', 'Dropped', 'Leads from store', [followUp], new Date(2026, 0, 5, 9, 15), 'Dream Builder', 'Maxwell Anderson', undefined, false, false, false, true),
