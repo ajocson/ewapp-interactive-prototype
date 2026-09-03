@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 
 import { LeadCardData } from '../lead-board.model';
 import { DraftSiStep, InsuranceProduct, ProductCategory } from './draft-si-flow.model';
@@ -10,8 +10,10 @@ import { DraftSiStep, InsuranceProduct, ProductCategory } from './draft-si-flow.
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: false
 })
-export class DraftSiFlowComponent {
+export class DraftSiFlowComponent implements OnInit {
   @Input({ required: true }) lead!: LeadCardData;
+  @Input() startStep: DraftSiStep = 1;
+  @Input() standaloneDraft = false;
   @Output() closed = new EventEmitter<void>();
   @Output() activityRequested = new EventEmitter<void>();
   @Output() contactRequired = new EventEmitter<void>();
@@ -27,6 +29,16 @@ export class DraftSiFlowComponent {
   paymentPeriod = '5 Pay';
   paymentFrequency = 'Annual';
   benefitAmount = '500,000';
+  updateInfoOpen = false;
+  title = 'Mr.';
+  suffix = 'No suffix';
+  firstName = 'John Mark';
+  middleName = '';
+  lastName = 'Doe';
+  mobileNumber = '171234567';
+  insuredBirthDate = 'January 01, 1990';
+  emailAddress = 'test@email.com';
+  noMiddleName = true;
 
   readonly categories: readonly ProductCategory[] = ['All Products', 'Traditional', 'Variable Unit Link'];
   readonly products: readonly InsuranceProduct[] = [
@@ -38,6 +50,13 @@ export class DraftSiFlowComponent {
     { id: 'life-essentials', name: 'Life Essentials', category: 'Traditional' },
     { id: 'sure-start', name: 'Sure Start', category: 'Variable Unit Link' }
   ];
+
+  ngOnInit(): void {
+    this.step = this.startStep;
+    if (this.startStep === 2) {
+      this.selectedProduct = this.products[0];
+    }
+  }
 
   get visibleProducts(): readonly InsuranceProduct[] {
     return this.activeCategory === 'All Products'
@@ -55,6 +74,10 @@ export class DraftSiFlowComponent {
 
   @HostListener('document:keydown.escape')
   closeWithEscape(): void {
+    if (this.updateInfoOpen) {
+      this.closeUpdateInfo();
+      return;
+    }
     if (this.step !== 'results') {
       this.closed.emit();
     }
@@ -96,6 +119,15 @@ export class DraftSiFlowComponent {
   }
 
   openProposal(): void {
+    this.updateInfoOpen = true;
+  }
+
+  closeUpdateInfo(): void {
+    this.updateInfoOpen = false;
+  }
+
+  continueToUpdate(): void {
+    this.updateInfoOpen = false;
     this.proposalRequested.emit();
   }
 

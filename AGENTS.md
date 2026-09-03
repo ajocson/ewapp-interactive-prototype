@@ -312,6 +312,16 @@ Verified on **2026-08-29**:
 - The GitHub Pages workflow copies the production `index.html` to `404.html`, preserving Angular SPA behavior for direct access and refreshes of nested `/lcam` routes.
 - `angular.json` allows a 20 kB component-style maximum error budget so deployment is not blocked by the current proposal-flow style size; the 8 kB warning budget remains active.
 
+## Latest Prototype Updates — 2026-09-03
+
+- Draft SI sidebar entry preserves the existing lead-card Draft SI flow while opening the product-selection path for standalone sample generation.
+- Product-picker Continue opens the existing Draft SI Insured Basic Information step with Dream Builder selected.
+- Convert to Proposal opens a Figma-matched Update Individual Information modal. Continue to Update opens Info in edit mode; Profile and Proposals remain disabled until the CSA and proposal milestones are completed.
+- Sidebar-only Draft SI Step 4 shows a blank Search Existing Lead field, keeps the remaining sample fields filled and editable, and uses a magenta checkbox accent.
+- Cancel from sidebar Draft SI closes the standalone flow without reopening the lead activity drawer.
+- The Update Individual Information modal is fixed at 322px height and uses the downloaded Figma icon assets in `src/assets/icons/update-info-*.png`.
+- Focused verification after these changes: Draft SI/AppComponent tests **23 passing**; proposal-flow/AppComponent tests **45 passing**; `git diff --check` passes.
+
 ## Known Issues and Limitations
 
 - Production build emits component-style budget warnings:

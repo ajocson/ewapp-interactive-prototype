@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, ViewChild, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, HostListener, ViewChild, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 
@@ -29,7 +29,7 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
   template: `
     <router-outlet />
     <div *ngIf="loggedIn && !showApplications" class="app-dashboard-host" [attr.inert]="selectedLead ? '' : null" [attr.aria-hidden]="selectedLead ? true : null">
-      <lam-dashboard [userType]="userType" (leadOpened)="openLead($event)" (newLeadRequested)="openNewLead()" (loggedOut)="logOut()" />
+      <lam-dashboard [userType]="userType" (leadOpened)="openLead($event)" (newLeadRequested)="openNewLead()" (draftSiRequested)="openDraftSiQuickQuote()" (loggedOut)="logOut()" />
     </div>
     <lam-applications *ngIf="loggedIn && showApplications" [userType]="userType" (leadSelected)="openApplicationLead($event)" (loggedOut)="logOut()" />
     <lam-lead-activity-drawer
@@ -78,7 +78,35 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
       icon="check_circle"
       [description]="activityToastMessage"
     />
-    <lam-draft-si-flow *ngIf="selectedLead && draftSiOpen" [lead]="selectedLead" (closed)="closeDraftSi()" (draftSiGenerated)="recordDraftSiGenerated()" (proposalRequested)="openDraftProposalInfo()" (activityRequested)="openContactDrawer()" (contactRequired)="openContactDrawer()" (appointmentRequired)="openContactDrawer()" />
+    <section *ngIf="draftSiQuickQuoteOpen" class="draft-si-quick-quote" role="dialog" aria-modal="true" aria-labelledby="draft-si-quick-quote-title">
+      <button type="button" class="draft-si-quick-quote__backdrop" aria-label="Close Draft Sales Illustration" (click)="closeDraftSiQuickQuote()"></button>
+      <div class="draft-si-quick-quote__panel">
+        <button type="button" class="draft-si-quick-quote__close material-symbols-rounded" aria-label="Close Draft Sales Illustration" (click)="closeDraftSiQuickQuote()">close</button>
+        <div class="draft-si-quick-quote__amount-card">
+          <div class="draft-si-quick-quote__amount-content">
+            <strong>Amount to Pay</strong>
+            <p><b>₱63,652.50</b><span>/ ANNUALLY</span></p>
+            <em>The amount is payable in 10 years.</em>
+            <small>This quote serves as an estimate, including rider premiums, but is subject to potential changes based on underwriting assessment and applicable taxes.</small>
+          </div>
+          <img src="assets/icons/draft-si-note.svg" alt="" aria-hidden="true">
+        </div>
+        <div class="draft-si-quick-quote__content">
+          <h2 id="draft-si-quick-quote-title">Generate Draft Sales Illustration</h2>
+          <p>Generate a draft sales illustration quickly. This will serve as an estimate, based on standard industry rating, and is subject to changes based on submitted information. These results are not part of the contract.</p>
+          <app-button label="Generate Draft SI" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" (clicked)="openDraftSiProductPicker()" />
+      </div>
+      </div>
+    </section>
+    <div class="confirmation-overlay product-picker-overlay" *ngIf="draftSiProductPickerOpen" (click)="closeDraftSiProductPicker()" role="presentation">
+      <section class="product-picker" role="dialog" aria-modal="true" aria-labelledby="draft-si-product-picker-title" (click)="$event.stopPropagation()">
+        <header><h2 id="draft-si-product-picker-title">Choose Product</h2><p>Select the insurance plan that best suits your needs. Limit your selection to one plan only.</p></header>
+        <nav aria-label="Product category"><button type="button" [class.is-active]="draftSiProductCategory === 'all'" (click)="draftSiProductCategory = 'all'">All Products</button><button type="button" [class.is-active]="draftSiProductCategory === 'traditional'" (click)="draftSiProductCategory = 'traditional'">Traditional</button><button type="button" [class.is-active]="draftSiProductCategory === 'variable'" (click)="draftSiProductCategory = 'variable'">Variable Unit Link</button></nav>
+        <div class="product-picker__grid"><button *ngFor="let product of draftSiProducts" type="button" [class.is-selected]="draftSiSelectedProduct === product" (click)="draftSiSelectedProduct = product"><span class="product-picker__icon"><img src="assets/product-icon.svg" alt=""></span><span>{{ product }}</span><span *ngIf="draftSiSelectedProduct === product" class="material-symbols-rounded" aria-hidden="true">check_circle</span></button></div>
+        <footer><button type="button" class="proposal-button proposal-button--neutral-outline" (click)="closeDraftSiProductPicker()">Cancel</button><button type="button" class="proposal-button proposal-button--primary" [disabled]="!draftSiSelectedProduct" (click)="continueDraftSiProductPicker()">Continue</button></footer>
+      </section>
+    </div>
+    <lam-draft-si-flow *ngIf="selectedLead && draftSiOpen" [lead]="selectedLead" [startStep]="draftSiFlowStartStep" [standaloneDraft]="draftSiFromSidebar" (closed)="closeDraftSi()" (draftSiGenerated)="recordDraftSiGenerated()" (proposalRequested)="openDraftProposalInfo()" (activityRequested)="openContactDrawer()" (contactRequired)="openContactDrawer()" (appointmentRequired)="openContactDrawer()" />
     <lam-proposal-flow *ngIf="selectedLead && proposalOpen" [lead]="selectedLead" [routeTab]="activeRecordTab" [editMode]="leadInfoEditMode" [submittedApplicationContext]="applicationLeadContext" (routeTabChange)="navigateToRecordTab($event)" (leadInfoSaved)="recordLeadInfoUpdated()" (csaCreated)="recordCsaCreated()" (siGenerated)="recordSiGenerated()" (proposalSaved)="recordProposalCreated()" (applicationConverted)="recordApplicationConverted()" (contactRequired)="openContactDrawer()" (appointmentRequired)="openContactDrawer()" (activityRequested)="openContactDrawer()" (underwritingSubmitted)="viewSubmittedApplication($event)" (closed)="closeLead()" />
     <section *ngIf="newLeadOpen" class="new-lead-modal" role="dialog" aria-modal="true" aria-labelledby="new-lead-title">
       <div class="new-lead-modal__backdrop" aria-hidden="true"></div>
@@ -218,6 +246,13 @@ export class AppComponent implements AfterViewInit {
     { label: '198 G. ARANETA AVENUE', value: '198 G. ARANETA AVENUE' }
   ];
   draftSiOpen = false;
+  draftSiQuickQuoteOpen = false;
+  draftSiProductPickerOpen = false;
+  draftSiFlowStartStep: 1 | 2 = 1;
+  draftSiFromSidebar = false;
+  draftSiSelectedProduct = '';
+  draftSiProductCategory: 'all' | 'traditional' | 'variable' = 'all';
+  readonly draftSiProducts = ['Dream Builder', 'Future Assure', 'Future Assure Max (Peso)', 'Future Assure Max (US Dollar)', 'Future Assure Regular Pay', 'Life Essentials', 'Sure Start'];
   proposalOpen = false;
   contactDrawerOpen = false;
   activeRecordTab: LeadRecordTab = 'info';
@@ -273,6 +308,49 @@ export class AppComponent implements AfterViewInit {
     this.newLeadStep = 1;
     this.newLeadSource = 'Self-Generated Lead';
     this.newLeadOpen = true;
+  }
+
+  openDraftSiQuickQuote(): void {
+    this.draftSiFromSidebar = true;
+    this.draftSiProductPickerOpen = false;
+    this.draftSiQuickQuoteOpen = true;
+    this.changeDetectorRef.markForCheck();
+  }
+
+  closeDraftSiQuickQuote(): void {
+    this.draftSiQuickQuoteOpen = false;
+    this.changeDetectorRef.markForCheck();
+  }
+
+  openDraftSiProductPicker(): void {
+    this.draftSiQuickQuoteOpen = false;
+    this.draftSiProductPickerOpen = true;
+    this.draftSiSelectedProduct = '';
+    this.draftSiFlowStartStep = 1;
+    this.draftSiProductCategory = 'all';
+    this.changeDetectorRef.markForCheck();
+  }
+
+  closeDraftSiProductPicker(): void {
+    this.draftSiProductPickerOpen = false;
+    this.changeDetectorRef.markForCheck();
+  }
+
+  continueDraftSiProductPicker(): void {
+    if (!this.draftSiSelectedProduct) return;
+    if (!this.selectedLead) {
+      this.selectedLead = this.dashboard?.boards.flatMap((board) => board.leads)[0] ?? null;
+    }
+    if (!this.selectedLead) return;
+    this.draftSiProductPickerOpen = false;
+    this.draftSiFlowStartStep = 2;
+    this.draftSiOpen = true;
+    this.changeDetectorRef.markForCheck();
+  }
+
+  @HostListener('document:keydown.escape')
+  closeDraftSiQuickQuoteOnEscape(): void {
+    if (this.draftSiQuickQuoteOpen) this.closeDraftSiQuickQuote();
   }
 
   logOut(): void {
@@ -356,6 +434,7 @@ export class AppComponent implements AfterViewInit {
 
   openDraftSi(): void {
     this.contactDrawerOpen = false;
+    this.draftSiFromSidebar = false;
     this.draftSiOpen = true;
     this.navigation.showLeadFlow();
     this.changeDetectorRef.markForCheck();
@@ -363,6 +442,10 @@ export class AppComponent implements AfterViewInit {
 
   closeDraftSi(): void {
     this.draftSiOpen = false;
+    if (this.draftSiFromSidebar) {
+      this.selectedLead = null;
+      this.draftSiFromSidebar = false;
+    }
     this.changeDetectorRef.markForCheck();
   }
 
@@ -436,7 +519,7 @@ export class AppComponent implements AfterViewInit {
     this.proposalOpen = true;
     this.contactDrawerOpen = false;
     this.activeRecordTab = 'info';
-    this.leadInfoEditMode = false;
+    this.leadInfoEditMode = true;
     this.navigation.showLeadFlow();
     void this.router.navigate(['/lcam', this.selectedLead.leadId]);
     this.changeDetectorRef.markForCheck();

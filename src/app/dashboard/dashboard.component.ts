@@ -38,6 +38,7 @@ export class DashboardComponent implements OnDestroy {
   @Input() userType: 'Agency' | 'Banca' = 'Banca';
   @Output() leadOpened = new EventEmitter<LeadCardData>();
   @Output() newLeadRequested = new EventEmitter<void>();
+  @Output() draftSiRequested = new EventEmitter<void>();
   @Output() loggedOut = new EventEmitter<void>();
   searchTerm = '';
   pendingSources: readonly string[] = ['All'];

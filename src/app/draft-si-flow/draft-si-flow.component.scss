@@ -57,6 +57,7 @@
 .lead-form__row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); }
 .lead-form .checkbox-line { flex-direction: row; align-items: center; color: var(--text-neutral-secondary); }
 .checkbox-line input { width: var(--space-xl); min-height: var(--space-xl); }
+.lead-form--standalone .checkbox-line input { accent-color: var(--color-magenta-700); }
 .checkbox-line .material-symbols-rounded { font-size: var(--space-xl); }
 .phone-field > span { position: absolute; left: var(--space-lg); z-index: 1; white-space: nowrap; }
 .phone-field input { padding-left: var(--si-phone-prefix-width); }
@@ -93,6 +94,20 @@
 .pdf-viewer { display: grid; justify-items: center; gap: var(--space-xl); padding: var(--space-xs) var(--space-xl) var(--space-5xl); background: var(--color-grey-50); overflow: auto; }
 .pdf-viewer img { display: block; width: min(100%, var(--si-pdf-width)); height: auto; background: var(--surface-default); }
 
+.si-update-info-overlay { position: fixed; z-index: calc(var(--layer-proposal-dialog) + 2); inset: var(--space-none); display: grid; place-items: center; padding: var(--space-xl); background: var(--modal-overlay-bg); }
+.si-update-info-modal { position: relative; box-sizing: border-box; display: flex; width: min(100%, 650px); height: 322px !important; min-height: 322px !important; max-height: 322px; flex-direction: column; align-items: center; overflow: hidden; padding: var(--space-xl) var(--space-3xl) var(--space-3xl); border-radius: var(--radius-md); background: linear-gradient(180deg, #fff0f0 0%, var(--surface-default) 50%); box-shadow: var(--shadow-xl); color: var(--text-neutral-primary); text-align: center; }
+.si-update-info-modal__close { align-self: flex-end; width: var(--space-3xl); height: var(--space-3xl); padding: var(--space-none); border: var(--border-width-none); background: transparent; cursor: pointer; }
+.si-update-info-modal__close img { display: block; width: 100%; height: 100%; }
+.si-update-info-modal__icons { position: relative; display: flex; width: 216px; height: 72px; align-items: center; justify-content: space-between; margin-top: var(--space-md); }
+.si-update-info-modal__icons span { display: grid; width: 72px; height: 72px; place-items: center; border-radius: var(--radius-round); background: var(--surface-default); box-shadow: 0 6px 10px rgba(0, 0, 0, .06); }
+.si-update-info-modal__icons span img { width: 48px; height: 48px; }
+.si-update-info-modal__icons span:last-child { position: absolute; top: -18px; left: 72px; box-shadow: 0 2px 4px rgba(0, 0, 0, .1), 0 6px 10px rgba(0, 0, 0, .05); }
+.si-update-info-modal h2 { margin: var(--space-lg) var(--space-none) var(--space-sm); font-family: var(--typography-font-family-heading); font-size: 28px; line-height: 33.6px; }
+.si-update-info-modal p { max-width: 542px; margin: var(--space-none); font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
+.si-update-info-modal__continue { min-width: 155px; height: 40px; margin-top: var(--space-xl); padding: var(--space-xs) var(--space-md); border: var(--border-width-none); border-radius: var(--radius-round); background: var(--color-purple-900); color: var(--text-neutral-inverse); font-size: 13.333px; cursor: pointer; }
+.si-update-info-modal__continue:hover { filter: brightness(var(--button-hover-brightness)); }
+.si-update-info-modal__close:focus-visible, .si-update-info-modal__continue:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring-color); outline-offset: var(--focus-ring-offset); }
+
 @media (max-width: 760px) {
   .si-overlay { align-items: start; padding: var(--space-none); }
   .si-dialog, .si-dialog--basic, .si-dialog--coverage { min-height: 100dvh; max-height: none; border-radius: var(--space-none); padding: var(--space-xl); }
@@ -114,4 +129,6 @@
   .si-results__actions span { display: none; }
   .pdf-viewer { justify-items: start; overflow: auto; }
   .pdf-viewer img { width: var(--si-pdf-mobile-width); max-width: none; }
+  .si-update-info-modal { min-height: 0; padding: var(--space-xl); }
+  .si-update-info-modal h2 { font-size: var(--h6-text-size); line-height: var(--h6-line-height); }
 }

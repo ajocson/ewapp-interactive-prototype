@@ -87,6 +87,18 @@ describe('AppComponent LCAM activity feedback', () => {
     vi.useRealTimers();
   });
 
+  it('opens the product picker from the Draft SI quick quote action', () => {
+    fixture.componentInstance.draftSiQuickQuoteOpen = true;
+    fixture.detectChanges();
+
+    fixture.componentInstance.openDraftSiProductPicker();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.draftSiQuickQuoteOpen).toBe(false);
+    expect(fixture.componentInstance.draftSiProductPickerOpen).toBe(true);
+    expect(fixture.nativeElement.querySelector('#draft-si-product-picker-title')?.textContent).toContain('Choose Product');
+  });
+
   it('reschedules an appointment in place and records the exact success feedback', () => {
     vi.useFakeTimers();
     const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;
@@ -177,7 +189,7 @@ describe('AppComponent LCAM activity feedback', () => {
     expect(fixture.nativeElement.querySelector('lam-applications')).toBeTruthy();
   });
 
-  it('opens the Info tab in view mode when a Draft SI is converted to a proposal', () => {
+  it('opens the Info tab in edit mode when a Draft SI is converted to a proposal', () => {
     const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;
     const lead = dashboard.boards.find((board) => board.id === 'lead')!.leads[0];
     fixture.componentInstance.openLead(lead);
@@ -189,7 +201,7 @@ describe('AppComponent LCAM activity feedback', () => {
     expect(fixture.componentInstance.draftSiOpen).toBe(false);
     expect(fixture.componentInstance.proposalOpen).toBe(true);
     expect(fixture.componentInstance.activeRecordTab).toBe('info');
-    expect(fixture.componentInstance.leadInfoEditMode).toBe(false);
+    expect(fixture.componentInstance.leadInfoEditMode).toBe(true);
   });
 
   it('closes the activity drawer before opening Draft SI', () => {

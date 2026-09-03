@@ -138,17 +138,17 @@
       </header>
 
       <div class="lead-info-layout">
-        <form class="lead-form">
+        <form class="lead-form" [class.lead-form--standalone]="standaloneDraft">
           <label class="field-label" for="existing-lead">Search Existing Lead</label>
-          <div class="search-lead"><span class="material-symbols-rounded" aria-hidden="true">person_search</span><input id="existing-lead" [value]="lead.name" readonly><button type="button" aria-label="Reset lead"><span class="material-symbols-rounded" aria-hidden="true">replay</span></button></div>
-          <div class="lead-form__row"><label>Title<input value="Mr." disabled></label><label>Suffix (Optional)<input placeholder="Select suffix" disabled></label></div>
-          <label>First Name<input [value]="lead.name.split(' ').slice(0, -1).join(' ')" disabled></label>
-          <label>Middle Name<input placeholder="Enter your middle name" disabled></label>
-          <label class="checkbox-line"><input type="checkbox" disabled> I do not have middle name <span class="material-symbols-rounded" aria-hidden="true">help_outline</span></label>
-          <label>Last Name<input [value]="lead.name.split(' ').slice(-1)[0]" disabled></label>
-          <label>Mobile Number<div class="phone-field"><span>🇵🇭 +63</span><input value="171234567" disabled></div><small>It can be used for essential communication related to their insurance coverage only.</small></label>
-          <label>Date of Birth<div class="input-with-icon"><input value="January 01, 1990" disabled><span class="material-symbols-rounded" aria-hidden="true">calendar_today</span></div></label>
-          <label>Email Address<input value="test@email.com" disabled><small>It can be used to set up the customer portal account.</small></label>
+          <div class="search-lead"><span class="material-symbols-rounded" aria-hidden="true">person_search</span><input id="existing-lead" [value]="standaloneDraft ? '' : lead.name" readonly><button type="button" aria-label="Reset lead"><span class="material-symbols-rounded" aria-hidden="true">replay</span></button></div>
+          <div class="lead-form__row"><label>Title<input name="title" [(ngModel)]="title" [disabled]="!standaloneDraft"></label><label>Suffix (Optional)<input name="suffix" placeholder="Select suffix" [(ngModel)]="suffix" [disabled]="!standaloneDraft"></label></div>
+          <label>First Name<input name="firstName" [(ngModel)]="firstName" [disabled]="!standaloneDraft"></label>
+          <label>Middle Name<input name="middleName" placeholder="Enter your middle name" [(ngModel)]="middleName" [disabled]="!standaloneDraft"></label>
+          <label class="checkbox-line"><input name="noMiddleName" type="checkbox" [(ngModel)]="noMiddleName" [disabled]="!standaloneDraft"> I do not have middle name <span class="material-symbols-rounded" aria-hidden="true">help_outline</span></label>
+          <label>Last Name<input name="lastName" [(ngModel)]="lastName" [disabled]="!standaloneDraft"></label>
+          <label>Mobile Number<div class="phone-field"><span>🇵🇭 +63</span><input name="mobileNumber" [(ngModel)]="mobileNumber" [disabled]="!standaloneDraft"></div><small>It can be used for essential communication related to their insurance coverage only.</small></label>
+          <label>Date of Birth<div class="input-with-icon"><input name="insuredBirthDate" [(ngModel)]="insuredBirthDate" [disabled]="!standaloneDraft"><span class="material-symbols-rounded" aria-hidden="true">calendar_today</span></div></label>
+          <label>Email Address<input name="emailAddress" [(ngModel)]="emailAddress" [disabled]="!standaloneDraft"><small>It can be used to set up the customer portal account.</small></label>
         </form>
 
         <aside class="lead-summary">
@@ -176,3 +176,17 @@
   <div class="si-results__actions"><button type="button" class="flow-button flow-button--outline flow-button--purple" (click)="startNewDraft()">Generate new draft SI</button><span></span><button type="button" class="flow-button flow-button--primary" (click)="openProposal()">Convert to Proposal</button><button type="button" class="flow-button flow-button--discovery" (click)="downloadResults()">Download Results</button></div>
   <div class="pdf-viewer" aria-label="Draft sales illustration document preview"><img src="assets/si-page-1.png" alt="Draft sales illustration page 1"></div>
 </section>
+
+<div *ngIf="updateInfoOpen" class="si-update-info-overlay" role="presentation">
+  <section class="si-update-info-modal" role="dialog" aria-modal="true" aria-labelledby="update-individual-information-title" aria-describedby="update-individual-information-description">
+    <button type="button" class="si-update-info-modal__close" aria-label="Close update individual information" (click)="closeUpdateInfo()"><img src="assets/icons/update-info-close.png" alt=""></button>
+    <div class="si-update-info-modal__icons" aria-hidden="true">
+      <span><img src="assets/icons/update-info-person.png" alt=""></span>
+      <span><img src="assets/icons/update-info-document.png" alt=""></span>
+      <span><img src="assets/icons/update-info-alert.png" alt=""></span>
+    </div>
+    <h2 id="update-individual-information-title">Update Individual Information</h2>
+    <p id="update-individual-information-description">We have detected incomplete details. Incomplete info may impact underwriting success. Ensure that all the provided information is accurate and correct.</p>
+    <button type="button" class="si-update-info-modal__continue" (click)="continueToUpdate()">Continue to Update</button>
+  </section>
+</div>

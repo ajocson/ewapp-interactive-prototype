@@ -50,12 +50,24 @@ describe('DraftSiFlowComponent', () => {
     expect(generated).toBe(true);
   });
 
-  it('requests the Info proposal view from generated results', () => {
+  it('opens the individual-information update modal from generated results', () => {
     let proposalRequested = false;
     fixture.componentInstance.proposalRequested.subscribe(() => proposalRequested = true);
 
     fixture.componentInstance.openProposal();
 
+    expect(fixture.componentInstance.updateInfoOpen).toBe(true);
+    expect(proposalRequested).toBe(false);
+  });
+
+  it('requests the editable Info proposal view after continuing the update modal', () => {
+    let proposalRequested = false;
+    fixture.componentInstance.proposalRequested.subscribe(() => proposalRequested = true);
+
+    fixture.componentInstance.openProposal();
+    fixture.componentInstance.continueToUpdate();
+
+    expect(fixture.componentInstance.updateInfoOpen).toBe(false);
     expect(proposalRequested).toBe(true);
   });
 });

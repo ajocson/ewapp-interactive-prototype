@@ -207,14 +207,14 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
     const systemTransactionLabels = this.lead.activities
       ?.filter((activity) => activity.category === 'system')
       .map((activity) => activity.label) ?? [];
-    const hasRecordProgress = systemTransactionLabels.some((label) =>
-      ['Draft SI', 'Draft SI Generated', 'CSA Created', 'SI Generated', 'Proposal Created'].includes(label)
-    );
     const hasCompletedCsa = systemTransactionLabels.some((label) =>
       ['CSA Created', 'SI Generated', 'Proposal Created'].includes(label)
     );
-    if (hasRecordProgress) {
+    const hasCreatedProposal = systemTransactionLabels.includes('Proposal Created');
+    if (hasCompletedCsa) {
       this.journeyState.unlock(this.lead.leadId, 'profile');
+    }
+    if (hasCreatedProposal) {
       this.journeyState.unlock(this.lead.leadId, 'proposals');
     }
     if (hasCompletedCsa) this.journeyState.markRiskProfileCalculated(this.lead.leadId);
