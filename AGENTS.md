@@ -324,6 +324,16 @@ Verified on **2026-08-29**:
 
 ## Known Issues and Limitations
 
+## Update Log Instructions
+
+- Update logs are stored in `docs/updates/`.
+- Use the filename format `UPDATES_Mon-DD-YYYY_h-mmAM/PM.md`.
+- At the start of every new session, read `AGENTS.md` first.
+- Read only the latest relevant update log when the current task depends on recent project changes.
+- Do not read every historical update log unless additional context is needed or instructions appear to conflict.
+- After pulling the repository on another computer, follow the same process: read `AGENTS.md`, then review the latest relevant update log.
+- Treat `AGENTS.md` as the primary source of project instructions; treat update logs as supplemental project history.
+
 ### Latest API error demo update — 2026-09-03
 
 - `/lcam/api` is a demo-only route that shows a two-second lead-board skeleton before displaying the API error state.
@@ -331,6 +341,7 @@ Verified on **2026-08-29**:
 - API mode keeps the board header minimum-width behavior, hides horizontal overflow like the search-empty state, and preserves the lower container’s light border, rounded corners, white background, padding, and full available height.
 - The page search field is read-only in API mode but is not disabled visually; normal LCAM search behavior is unchanged.
 - The API error illustration is stored at `src/assets/api-error-illustration.png`.
+- Follow-Up pagination keeps the currently visible 10 lead cards rendered while the next 10 cards load through skeleton placeholders; the existing cards must not disappear during Load More.
 
 - Production build emits component-style budget warnings:
   - `draft-si-flow.component.scss`: about 12.61 kB vs. 8 kB warning budget.

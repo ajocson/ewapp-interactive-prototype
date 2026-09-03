@@ -9,6 +9,7 @@
 - Added the Figma-provided API error illustration and error copy.
 - Made the LCAM page search field read-only on `/lcam/api` without applying disabled styling, so users cannot enter search text during the demo error state.
 - Removed bold styling from the support email in the API error message.
+- Fixed Follow-Up Load More loading so existing lead cards remain visible while only the next 10 cards render skeleton placeholders during the two-second delay.
 
 ### Verification
 
