@@ -32,8 +32,8 @@ describe('SideNavigationComponent', () => {
     expect(fixture.nativeElement.querySelector('[aria-current="page"]')).toBe(lcamButton);
   });
 
-  it('renders all Figma navigation destinations and actions', () => {
-    expect(fixture.nativeElement.textContent).toContain('Dashboard');
+  it('renders the available navigation destinations and actions', () => {
+    expect(fixture.nativeElement.textContent).not.toContain('Dashboard');
     expect(fixture.nativeElement.textContent).toContain('Applications');
     expect(fixture.nativeElement.textContent).toContain('Sally');
     expect(fixture.nativeElement.textContent).toContain('New Lead');

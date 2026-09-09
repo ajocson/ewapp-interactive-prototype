@@ -57,8 +57,14 @@ export class ApplicationsComponent implements OnDestroy {
   readonly sortOptions = [
     { label: 'Recently Created', value: 'recent' },
     { label: 'Oldest Created', value: 'oldest' },
+    { label: 'Submitted Date', value: 'submitted-date' },
+    { label: 'Updated Date', value: 'updated-date' },
     { label: 'Name A–Z', value: 'name-asc' },
     { label: 'Name Z–A', value: 'name-desc' }
+  ];
+  readonly applicationBoardSortOptions = [
+    { label: 'Submitted Date', value: 'submitted-date' as const },
+    { label: 'Updated Date', value: 'updated-date' as const }
   ];
   readonly boards: readonly LeadBoardData[] = this.createBoards();
 
@@ -225,6 +231,11 @@ export class ApplicationsComponent implements OnDestroy {
 
   private compareLeads(first: LeadCardData, second: LeadCardData): number {
     if (this.appliedSort === 'oldest') return first.createdAtTimestamp - second.createdAtTimestamp;
+    if (this.appliedSort === 'submitted-date') return second.createdAtTimestamp - first.createdAtTimestamp;
+    if (this.appliedSort === 'updated-date') {
+      return (second.lastActivityTimestamp ?? second.createdAtTimestamp)
+        - (first.lastActivityTimestamp ?? first.createdAtTimestamp);
+    }
     if (this.appliedSort === 'name-asc') return first.name.localeCompare(second.name);
     if (this.appliedSort === 'name-desc') return second.name.localeCompare(first.name);
     return second.createdAtTimestamp - first.createdAtTimestamp;

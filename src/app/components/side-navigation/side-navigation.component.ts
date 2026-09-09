@@ -16,7 +16,6 @@ export class SideNavigationComponent {
   constructor(readonly navigation: AppNavigationStateService) {}
 
   readonly primaryItems: readonly SideNavigationItem[] = [
-    { label: 'Dashboard', icon: 'space_dashboard' },
     { label: 'LCAM Board', icon: 'view_week' },
     { label: 'Applications', icon: 'contract_edit' },
     { label: 'Customers', icon: 'group' }

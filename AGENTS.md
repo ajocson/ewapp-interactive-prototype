@@ -282,6 +282,13 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - Follow-Up `Load More` is hidden while an applied board search is active, so a searched result does not incorrectly show pagination controls.
 - The auto-dropped John Mark Doe Follow-Up demo lead keeps Lead ID `50824` and is positioned as the fourth entry within the initial 10 sample leads. This is sample ordering only; preserve all lifecycle behavior and the existing activity/timeline data.
 
+### Latest UI refinements — 2026-09-09
+
+- Applications page and Applications board filters support `Submitted Date` and `Updated Date` sorting before name sorting; this is scoped to Applications and must not alter LCAM board sort behavior.
+- Parked leads expose a separate full-width `Drop Lead` action below the parked-state summary and use the existing Drop Lead confirmation flow. Keep the standard active-lead Park/Drop actions and Reactivate flow unchanged.
+- The AFYP Declaration label includes a 16px neutral-primary information icon with wrapped hover guidance; preserve the black tooltip treatment and avoid clipping within the drawer.
+- The Dashboard sidebar item is intentionally hidden for the current prototype, and the document title is `EWApp Interactive Prototype`.
+
 - Verified on **2026-09-01** after the latest timeline, proposal-navigation, Drop Lead, and drawer updates.
 
 ### Latest EWApp prototype update — 2026-08-29

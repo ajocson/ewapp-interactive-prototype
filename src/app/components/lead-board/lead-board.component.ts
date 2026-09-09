@@ -33,6 +33,7 @@ export class LeadBoardComponent {
   @Input() filterLabel = 'Filter by Lead State';
   @Input() filterOptions?: readonly TdxFieldControlOption[];
   @Input() filterByTag = false;
+  @Input() additionalSortOptions: readonly { value: Exclude<BoardSortOption, null>; label: string }[] = [];
   @Input() highlightedLeadId: string | null = null;
   @Output() leadSelected = new EventEmitter<LeadCardData>();
 
@@ -108,6 +109,15 @@ export class LeadBoardComponent {
       case 'name-desc':
         leads = [...leads].sort((first, second) => second.name.localeCompare(first.name));
         break;
+      case 'submitted-date':
+        leads = [...leads].sort((first, second) => second.createdAtTimestamp - first.createdAtTimestamp);
+        break;
+      case 'updated-date':
+        leads = [...leads].sort((first, second) =>
+          (second.lastActivityTimestamp ?? second.createdAtTimestamp)
+          - (first.lastActivityTimestamp ?? first.createdAtTimestamp)
+        );
+        break;
       case 'appointment-upcoming':
         leads = [...leads].sort((first, second) => this.compareAppointments(first, second, 1));
         break;
@@ -150,9 +160,16 @@ export class LeadBoardComponent {
   }
 
   get availableSortOptions(): readonly { value: Exclude<BoardSortOption, null>; label: string }[] {
-    return this.board.id === 'appointments'
+    const boardSortOptions = this.board.id === 'appointments'
       ? [...this.sortOptions, ...this.appointmentSortOptions]
       : this.sortOptions;
+    if (!this.additionalSortOptions.length) return boardSortOptions;
+
+    return [
+      ...boardSortOptions.slice(0, 2),
+      ...this.additionalSortOptions,
+      ...boardSortOptions.slice(2)
+    ];
   }
 
   get hasDraftFilters(): boolean {

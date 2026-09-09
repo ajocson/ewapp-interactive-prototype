@@ -124,6 +124,50 @@
   line-height: var(--paragraph-sm-line-height);
 }
 
+.drawer-scheduler__field-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.drawer-scheduler__info-icon {
+  position: relative;
+  color: var(--icon-neutral-primary);
+  cursor: default;
+  font-size: 16px;
+  line-height: 16px;
+}
+
+.drawer-scheduler__info-icon::after {
+  position: absolute;
+  z-index: var(--layer-tooltip);
+  bottom: calc(100% + var(--space-xs));
+  left: 50%;
+  width: min(280px, calc(100vw - var(--space-2xl)));
+  max-width: 280px;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-xs);
+  background: var(--color-black);
+  color: var(--text-neutral-inverse);
+  content: attr(data-tooltip);
+  font-family: var(--typography-font-family-paragraph);
+  font-size: var(--caption-text-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--caption-line-height);
+  opacity: 0;
+  pointer-events: none;
+  text-align: center;
+  white-space: normal;
+  transform: translate(-50%, var(--space-xs));
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.drawer-scheduler__info-icon:hover::after,
+.drawer-scheduler__info-icon:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
 .drawer-scheduler__error {
   color: var(--color-red-600);
   font-size: 12px;
@@ -225,6 +269,14 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(var(--space-none), 1fr));
   gap: var(--space-lg);
+}
+
+.drawer-actions--parked > div {
+  display: block;
+}
+
+.drawer-actions--parked {
+  border-top: var(--border-width-xs-1) solid var(--border-neutral-subtle);
 }
 
 .drawer-scheduler__actions {

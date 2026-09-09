@@ -636,7 +636,6 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
   }
 
   openLeadAction(mode: 'park' | 'drop'): void {
-    if (this.isLeadPaused) return;
     this.scheduling = false;
     this.rescheduling = false;
     this.cancellingAppointment = false;

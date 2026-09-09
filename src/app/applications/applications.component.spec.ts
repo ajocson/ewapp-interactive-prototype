@@ -32,6 +32,17 @@ describe('ApplicationsComponent page filters', () => {
     ]);
   });
 
+  it('offers application-only submitted and updated date sorting options', () => {
+    expect(fixture.componentInstance.sortOptions.map((option) => option.label)).toEqual([
+      'Recently Created',
+      'Oldest Created',
+      'Submitted Date',
+      'Updated Date',
+      'Name A–Z',
+      'Name Z–A'
+    ]);
+  });
+
   it('applies lead status, referrer, and sort selections together', () => {
     const component = fixture.componentInstance;
     const selectedReferrer = component.boards[0].leads[0].referrer;

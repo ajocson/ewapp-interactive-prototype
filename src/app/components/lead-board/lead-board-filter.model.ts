@@ -6,6 +6,8 @@ export type BoardSortOption =
   | 'oldest'
   | 'name-asc'
   | 'name-desc'
+  | 'submitted-date'
+  | 'updated-date'
   | 'appointment-upcoming'
   | 'appointment-latest'
   | null;

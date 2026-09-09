@@ -132,6 +132,13 @@
         <app-button *ngIf="lead.leadType === 'Parked'" class="drawer-state-summary__button" label="Reactivate Lead" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="reactivateLead()" />
       </section>
 
+      <section *ngIf="activeTab === 'overview' && lead.leadType === 'Parked' && !actionMode && !scheduling && !cancellingAppointment && !followUpRecording" class="drawer-actions drawer-actions--parked" [class.drawer-actions--hidden]="unableToSetAppointmentOpen">
+        <h3>Lead Action</h3>
+        <div>
+          <app-button class="drawer-action-button" label="Drop Lead" leftIcon="stop_circle" [variant]="buttonVariant.Danger" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="openLeadAction('drop')" />
+        </div>
+      </section>
+
       <ng-container *ngIf="!isApplicationLead && !actionMode && !isLeadPaused">
 
       <section *ngIf="scheduling; else appointmentActionState" class="drawer-scheduler" [class.drawer-scheduler--follow-up]="schedulerMode === 'follow-up'" aria-labelledby="scheduler-title">
@@ -168,7 +175,15 @@
 
         <div *ngIf="schedulerMode === 'appointment'" class="drawer-scheduler__required-fields">
           <label>
-            <span>AFYP Declaration</span>
+            <span class="drawer-scheduler__field-label">
+              <span>AFYP Declaration</span>
+              <span
+                class="drawer-scheduler__info-icon material-symbols-rounded"
+                role="img"
+                aria-label="AFYP Declaration information"
+                data-tooltip="For dollar-denominated products, enter the AFYP equivalent in Philippine Peso (PHP)."
+              >info</span>
+            </span>
             <tdx-field-control
               ariaLabel="AFYP Declaration"
               inputType="number"

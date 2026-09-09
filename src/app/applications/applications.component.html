@@ -66,6 +66,7 @@
             filterLabel="Filter by Lead Status"
             [filterOptions]="statusOptionsFor(board)"
             [filterByTag]="true"
+            [additionalSortOptions]="applicationBoardSortOptions"
             (leadSelected)="leadSelected.emit($event)"
           />
         </div>
