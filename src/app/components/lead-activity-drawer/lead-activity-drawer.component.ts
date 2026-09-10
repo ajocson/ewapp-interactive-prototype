@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnChanges, OnDestroy, Output } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, inject, Input, OnChanges, OnDestroy, Output, ViewChild } from '@angular/core';
 
 import { LeadActivityRecord, LeadAppointment, LeadCardData, leadDisplayName } from '../../lead-board.model';
 import { TdxButtonEmphasis, TdxButtonSize, TdxButtonVariant } from '../../shared/components/button/button.model';
@@ -96,9 +96,11 @@ interface TimeOption {
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: false
 })
-export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
+export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() userType: 'Agency' | 'Banca' = 'Banca';
   @Input() fromApplicationsPage = false;
+  @Input() showCsaContactRequirement = false;
+  @ViewChild('drawerScroll') private drawerScroll?: ElementRef<HTMLDivElement>;
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly document = inject(DOCUMENT);
   private agingTooltipElement: HTMLDivElement | null = null;
@@ -400,6 +402,15 @@ export class LeadActivityDrawerComponent implements OnChanges, OnDestroy {
     this.selectedDate = this.lead.appointment?.date ?? '';
     this.selectedStartMinutes = this.lead.appointment?.startMinutes ?? null;
     this.selectedEndMinutes = this.lead.appointment?.endMinutes ?? null;
+  }
+
+  ngAfterViewInit(): void {
+    this.scrollToBottom();
+  }
+
+  private scrollToBottom(): void {
+    const scrollElement = this.drawerScroll?.nativeElement;
+    if (scrollElement) scrollElement.scrollTop = scrollElement.scrollHeight;
   }
 
   showAgingTooltip(event: MouseEvent, message: string): void {

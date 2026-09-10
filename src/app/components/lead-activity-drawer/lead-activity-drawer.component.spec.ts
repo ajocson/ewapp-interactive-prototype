@@ -75,6 +75,26 @@ describe('LeadActivityDrawerComponent', () => {
     expect(fixture.nativeElement.textContent).not.toContain('EWB Client Financial Segmentation');
   });
 
+  it('shows the CSA contact requirement banner only when requested', () => {
+    fixture.componentRef.setInput('lead', { ...createLead(), leadType: 'Inactive', tags: [{ label: 'New Lead', tone: 'primary' }] });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.drawer-contact .section-message--info')).toBeNull();
+
+    fixture.componentRef.setInput('showCsaContactRequirement', true);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.drawer-contact .section-message--info')?.textContent)
+      .toContain('This lead must be marked as contacted before you can continue to profile (CSA).');
+  });
+
+  it('starts with the drawer scrolled to the activity actions', () => {
+    const scrollElement = fixture.nativeElement.querySelector('.drawer-scroll') as HTMLDivElement;
+    Object.defineProperty(scrollElement, 'scrollHeight', { configurable: true, value: 900 });
+
+    fixture.componentInstance['scrollToBottom']();
+
+    expect(scrollElement.scrollTop).toBe(900);
+  });
+
   it('allows reactivation for parked leads but not dropped leads', () => {
     fixture.componentRef.setInput('lead', { ...createLead(), leadType: 'Parked' });
     fixture.detectChanges();

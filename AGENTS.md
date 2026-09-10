@@ -289,6 +289,12 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - The AFYP Declaration label includes a 16px neutral-primary information icon with wrapped hover guidance; preserve the black tooltip treatment and avoid clipping within the drawer.
 - The Dashboard sidebar item is intentionally hidden for the current prototype, and the document title is `EWApp Interactive Prototype`.
 
+### Latest inactive-lead CSA guard — 2026-09-10
+
+- Inactive leads opened from the LCAM board cannot continue from Info to Add Profile (CSA); that action emits the existing contact-required event so the side drawer presents `Mark as Contacted`.
+- This guard is scoped to the inactive-lead Add Profile action. Preserve the existing Info save behavior and all active/contacted lead CSA flows.
+- The lead activity drawer opens scrolled to its bottom so the relevant activity actions are immediately visible; preserve action behavior while maintaining this presentation convention.
+
 - Verified on **2026-09-01** after the latest timeline, proposal-navigation, Drop Lead, and drawer updates.
 
 ### Latest EWApp prototype update — 2026-08-29

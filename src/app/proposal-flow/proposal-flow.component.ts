@@ -60,6 +60,7 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
   @Output() closed = new EventEmitter<void>();
   @Output() routeTabChange = new EventEmitter<LeadRecordTab>();
   @Output() contactRequired = new EventEmitter<void>();
+  @Output() csaContactRequired = new EventEmitter<void>();
   @Output() appointmentRequired = new EventEmitter<void>();
   @Output() activityRequested = new EventEmitter<void>();
   @Output() csaCreated = new EventEmitter<void>();
@@ -387,6 +388,10 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
   }
 
   requestAddProfile(): void {
+    if (this.lead.leadType === 'Inactive') {
+      this.csaContactRequired.emit();
+      return;
+    }
     this.confirmation = 'add-profile';
   }
 

@@ -37,6 +37,7 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
       [lead]="selectedLead"
       [userType]="userType"
       [fromApplicationsPage]="applicationLeadContext"
+      [showCsaContactRequirement]="csaContactRequirementOpen"
       (closed)="contactDrawerOpen ? closeContactDrawer() : closeLead()"
       (contacted)="markLeadAsContacted($event)"
       (appointmentScheduled)="scheduleLeadAppointment($event)"
@@ -107,7 +108,7 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
       </section>
     </div>
     <lam-draft-si-flow *ngIf="selectedLead && draftSiOpen" [lead]="selectedLead" [startStep]="draftSiFlowStartStep" [standaloneDraft]="draftSiFromSidebar" (closed)="closeDraftSi()" (draftSiGenerated)="recordDraftSiGenerated()" (proposalRequested)="openDraftProposalInfo()" (activityRequested)="openContactDrawer()" (contactRequired)="openContactDrawer()" (appointmentRequired)="openContactDrawer()" />
-    <lam-proposal-flow *ngIf="selectedLead && proposalOpen" [lead]="selectedLead" [routeTab]="activeRecordTab" [editMode]="leadInfoEditMode" [submittedApplicationContext]="applicationLeadContext" (routeTabChange)="navigateToRecordTab($event)" (leadInfoSaved)="recordLeadInfoUpdated()" (csaCreated)="recordCsaCreated()" (siGenerated)="recordSiGenerated()" (proposalSaved)="recordProposalCreated()" (applicationConverted)="recordApplicationConverted()" (contactRequired)="openContactDrawer()" (appointmentRequired)="openContactDrawer()" (activityRequested)="openContactDrawer()" (underwritingSubmitted)="viewSubmittedApplication($event)" (closed)="closeLead()" />
+    <lam-proposal-flow *ngIf="selectedLead && proposalOpen" [lead]="selectedLead" [routeTab]="activeRecordTab" [editMode]="leadInfoEditMode" [submittedApplicationContext]="applicationLeadContext" (routeTabChange)="navigateToRecordTab($event)" (leadInfoSaved)="recordLeadInfoUpdated()" (csaCreated)="recordCsaCreated()" (siGenerated)="recordSiGenerated()" (proposalSaved)="recordProposalCreated()" (applicationConverted)="recordApplicationConverted()" (contactRequired)="openContactDrawer()" (csaContactRequired)="openContactDrawerForCsa()" (appointmentRequired)="openContactDrawer()" (activityRequested)="openContactDrawer()" (underwritingSubmitted)="viewSubmittedApplication($event)" (closed)="closeLead()" />
     <section *ngIf="newLeadOpen" class="new-lead-modal" role="dialog" aria-modal="true" aria-labelledby="new-lead-title">
       <div class="new-lead-modal__backdrop" aria-hidden="true"></div>
       <div class="new-lead-modal__panel">
@@ -256,6 +257,7 @@ export class AppComponent implements AfterViewInit {
   readonly draftSiProducts = ['Dream Builder', 'Future Assure', 'Future Assure Max (Peso)', 'Future Assure Max (US Dollar)', 'Future Assure Regular Pay', 'Life Essentials', 'Sure Start'];
   proposalOpen = false;
   contactDrawerOpen = false;
+  csaContactRequirementOpen = false;
   activeRecordTab: LeadRecordTab = 'info';
   leadInfoEditMode = false;
   applicationLeadContext = false;
@@ -601,6 +603,13 @@ export class AppComponent implements AfterViewInit {
 
   openContactDrawer(): void {
     this.contactDrawerOpen = true;
+    this.csaContactRequirementOpen = false;
+    this.changeDetectorRef.markForCheck();
+  }
+
+  openContactDrawerForCsa(): void {
+    this.contactDrawerOpen = true;
+    this.csaContactRequirementOpen = true;
     this.changeDetectorRef.markForCheck();
   }
 
@@ -623,6 +632,7 @@ export class AppComponent implements AfterViewInit {
 
   closeContactDrawer(): void {
     this.contactDrawerOpen = false;
+    this.csaContactRequirementOpen = false;
     this.changeDetectorRef.markForCheck();
   }
 

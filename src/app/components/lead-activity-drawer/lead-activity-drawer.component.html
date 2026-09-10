@@ -22,7 +22,7 @@
 
   <app-tab-group [tabs]="tabs" [activeId]="activeTab" ariaLabel="Lead activity sections" (activeIdChange)="activeTab = $event; scheduling = false; rescheduling = false; cancellingAppointment = false; followUpRecording = false" />
 
-  <div class="drawer-scroll">
+  <div #drawerScroll class="drawer-scroll">
     <ng-container *ngIf="activeTab === 'overview'">
       <section class="drawer-lead-info" [class.drawer-lead-info--action-open]="actionMode">
         <dl class="drawer-details">
@@ -256,6 +256,10 @@
           <app-stepper *ngIf="!followUpRecording" [steps]="activitySteps" [currentIndex]="currentStepIndex" orientation="horizontal" />
 
           <ng-container *ngIf="!isContacted && !isAppointmentSet && !isMeeting && !isFollowUp">
+            <app-section-message
+              *ngIf="showCsaContactRequirement"
+              description="This lead must be marked as contacted before you can continue to profile (CSA)."
+            />
             <app-section-message
               *ngIf="lead.notContactedFor48Hours"
               appearance="warning"

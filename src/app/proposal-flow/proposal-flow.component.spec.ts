@@ -71,6 +71,7 @@ describe('ProposalFlowComponent', () => {
 
   it('restores General Assessment when returning to Profile after a risk calculation', () => {
     const component = fixture.componentInstance;
+    component.lead = { ...component.lead, leadType: 'Active', tags: [{ label: 'Contacted', tone: 'success' }] };
     component.requestAddProfile();
     component.proceedConfirmation();
     component.goTo('assessment');
@@ -124,6 +125,27 @@ describe('ProposalFlowComponent', () => {
 
     expect(contactRequired).toBe(true);
     expect(component.productPickerOpen).toBe(false);
+  });
+
+  it('opens the contact drawer request instead of adding a profile for an inactive lead', () => {
+    const component = fixture.componentInstance;
+    let csaContactRequired = false;
+    component.csaContactRequired.subscribe(() => csaContactRequired = true);
+
+    component.requestAddProfile();
+
+    expect(csaContactRequired).toBe(true);
+    expect(component.confirmation).toBeNull();
+    expect(component.stage).toBe('individual-form');
+  });
+
+  it('keeps Add Profile available for a contacted lead', () => {
+    const component = fixture.componentInstance;
+    component.lead = { ...component.lead, leadType: 'Active', tags: [{ label: 'Contacted', tone: 'success' }] };
+
+    component.requestAddProfile();
+
+    expect(component.confirmation).toBe('add-profile');
   });
 
   it('allows a contacted lead without an appointment to create a proposal', () => {
@@ -355,6 +377,7 @@ describe('ProposalFlowComponent', () => {
 
   it('confirms before adding a profile', () => {
     const component = fixture.componentInstance;
+    component.lead = { ...component.lead, leadType: 'Active', tags: [{ label: 'Contacted', tone: 'success' }] };
 
     component.requestAddProfile();
     expect(component.confirmation).toBe('add-profile');
