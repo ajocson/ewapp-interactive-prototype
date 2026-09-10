@@ -314,7 +314,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   retryApiError(): void {
-    if (this.router.url === '/lcam/board-loading-api-error') return;
+    if (this.router.url === '/lcam/board-loading-api-error' || this.router.url === '/lcam/page-search-api-error') return;
     void this.router.navigate(['/lcam']);
   }
 

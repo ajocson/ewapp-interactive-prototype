@@ -323,6 +323,7 @@ export class DashboardComponent implements OnDestroy {
     this.retryTimer = setTimeout(() => {
       this.isRetrying = false;
       if (retryingApiError) this.apiErrorVisible = true;
+      if (retryingSearch) this.searchErrorVisible = true;
       this.changeDetectorRef.markForCheck();
     }, 1500);
   }
