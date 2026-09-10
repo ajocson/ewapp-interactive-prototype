@@ -128,19 +128,26 @@
           </section>
           <footer class="proposal-draft__actions"><button type="button" class="proposal-draft__save" (click)="requestSaveProposal()">Save Proposal <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button></footer>
         </article>
-        <article class="proposal-card individual-card" *ngIf="routeTab !== 'applications' && stage === 'individual-form'">
-          <h2>Individual Information</h2>
+        <article class="proposal-card individual-card individual-card--form" *ngIf="routeTab !== 'applications' && stage === 'individual-form'">
+          <header class="individual-card__header"><h2>Individual Information</h2></header>
           <form class="individual-form">
             <p class="form-message"><span class="material-symbols-rounded" aria-hidden="true">info</span>Complete all details to proceed with the CSA/Sales process.</p>
             <fieldset class="form-section"><legend>Basic Information</legend><div class="form-grid">
               <label>First Name<input name="firstName" [(ngModel)]="firstName"></label><label class="compact-field">Title<select name="title" [(ngModel)]="title"><option>Mr.</option><option>Ms.</option></select></label>
-              <label>Middle Name<input [value]="noMiddleName ? 'No Middle Name' : middleName" disabled></label><label>Gender<input name="gender" [(ngModel)]="gender" disabled></label>
+              <label>Middle Name<input [value]="middleName" placeholder="No Middle Name" disabled></label><label>Gender<input name="gender" [(ngModel)]="gender" disabled></label>
               <label class="checkbox-field"><input type="checkbox" name="noMiddleName" [(ngModel)]="noMiddleName">No Middle Name</label><span></span>
               <label>Last Name<input name="lastName" [(ngModel)]="lastName"></label><label>Birth Date<span class="date-field"><input name="birthDate" [(ngModel)]="birthDate"><span class="material-symbols-rounded" aria-hidden="true">calendar_today</span></span></label>
               <label>Suffix<select name="suffix" [(ngModel)]="suffix"><option>No suffix</option></select></label>
             </div></fieldset>
             <fieldset class="form-section"><legend>Contact Info</legend><div class="form-grid">
-              <label>Mobile Number<div class="phone-input"><span>+639</span><input name="mobileNumber" [(ngModel)]="mobileNumber"></div></label><label>Email Address<input name="email" [(ngModel)]="emailAddress"></label><label>Source of Lead<input name="source" [(ngModel)]="sourceOfLead"></label>
+              <label>Mobile Number<div class="phone-input"><span>+639</span><input name="mobileNumber" [(ngModel)]="mobileNumber"></div></label><label>Email Address<input name="email" [(ngModel)]="emailAddress"></label>
+            </div></fieldset>
+            <fieldset class="form-section"><legend>Source of Lead</legend><div class="form-grid">
+              <label>Source of Lead<span class="select-like-field"><input name="source" placeholder="Select source"><span class="material-symbols-rounded" aria-hidden="true">keyboard_arrow_down</span></span></label><label>Product Interested<span class="select-like-field"><input name="product" placeholder="Select product"><span class="material-symbols-rounded" aria-hidden="true">keyboard_arrow_down</span></span></label>
+              <label>Referral Date<span class="date-field"><input name="referralDate" value="02/03/2026" placeholder="mm/dd/yyyy" aria-label="Referral Date"><span class="material-symbols-rounded" aria-hidden="true">calendar_today</span></span></label><label>Manual Source<span class="select-like-field"><input name="manualSource" placeholder="Select manual source"><span class="material-symbols-rounded" aria-hidden="true">keyboard_arrow_down</span></span></label>
+              <label>Store/Branch Name<input value="595 THE FORT-BGC CORPORATE CENTER" disabled></label><label>Store/Branch ID<input value="RBG0380" disabled></label>
+              <label>Referrer's Name<input [value]="lead.referrer" disabled></label><label>Referrer's ID<input value="100234" disabled></label>
+              <label>EWB Client Financial Segmentation<input value="Mid" disabled></label>
             </div></fieldset>
           </form>
           <footer class="card-footer"><button type="button" class="proposal-button proposal-button--outline">Cancel</button><button type="button" class="proposal-button proposal-button--primary" (click)="saveLeadInfo()">Save Changes</button></footer>

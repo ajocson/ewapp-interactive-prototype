@@ -220,14 +220,14 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
     }
     if (hasCompletedCsa) this.journeyState.markRiskProfileCalculated(this.lead.leadId);
     const nameParts = this.lead.name.trim().split(/\s+/).filter(Boolean);
-    const firstName = nameParts.shift() ?? '';
+    const firstName = nameParts.slice(0, -1).join(' ');
     const lastName = nameParts.pop() ?? '';
     this.firstName = firstName;
-    this.middleName = nameParts.join(' ');
+    this.middleName = '';
     this.lastName = lastName;
     this.title = this.lead.gender === 'Female' ? 'Ms.' : 'Mr.';
     this.gender = this.lead.gender;
-    this.noMiddleName = this.middleName.length === 0;
+    this.noMiddleName = false;
     this.sourceOfLead = this.lead.source;
     const info = this.journeyState.info(this.lead.leadId);
     if (!info) return;

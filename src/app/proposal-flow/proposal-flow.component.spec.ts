@@ -21,10 +21,25 @@ describe('ProposalFlowComponent', () => {
 
   it('starts with the Figma sample data prefilled', () => {
     expect(fixture.componentInstance.stage).toBe('individual-form');
-    expect(fixture.componentInstance.firstName).toBe('John');
-    expect(fixture.componentInstance.middleName).toBe('Mark');
+    expect(fixture.componentInstance.firstName).toBe('John Mark');
+    expect(fixture.componentInstance.middleName).toBe('');
     expect(fixture.componentInstance.mobileNumber).toBe('171234567');
     expect(fixture.componentInstance.emailAddress).toBe('test@email.com');
+  });
+
+  it('renders the Individual Information form sections and actions', () => {
+    const card = fixture.nativeElement.querySelector('.individual-card') as HTMLElement;
+
+    expect(card.querySelector('.individual-card__header h2')?.textContent).toContain('Individual Information');
+    expect(card.querySelectorAll('.form-section')).toHaveLength(3);
+    expect(card.textContent).toContain('Contact Info');
+    expect(card.textContent).toContain('Source of Lead');
+    expect(card.textContent).toContain('Product Interested');
+    expect(card.textContent).toContain('Store/Branch Name');
+    expect(card.textContent).toContain('EWB Client Financial Segmentation');
+    expect((card.querySelector('input[value="RBG0380"]') as HTMLInputElement)?.value).toBe('RBG0380');
+    expect((card.querySelector('input[value="Mid"]') as HTMLInputElement)?.value).toBe('Mid');
+    expect(card.textContent).toContain('Save Changes');
   });
 
   it('hides Record Activity for converted application leads on every record tab', () => {

@@ -47,6 +47,41 @@
 .phone-input input { border: var(--border-width-none); }
 .card-footer { display: flex; justify-content: flex-end; gap: var(--space-xl); padding: var(--space-3xl) var(--proposal-card-content-padding); border-top: var(--border-width-xs-1) solid var(--border-neutral-subtle); }
 
+/* Figma-matched Individual Information form; keep the existing form bindings and flow intact. */
+.individual-card--form { border: 2px solid #f0f0f0; border-radius: 24px; }
+.individual-card--form .individual-card__header { height: 85px; box-sizing: border-box; padding: 30px 28px 12px; background: #f0f0f0; border-radius: 21px 21px 0 0; }
+.individual-card--form .individual-card__header h2 { margin: 0; color: #37424a; font-family: var(--typography-font-family-heading); font-size: 22px; font-weight: var(--font-weight-bold); line-height: 27px; letter-spacing: -1.32px; }
+.individual-card--form .individual-form { padding-top: 30px; }
+.individual-card--form .form-message { height: 40px; box-sizing: border-box; align-items: flex-start; gap: 10px; margin: 0; padding: 3px 28px 0 25px; color: #263234; font-size: 14px; line-height: 19.6px; }
+.individual-card--form .form-message .material-symbols-rounded { flex: 0 0 24px; width: 24px; height: 24px; color: var(--color-cyan-800); font-size: 24px; }
+.individual-card--form .form-section { padding: 0 28px 30px; }
+.individual-card--form .form-section + .form-section { padding-top: 0; border-top: 0; }
+.individual-card--form .form-section + .form-section legend { margin-bottom: 17px; }
+.individual-card--form .form-section legend { margin-bottom: 12px; color: #37424a; font-family: var(--typography-font-family-heading); font-size: 18px; line-height: 22px; letter-spacing: -1.08px; }
+.individual-card--form .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.individual-card--form .individual-form label { gap: 7px; color: #808080; font-size: 9px; line-height: 11.25px; }
+.individual-card--form .individual-form input, .individual-card--form .individual-form select { height: 44px; box-sizing: border-box; padding: 12px 10px; border-color: rgba(0, 0, 0, .12); border-radius: 8px; color: #37424a; font-size: 14px; line-height: 18px; }
+.individual-card--form .individual-form input:disabled { background: #dcdcdc; color: rgba(55, 66, 74, .58); }
+.individual-card--form .individual-form .checkbox-field { gap: 8px; color: #808080; font-size: 14px; line-height: 18px; }
+.individual-card--form .individual-form .checkbox-field input { width: 18px; height: 18px; padding: 0; accent-color: #7521d5; }
+.individual-card--form .individual-form .date-field { height: 44px; }
+.individual-card--form .individual-form .date-field input { padding-right: 38px; }
+.individual-card--form .individual-form .select-like-field { position: relative; display: block; }
+.individual-card--form .individual-form .select-like-field input { padding-right: 38px; }
+.individual-card--form .individual-form .select-like-field .material-symbols-rounded { position: absolute; top: 50%; right: 10px; color: #37424a; font-size: 20px; pointer-events: none; transform: translateY(-50%); }
+.individual-card--form .individual-form .phone-input { height: 44px; border-color: rgba(0, 0, 0, .12); border-radius: 8px; }
+.individual-card--form .individual-form .phone-input span { padding-left: 10px; color: #37424a; font-size: 14px; }
+.individual-card--form .individual-form .phone-input input { height: 42px; padding-left: 4px; border: 0; }
+.individual-card--form .card-footer { min-height: 78px; box-sizing: border-box; justify-content: center; gap: 8px; padding: 20px 28px 16px; border-top-color: #e0e0e0; }
+.individual-card--form .card-footer .proposal-button { width: 219px; min-width: 219px; height: 42px; padding: 8px 16px; border-radius: 24px; font-family: var(--typography-font-family-heading); font-size: 14px; line-height: 24px; }
+.individual-card--form .card-footer .proposal-button--primary { border-color: #7521d5; background: #7521d5; }
+
+@media (max-width: 720px) {
+  .individual-card--form .form-grid { grid-template-columns: 1fr; }
+  .individual-card--form .compact-field { width: 100%; }
+  .individual-card--form .card-footer .proposal-button { min-width: 0; flex: 1 1 0; }
+}
+
 .proposal-button { min-height: var(--button-medium-height); padding: var(--button-medium-padding-y) var(--button-medium-padding-x); border-radius: var(--radius-round); font-size: var(--paragraph-sm-text-size); font-weight: var(--font-weight-bold); line-height: var(--paragraph-sm-line-height); }
 .proposal-button--primary { border: var(--border-width-xs-1) solid var(--color-purple-900); background: var(--color-purple-900); color: var(--text-neutral-inverse); }
 .proposal-button--outline { border: var(--border-width-xs-1) solid var(--color-purple-900); background: var(--surface-default); color: var(--color-purple-900); }
