@@ -29,7 +29,7 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
   template: `
     <router-outlet />
     <div *ngIf="loggedIn && !showApplications" class="app-dashboard-host" [attr.inert]="selectedLead ? '' : null" [attr.aria-hidden]="selectedLead ? true : null">
-      <lam-dashboard [userType]="userType" [apiErrorMode]="apiErrorMode" (leadOpened)="openLead($event)" (newLeadRequested)="openNewLead()" (draftSiRequested)="openDraftSiQuickQuote()" (loggedOut)="logOut()" />
+      <lam-dashboard [userType]="userType" [apiErrorMode]="apiErrorMode" [searchErrorMode]="searchErrorMode" [suppressBoardLoading]="drawerLoadingErrorMode" (leadOpened)="openLead($event)" (newLeadRequested)="openNewLead()" (draftSiRequested)="openDraftSiQuickQuote()" (retryRequested)="retryApiError()" (loggedOut)="logOut()" />
     </div>
     <lam-applications *ngIf="loggedIn && showApplications" [userType]="userType" (leadSelected)="openApplicationLead($event)" (loggedOut)="logOut()" />
     <lam-lead-activity-drawer
@@ -38,6 +38,7 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
       [userType]="userType"
       [fromApplicationsPage]="applicationLeadContext"
       [showCsaContactRequirement]="csaContactRequirementOpen"
+      [loadingErrorMode]="drawerLoadingErrorMode"
       (closed)="contactDrawerOpen ? closeContactDrawer() : closeLead()"
       (contacted)="markLeadAsContacted($event)"
       (appointmentScheduled)="scheduleLeadAppointment($event)"
@@ -57,6 +58,7 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
       (leadStateChanged)="changeLeadState($event)"
       (draftSiRequested)="openDraftSi()"
       (editLeadRequested)="editLeadInfo()"
+      (retryRequested)="retryDrawerLoading()"
     />
     <main *ngIf="!loggedIn" class="login-screen">
       <img class="login-screen__bg login-screen__bg--left" src="https://www.figma.com/api/mcp/asset/fbd3a5a3-ade6-4a22-a213-1698ce7f245d.svg" alt="" aria-hidden="true">
@@ -108,7 +110,7 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
       </section>
     </div>
     <lam-draft-si-flow *ngIf="selectedLead && draftSiOpen" [lead]="selectedLead" [startStep]="draftSiFlowStartStep" [standaloneDraft]="draftSiFromSidebar" (closed)="closeDraftSi()" (draftSiGenerated)="recordDraftSiGenerated()" (proposalRequested)="openDraftProposalInfo()" (activityRequested)="openContactDrawer()" (contactRequired)="openContactDrawer()" (appointmentRequired)="openContactDrawer()" />
-    <lam-proposal-flow *ngIf="selectedLead && proposalOpen" [lead]="selectedLead" [routeTab]="activeRecordTab" [editMode]="leadInfoEditMode" [submittedApplicationContext]="applicationLeadContext" (routeTabChange)="navigateToRecordTab($event)" (leadInfoSaved)="recordLeadInfoUpdated()" (csaCreated)="recordCsaCreated()" (siGenerated)="recordSiGenerated()" (proposalSaved)="recordProposalCreated()" (applicationConverted)="recordApplicationConverted()" (contactRequired)="openContactDrawer()" (csaContactRequired)="openContactDrawerForCsa()" (appointmentRequired)="openContactDrawer()" (activityRequested)="openContactDrawer()" (underwritingSubmitted)="viewSubmittedApplication($event)" (closed)="closeLead()" />
+    <lam-proposal-flow *ngIf="selectedLead && proposalOpen" [lead]="selectedLead" [routeTab]="activeRecordTab" [editMode]="leadInfoEditMode" [submittedApplicationContext]="applicationLeadContext" [convertApplicationApiErrorMode]="convertApplicationApiErrorMode" (routeTabChange)="navigateToRecordTab($event)" (leadInfoSaved)="recordLeadInfoUpdated()" (csaCreated)="recordCsaCreated()" (siGenerated)="recordSiGenerated()" (proposalSaved)="recordProposalCreated()" (applicationConverted)="recordApplicationConverted()" (contactRequired)="openContactDrawer()" (csaContactRequired)="openContactDrawerForCsa()" (appointmentRequired)="openContactDrawer()" (activityRequested)="openContactDrawer()" (underwritingSubmitted)="viewSubmittedApplication($event)" (closed)="closeLead()" />
     <section *ngIf="newLeadOpen" class="new-lead-modal" role="dialog" aria-modal="true" aria-labelledby="new-lead-title">
       <div class="new-lead-modal__backdrop" aria-hidden="true"></div>
       <div class="new-lead-modal__panel">
@@ -191,6 +193,9 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
 })
 export class AppComponent implements AfterViewInit {
   apiErrorMode = false;
+  searchErrorMode = false;
+  drawerLoadingErrorMode = false;
+  convertApplicationApiErrorMode = false;
   readonly buttonVariant = TdxButtonVariant;
   readonly buttonEmphasis = TdxButtonEmphasis;
   readonly buttonSize = TdxButtonSize;
@@ -290,6 +295,11 @@ export class AppComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    const navigationEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+    if (navigationEntry?.type === 'reload') {
+      void this.router.navigate(['/lcam']);
+      return;
+    }
     this.openRoute(this.router.url);
   }
 
@@ -300,6 +310,14 @@ export class AppComponent implements AfterViewInit {
     this.draftSiOpen = false;
     this.proposalOpen = false;
     this.changeDetectorRef.markForCheck();
+  }
+
+  retryApiError(): void {
+    void this.router.navigate(['/lcam']);
+  }
+
+  retryDrawerLoading(): void {
+    void this.router.navigate(this.selectedLead ? ['/lcam', this.selectedLead.leadId] : ['/lcam']);
   }
 
   openApplicationLead(lead: LeadCardData): void {
@@ -762,6 +780,7 @@ export class AppComponent implements AfterViewInit {
 
   closeLead(): void {
     const returnToApplications = this.showApplications;
+    const stayInDrawerLoadingScenario = this.router.url === '/lcam/side-drawer-loading-api-error';
     if (this.pendingHighlightLeadId) {
       this.dashboard?.startHighlightTimer();
       this.pendingHighlightLeadId = null;
@@ -773,14 +792,16 @@ export class AppComponent implements AfterViewInit {
     this.activeRecordTab = 'info';
     this.leadInfoEditMode = false;
     this.navigation.activeDestination.set(returnToApplications ? 'applications' : 'lcam-board');
-    if (this.router.url !== '/lcam') void this.router.navigate(['/lcam']);
+    if (!stayInDrawerLoadingScenario && this.router.url !== '/lcam') void this.router.navigate(['/lcam']);
     this.changeDetectorRef.markForCheck();
   }
 
   private openRoute(url: string): void {
     const path = url.split(/[?#]/, 1)[0];
-    if (path === '/lcam/api') {
+    if (path === '/lcam/board-loading-api-error') {
       this.apiErrorMode = true;
+      this.searchErrorMode = false;
+      this.convertApplicationApiErrorMode = false;
       this.selectedLead = null;
       this.draftSiOpen = false;
       this.proposalOpen = false;
@@ -789,7 +810,51 @@ export class AppComponent implements AfterViewInit {
       this.changeDetectorRef.markForCheck();
       return;
     }
+    if (path === '/lcam/page-search-api-error') {
+      this.apiErrorMode = false;
+      this.searchErrorMode = true;
+      this.convertApplicationApiErrorMode = false;
+      this.selectedLead = null;
+      this.draftSiOpen = false;
+      this.proposalOpen = false;
+      this.contactDrawerOpen = false;
+      this.navigation.activeDestination.set('lcam-board');
+      this.changeDetectorRef.markForCheck();
+      return;
+    }
+    if (path === '/lcam/convert-application-api-error') {
+      this.apiErrorMode = false;
+      this.searchErrorMode = false;
+      this.drawerLoadingErrorMode = false;
+      this.convertApplicationApiErrorMode = true;
+      this.selectedLead = this.dashboard?.findLeadByLeadId('16719') ?? null;
+      this.draftSiOpen = false;
+      this.proposalOpen = Boolean(this.selectedLead);
+      this.contactDrawerOpen = false;
+      this.activeRecordTab = 'proposals';
+      this.leadInfoEditMode = false;
+      if (this.selectedLead) this.journeyState.unlock(this.selectedLead.leadId, 'proposals');
+      this.navigation.showLeadFlow();
+      this.changeDetectorRef.markForCheck();
+      return;
+    }
+    if (path === '/lcam/side-drawer-loading-api-error') {
+      this.apiErrorMode = false;
+      this.searchErrorMode = false;
+      this.convertApplicationApiErrorMode = false;
+      this.drawerLoadingErrorMode = true;
+      this.selectedLead = this.dashboard?.boards.flatMap(board => board.leads)[0] ?? null;
+      this.draftSiOpen = false;
+      this.proposalOpen = false;
+      this.contactDrawerOpen = false;
+      this.navigation.activeDestination.set('lcam-board');
+      this.changeDetectorRef.markForCheck();
+      return;
+    }
     this.apiErrorMode = false;
+    this.searchErrorMode = false;
+    this.drawerLoadingErrorMode = false;
+    this.convertApplicationApiErrorMode = false;
     const match = /^\/lcam(?:\/([^/]+)(?:\/(profile|proposals|applications))?)?\/?$/.exec(path);
     if (!match) return;
 

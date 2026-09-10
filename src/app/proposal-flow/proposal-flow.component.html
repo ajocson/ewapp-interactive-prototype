@@ -92,8 +92,15 @@
             <button type="button" (click)="salesIllustrationGenerated = true" aria-label="View generated sales illustration"><span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span><span>Sales Illustration_Dream Builder_810000106051</span><span class="material-symbols-rounded" aria-hidden="true">keyboard_arrow_right</span></button>
             <a class="generated-proposal__download" href="assets/si-page-1.png" download="Sales Illustration_Dream Builder_810000106051.png">Download Sales Illustration</a>
           </section>
-          <footer><button *ngIf="!hasGeneratedSalesIllustration" type="button" class="generated-proposal__generate" (click)="generateSalesIllustration()">Generate Sales Illustration<span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button><button *ngIf="hasGeneratedSalesIllustration && !isTabEnabled('applications')" type="button" class="generated-proposal__convert" (click)="convertToApplication()">Convert to Application<span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button></footer>
+          <footer><button *ngIf="!hasGeneratedSalesIllustration" type="button" class="generated-proposal__generate" (click)="generateSalesIllustration()">Generate Sales Illustration<span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button><app-button *ngIf="hasGeneratedSalesIllustration && !isTabEnabled('applications')" class="generated-proposal__convert" label="Convert to Application" [variant]="TdxButtonVariant.Primary" [size]="TdxButtonSize.Medium" [loading]="convertApplicationLoading" rightIcon="chevron_right" (clicked)="convertToApplication()" /></footer>
         </article>
+        <div *ngIf="convertApplicationApiErrorVisible" class="confirmation-overlay convert-application-api-error-overlay" (click)="closeConvertApplicationApiError()" role="presentation">
+          <section class="confirmation-dialog convert-application-api-error" role="dialog" aria-modal="true" aria-labelledby="convert-application-api-error-title" (click)="$event.stopPropagation()">
+            <img src="assets/icon-warning.svg" alt="">
+            <div><h2 id="convert-application-api-error-title">Can’t convert to application right now</h2><p>We couldn’t create the application at the moment. Please try again later.</p></div>
+            <footer><app-button label="Close" [variant]="TdxButtonVariant.Primary" [emphasis]="TdxButtonEmphasis.Outline" [size]="TdxButtonSize.Medium" (clicked)="closeConvertApplicationApiError()" /><app-button label="Try Again" [variant]="TdxButtonVariant.Primary" [size]="TdxButtonSize.Medium" (clicked)="retryConvertApplication()" /></footer>
+          </section>
+        </div>
         <article class="proposal-card proposal-draft" *ngIf="proposalDraftOpen && routeTab !== 'applications'">
           <header class="proposal-draft__header"><h2>{{ selectedProduct }}</h2></header>
           <nav class="proposal-draft__tabs" aria-label="Proposal sections"><button type="button" [class.is-active]="proposalTab === 'info'" (click)="proposalTab = 'info'">Info</button><button type="button" [class.is-active]="proposalTab === 'benefits'" (click)="proposalTab = 'benefits'">Benefits</button><button type="button" disabled>Riders</button></nav>

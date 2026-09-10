@@ -21,6 +21,7 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
   @Input({ required: true }) lead!: LeadCardData;
   @Input() routeTab: LeadRecordTab = 'info';
   @Input() submittedApplicationContext = false;
+  @Input() convertApplicationApiErrorMode = false;
   private leadInfoEditMode = false;
   @Input() set editMode(value: boolean) {
     this.leadInfoEditMode = value;
@@ -89,8 +90,11 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
   applicationUnderwritingSubmitted = false;
   proposalSaveConfirmation = false;
   proposalToastMessage = '';
+  convertApplicationApiErrorVisible = false;
+  convertApplicationLoading = false;
   confirmation: 'add-profile' | 'save-csa' | null = null;
   private proposalToastTimeout?: number;
+  private convertApplicationApiErrorTimeout?: number;
 
   readonly TdxButtonVariant = TdxButtonVariant;
   readonly TdxButtonEmphasis = TdxButtonEmphasis;
@@ -138,6 +142,7 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.proposalToastTimeout !== undefined) window.clearTimeout(this.proposalToastTimeout);
+    if (this.convertApplicationApiErrorTimeout !== undefined) window.clearTimeout(this.convertApplicationApiErrorTimeout);
   }
 
   @HostListener('document:keydown.escape')
@@ -288,6 +293,10 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
       this.appointmentRequired.emit();
       return;
     }
+    if (this.convertApplicationApiErrorMode) {
+      this.startConvertApplicationApiError();
+      return;
+    }
     this.journeyState.unlock(this.lead.leadId, 'applications');
     this.applicationOpen = true;
     this.applicationDetailOpen = true;
@@ -301,6 +310,29 @@ export class ProposalFlowComponent implements OnChanges, OnDestroy {
     this.applicationConverted.emit();
     this.routeTabChange.emit('applications');
     this.changeDetectorRef.markForCheck();
+  }
+
+  retryConvertApplication(): void {
+    this.convertApplicationApiErrorVisible = false;
+    this.startConvertApplicationApiError();
+  }
+
+  closeConvertApplicationApiError(): void {
+    this.convertApplicationApiErrorVisible = false;
+    this.changeDetectorRef.markForCheck();
+  }
+
+  private startConvertApplicationApiError(): void {
+    if (this.convertApplicationApiErrorTimeout !== undefined) window.clearTimeout(this.convertApplicationApiErrorTimeout);
+    this.convertApplicationApiErrorVisible = false;
+    this.convertApplicationLoading = true;
+    this.changeDetectorRef.markForCheck();
+    this.convertApplicationApiErrorTimeout = window.setTimeout(() => {
+      this.convertApplicationLoading = false;
+      this.convertApplicationApiErrorVisible = true;
+      this.convertApplicationApiErrorTimeout = undefined;
+      this.changeDetectorRef.markForCheck();
+    }, 4000);
   }
 
   openApplicationDetail(): void {

@@ -21,6 +21,7 @@
   </header>
 
   <app-tab-group [tabs]="tabs" [activeId]="activeTab" ariaLabel="Lead activity sections" (activeIdChange)="activeTab = $event; scheduling = false; rescheduling = false; cancellingAppointment = false; followUpRecording = false" />
+  <ng-container *ngIf="!loadingErrorMode; else drawerLoadingError">
 
   <div #drawerScroll class="drawer-scroll">
     <ng-container *ngIf="activeTab === 'overview'">
@@ -447,6 +448,43 @@
       </ng-template>
     </section>
   </div>
+  </ng-container>
+
+  <ng-template #drawerLoadingError>
+    <section class="drawer-loading-error" role="status" aria-live="polite">
+      <ng-container *ngIf="!loadingErrorVisible; else drawerErrorMessage">
+        <div class="drawer-loading-skeleton" aria-label="Loading lead details">
+          <div class="drawer-loading-skeleton__row">
+            <span></span><span></span>
+          </div>
+          <div class="drawer-loading-skeleton__row">
+            <span></span><span></span>
+          </div>
+          <div class="drawer-loading-skeleton__row">
+            <span></span><span></span>
+          </div>
+          <div class="drawer-loading-skeleton__full"></div>
+          <div class="drawer-loading-skeleton__full"></div>
+          <div class="drawer-loading-skeleton__section"></div>
+          <div class="drawer-loading-skeleton__full drawer-loading-skeleton__full--short"></div>
+          <div class="drawer-loading-skeleton__cards">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="drawer-loading-skeleton__textarea"></div>
+          <div class="drawer-loading-skeleton__full drawer-loading-skeleton__full--short"></div>
+          <div class="drawer-loading-skeleton__actions">
+            <span></span><span></span>
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #drawerErrorMessage>
+        <img class="drawer-loading-error__icon" src="assets/api-error-illustration.png" alt="" aria-hidden="true" />
+        <h3>Can’t load lead details right now</h3>
+        <p>We couldn’t retrieve the lead details at the moment. Please try again later.</p>
+        <app-button label="Try Again" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="retryLoadingError()" />
+      </ng-template>
+    </section>
+  </ng-template>
 </aside>
 
 <button

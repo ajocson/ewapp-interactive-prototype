@@ -35,6 +35,8 @@ export class LeadBoardComponent {
   @Input() filterByTag = false;
   @Input() additionalSortOptions: readonly { value: Exclude<BoardSortOption, null>; label: string }[] = [];
   @Input() highlightedLeadId: string | null = null;
+  @Input() externalLoading = false;
+  @Input() skipInitialLoading = false;
   @Output() leadSelected = new EventEmitter<LeadCardData>();
 
   @ViewChild('searchInput') private searchInput?: ElementRef<HTMLInputElement>;

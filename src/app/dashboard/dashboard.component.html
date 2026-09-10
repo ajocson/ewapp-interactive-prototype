@@ -14,7 +14,7 @@
 
     <section class="priorities" aria-label="Lead priorities">
       <div class="filters" role="search">
-        <app-search-field class="filters__search" name="lead-search" placeholder="Search by lead name or ID" ariaLabel="Search by lead name or ID" [readonly]="apiErrorVisible" [value]="pendingSearchTerm" (valueChange)="pendingSearchTerm = $event" (cleared)="clearPageSearch()" (keydown.enter)="applyPageSearch()" />
+        <app-search-field class="filters__search" name="lead-search" placeholder="Search by lead name or ID" ariaLabel="Search by lead name or ID" [readonly]="apiErrorVisible" [clearDisabled]="searchErrorModeActive" [focusState]="searchErrorModeActive" [style.--search-field-border-default]="searchErrorModeActive ? 'var(--color-purple-300)' : null" [style.--search-field-border-width]="searchErrorModeActive ? '2px' : null" [value]="pendingSearchTerm" (valueChange)="pendingSearchTerm = $event" (cleared)="clearPageSearch()" (keydown.enter)="applyPageSearch()" />
         <tdx-field-control
           name="lead-source"
           ariaLabel="Source of lead"
@@ -126,12 +126,14 @@
         </div>
       </div>
 
-      <div class="board-viewport" [class.board-viewport--page-empty]="pageSearchHasNoMatches || apiErrorVisible" tabindex="0" aria-label="Lead pipeline boards">
-        <div class="board-track" [class.board-track--page-empty]="pageSearchHasNoMatches || apiErrorVisible">
+      <div class="board-viewport" [class.board-viewport--page-empty]="pageSearchHasNoMatches || apiErrorVisible || searchErrorVisible" tabindex="0" aria-label="Lead pipeline boards">
+        <div class="board-track" [class.board-track--page-empty]="pageSearchHasNoMatches || apiErrorVisible || searchErrorVisible">
           <lam-lead-board
-            *ngFor="let board of (apiErrorVisible ? apiErrorBoards : filteredBoards); trackBy: trackBoard"
+            *ngFor="let board of ((apiErrorVisible || searchErrorVisible) ? apiErrorBoards : filteredBoards); trackBy: trackBoard"
             [board]="board"
             [highlightedLeadId]="highlightedLeadId"
+            [externalLoading]="isRetrying"
+            [skipInitialLoading]="suppressBoardLoading"
             (leadSelected)="selectLead($event)"
           />
         </div>
@@ -150,6 +152,16 @@
             <h2 id="api-error-title">Can’t display leads right now</h2>
             <p>We couldn’t load the lead data at the moment. Please try again later.</p>
             <p>If issue persists, contact EWATechServices@ewageas.com.ph.</p>
+            <app-button label="Try Again" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="requestRetry()" />
+          </div>
+        </section>
+        <section *ngIf="searchErrorVisible" class="page-search-empty-state" role="alert" aria-labelledby="search-error-title">
+          <div class="page-search-empty-state__content">
+            <img src="assets/api-error-illustration.png" alt="" aria-hidden="true">
+            <h2 id="search-error-title">Can’t display search results right now</h2>
+            <p>We couldn’t retrieve results for your search. Please try again later.</p>
+            <p>If issue persists, contact EWATechServices@ewageas.com.ph.</p>
+            <app-button label="Try Again" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="requestRetry()" />
           </div>
         </section>
       </div>

@@ -39,4 +39,44 @@ describe('SideNavigationComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('New Lead');
     expect(fixture.nativeElement.textContent).toContain('Draft SI');
   });
+
+  it('opens the prototype scenario navigator with the available API handling link', () => {
+    const trigger = fixture.nativeElement.querySelector('.prototype-scenarios__trigger') as HTMLButtonElement;
+
+    trigger.click();
+    fixture.detectChanges();
+
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(fixture.nativeElement.querySelector('.prototype-scenarios__menu').textContent).toContain('LCAM Board loading API error');
+    expect(fixture.nativeElement.querySelector('a[href="/lcam/board-loading-api-error"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('a[href="/lcam/page-search-api-error"]')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('LCAM Page search API error');
+    expect(fixture.nativeElement.querySelector('[aria-label="Search prototype scenarios"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.prototype-scenarios__scope')).toBeNull();
+  });
+
+  it('filters prototype scenarios from the menu search', () => {
+    const trigger = fixture.nativeElement.querySelector('.prototype-scenarios__trigger') as HTMLButtonElement;
+    trigger.click();
+    fixture.detectChanges();
+
+    const search = fixture.nativeElement.querySelector('[aria-label="Search prototype scenarios"]') as HTMLInputElement;
+    search.value = 'drawer';
+    search.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Side drawer loading');
+    expect(fixture.nativeElement.textContent).not.toContain('LCAM Board loading API error');
+  });
+
+  it('closes the prototype scenario navigator with Escape', () => {
+    const trigger = fixture.nativeElement.querySelector('.prototype-scenarios__trigger') as HTMLButtonElement;
+    trigger.click();
+    fixture.detectChanges();
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+  });
 });

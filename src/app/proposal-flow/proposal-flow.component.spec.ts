@@ -231,6 +231,37 @@ describe('ProposalFlowComponent', () => {
     vi.useRealTimers();
   });
 
+  it('shows the convert-to-application API error after the loading state', () => {
+    vi.useFakeTimers();
+    const component = fixture.componentInstance;
+    component.lead = {
+      ...component.lead,
+      tags: [{ label: 'Meeting', tone: 'success' }],
+      appointment: { date: '2026-08-29', dateLabel: 'August 29, 2026', startMinutes: 840, endMinutes: 900, timeLabel: '2:00 PM-3:00 PM' },
+      activities: [
+        { id: 'appointment', category: 'sales', label: 'Appointment Scheduled', dateLabel: 'Aug 29, 2026', timeLabel: '2:00 PM', occurredAtTimestamp: 100 },
+        { id: 'presentation', category: 'sales', label: 'Presentation Completed', dateLabel: 'Aug 29, 2026', timeLabel: '3:00 PM', occurredAtTimestamp: 200 }
+      ]
+    };
+    component.routeTab = 'proposals';
+    component.proposalCreated = true;
+    component.hasGeneratedSalesIllustration = true;
+    component.convertApplicationApiErrorMode = true;
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('.generated-proposal__convert .tdx-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(component.convertApplicationLoading).toBe(true);
+    expect(fixture.nativeElement.querySelector('.convert-application-api-error')).toBeNull();
+
+    vi.advanceTimersByTime(4000);
+    fixture.detectChanges();
+    expect(component.convertApplicationLoading).toBe(false);
+    expect(fixture.nativeElement.querySelector('.convert-application-api-error')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Can’t convert to application right now');
+    vi.useRealTimers();
+  });
+
   it('keeps a generated sales illustration available after returning from the viewer', () => {
     const component = fixture.componentInstance;
     component.proposalCreated = true;

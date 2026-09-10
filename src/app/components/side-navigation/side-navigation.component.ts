@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Output } from '@angular/core';
 
 import { SideNavigationItem } from './side-navigation.model';
 import { AppNavigationStateService } from '../../shared/services/app-navigation-state.service';
@@ -13,7 +13,46 @@ import { AppNavigationStateService } from '../../shared/services/app-navigation-
 export class SideNavigationComponent {
   @Output() newLeadRequested = new EventEmitter<void>();
   @Output() draftSiRequested = new EventEmitter<void>();
-  constructor(readonly navigation: AppNavigationStateService) {}
+  constructor(
+    readonly navigation: AppNavigationStateService,
+    private readonly elementRef: ElementRef<HTMLElement>
+  ) {}
+
+  prototypeMenuOpen = false;
+  scenarioSearchTerm = '';
+
+  readonly prototypeScenarioGroups: readonly SideNavigationScenarioGroup[] = [
+    {
+      label: 'API / Data handling',
+      scenarios: [
+        { label: 'LCAM Board loading API error', path: '/lcam/board-loading-api-error' },
+        { label: 'LCAM Page search API error', path: '/lcam/page-search-api-error' },
+      ]
+    },
+    {
+      label: 'Access / Request handling',
+      scenarios: [
+        { label: 'LCAM Side drawer loading API error', path: '/lcam/side-drawer-loading-api-error' },
+        { label: 'Convert to Application API error', path: '/lcam/convert-application-api-error' }
+      ]
+    }
+  ];
+
+  get filteredPrototypeScenarioGroups(): readonly SideNavigationScenarioGroup[] {
+    const searchTerm = this.scenarioSearchTerm.trim().toLowerCase();
+
+    if (!searchTerm) return this.prototypeScenarioGroups;
+
+    return this.prototypeScenarioGroups
+      .map(group => ({
+        ...group,
+        scenarios: group.scenarios.filter(scenario =>
+          group.label.toLowerCase().includes(searchTerm)
+          || scenario.label.toLowerCase().includes(searchTerm)
+        )
+      }))
+      .filter(group => group.scenarios.length > 0);
+  }
 
   readonly primaryItems: readonly SideNavigationItem[] = [
     { label: 'LCAM Board', icon: 'view_week' },
@@ -41,4 +80,36 @@ export class SideNavigationComponent {
     if (item.label === 'LCAM Board') this.navigation.goToLcamBoard();
     if (item.label === 'Applications') this.navigation.goToApplications();
   }
+
+  togglePrototypeMenu(): void {
+    this.prototypeMenuOpen = !this.prototypeMenuOpen;
+  }
+
+  closePrototypeMenu(): void {
+    this.prototypeMenuOpen = false;
+    this.scenarioSearchTerm = '';
+  }
+
+  @HostListener('document:click', ['$event.target'])
+  closePrototypeMenuWhenClickingOutside(target: EventTarget | null): void {
+    if (target instanceof Node && !this.elementRef.nativeElement.contains(target)) {
+      this.closePrototypeMenu();
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  closePrototypeMenuOnEscape(): void {
+    this.closePrototypeMenu();
+  }
+}
+
+interface SideNavigationScenarioGroup {
+  label: string;
+  scenarios: readonly SideNavigationScenario[];
+}
+
+interface SideNavigationScenario {
+  label: string;
+  path?: string;
+  comingSoon?: boolean;
 }

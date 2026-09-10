@@ -39,4 +39,69 @@
       </button>
     </div>
   </div>
+
+  <div class="prototype-scenarios" [class.prototype-scenarios--open]="prototypeMenuOpen">
+    <section
+      *ngIf="prototypeMenuOpen"
+      id="prototype-scenarios-menu"
+      class="prototype-scenarios__menu"
+      aria-labelledby="prototype-scenarios-title"
+    >
+      <div class="prototype-scenarios__header">
+        <div>
+          <p id="prototype-scenarios-title">Other Prototype Scenarios</p>
+          <span id="prototype-scenarios-description">Not part of the actual EWApp UI. Use this library to access prototype links for special-handling scenarios across EWApp pages.</span>
+        </div>
+        <button
+          type="button"
+          class="prototype-scenarios__close"
+          aria-label="Close prototype scenarios"
+          (click)="closePrototypeMenu()"
+        >
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <label class="prototype-scenarios__search">
+        <span class="material-symbols-rounded" aria-hidden="true">search</span>
+        <input
+          type="search"
+          aria-label="Search prototype scenarios"
+          placeholder="Search scenarios"
+          [(ngModel)]="scenarioSearchTerm"
+        >
+      </label>
+
+      <div *ngFor="let group of filteredPrototypeScenarioGroups" class="prototype-scenarios__group">
+        <a
+          *ngFor="let scenario of group.scenarios"
+          class="prototype-scenarios__link"
+          [class.prototype-scenarios__link--disabled]="scenario.comingSoon"
+          [attr.href]="scenario.path || null"
+          [attr.aria-disabled]="scenario.comingSoon ? 'true' : null"
+          [attr.tabindex]="scenario.comingSoon ? -1 : 0"
+          (click)="scenario.comingSoon ? $event.preventDefault() : closePrototypeMenu()"
+        >
+          <span>{{ scenario.label }}</span>
+          <span *ngIf="scenario.comingSoon" class="prototype-scenarios__status">Soon</span>
+          <span *ngIf="!scenario.comingSoon" class="material-symbols-rounded" aria-hidden="true">arrow_outward</span>
+        </a>
+      </div>
+      <p *ngIf="scenarioSearchTerm.trim() && !filteredPrototypeScenarioGroups.length" class="prototype-scenarios__empty">
+        No matching scenarios
+      </p>
+    </section>
+
+    <button
+      type="button"
+      class="prototype-scenarios__trigger"
+      aria-label="Open prototype scenarios"
+      aria-controls="prototype-scenarios-menu"
+      [attr.aria-expanded]="prototypeMenuOpen"
+      [attr.title]="prototypeMenuOpen ? 'Close prototype scenarios' : 'Open prototype scenarios'"
+      (click)="togglePrototypeMenu()"
+    >
+      <span class="material-symbols-rounded" aria-hidden="true">import_contacts</span>
+    </button>
+  </div>
 </nav>

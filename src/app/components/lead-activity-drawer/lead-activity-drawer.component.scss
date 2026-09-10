@@ -1,5 +1,46 @@
 :host { display: contents; }
 
+.drawer-loading-error {
+  display: flex;
+  min-height: 420px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  padding: var(--space-2xl);
+  color: var(--text-neutral-primary);
+  text-align: center;
+}
+
+.drawer-loading-skeleton { display: flex; width: 100%; flex-direction: column; gap: var(--space-lg); }
+.drawer-loading-skeleton__row,
+.drawer-loading-skeleton__cards,
+.drawer-loading-skeleton__actions { display: flex; gap: var(--space-lg); }
+.drawer-loading-skeleton__row span,
+.drawer-loading-skeleton__full,
+.drawer-loading-skeleton__section,
+.drawer-loading-skeleton__textarea,
+.drawer-loading-skeleton__cards span,
+.drawer-loading-skeleton__actions span {
+  display: block;
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, var(--color-grey-100) 25%, var(--color-grey-200) 50%, var(--color-grey-100) 75%);
+  background-size: 200% 100%;
+  animation: drawer-loading-error-shimmer 1.2s ease-in-out infinite;
+}
+.drawer-loading-skeleton__row span { height: 28px; flex: 1 1 0; }
+.drawer-loading-skeleton__full { height: 92px; }
+.drawer-loading-skeleton__full--short { width: 72%; height: 28px; }
+.drawer-loading-skeleton__section { width: 58%; height: 28px; margin-top: var(--space-md); }
+.drawer-loading-skeleton__cards span { height: 104px; flex: 1 1 0; }
+.drawer-loading-skeleton__textarea { height: 152px; }
+.drawer-loading-skeleton__actions span { height: 56px; flex: 1 1 0; }
+.drawer-loading-error__icon { width: 60px; height: 60px; object-fit: contain; }
+.drawer-loading-error h3 { margin: var(--space-none); font-size: var(--heading-sm-text-size); line-height: var(--heading-sm-line-height); }
+.drawer-loading-error p { max-width: 280px; margin: var(--space-none); font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
+.drawer-loading-error app-button { margin-top: var(--space-md); }
+@keyframes drawer-loading-error-shimmer { to { background-position: -200% 0; } }
+
 .drawer-overlay {
   padding: var(--space-none);
   border: var(--border-width-none);

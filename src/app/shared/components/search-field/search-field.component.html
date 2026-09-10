@@ -1,7 +1,8 @@
-<label class="tdx-search-field" [class.tdx-search-field--compact]="compact" [class.tdx-search-field--disabled]="disabled">
+<label class="tdx-search-field" [class.tdx-search-field--compact]="compact" [class.tdx-search-field--disabled]="disabled" [class.tdx-search-field--focused]="focusState">
   <span class="material-symbols-rounded tdx-search-field__leading-icon" aria-hidden="true">search</span>
   <span class="visually-hidden">{{ ariaLabel }}</span>
   <input
+    #searchInput
     type="search"
     [name]="name"
     [value]="value"
@@ -12,7 +13,7 @@
     (focus)="focused.emit()"
     (input)="updateValue($any($event.target).value)"
   >
-  <button *ngIf="value && !disabled" type="button" class="tdx-search-field__clear" [attr.aria-label]="'Clear ' + ariaLabel.toLocaleLowerCase()" (click)="clear()">
+  <button *ngIf="value && !disabled && clearable" type="button" class="tdx-search-field__clear" [disabled]="clearDisabled" [attr.aria-label]="'Clear ' + ariaLabel.toLocaleLowerCase()" (click)="clear()">
     <span class="material-symbols-rounded" aria-hidden="true">cancel</span>
   </button>
 </label>

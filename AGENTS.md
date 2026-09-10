@@ -289,6 +289,8 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - The AFYP Declaration label includes a 16px neutral-primary information icon with wrapped hover guidance; preserve the black tooltip treatment and avoid clipping within the drawer.
 - The Dashboard sidebar item is intentionally hidden for the current prototype, and the document title is `EWApp Interactive Prototype`.
 
+- The floating Other Prototype Scenarios navigator exposes the LCAM API-error walkthroughs at `/lcam/board-loading-api-error`, `/lcam/page-search-api-error`, `/lcam/side-drawer-loading-api-error`, and `/lcam/convert-application-api-error`; legacy `/lcam/api`, `/lcam/search-error`, and `/lcam/drawer-loading` links redirect to their canonical routes.
+
 ### Latest inactive-lead CSA guard — 2026-09-10
 
 - Inactive leads opened from the LCAM board cannot continue from Info to Add Profile (CSA); that action emits the existing contact-required event so the side drawer presents `Mark as Contacted`.

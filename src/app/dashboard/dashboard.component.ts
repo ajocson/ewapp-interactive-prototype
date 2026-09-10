@@ -36,6 +36,7 @@ const DESKTOP_SIDEBAR_QUERY = '(min-width: 1024px)';
 })
 export class DashboardComponent implements OnDestroy {
   @Input() userType: 'Agency' | 'Banca' = 'Banca';
+  @Input() suppressBoardLoading = false;
   @Input() set apiErrorMode(value: boolean) {
     if (this.apiErrorTimer) clearTimeout(this.apiErrorTimer);
     this.apiErrorVisible = false;
@@ -46,10 +47,23 @@ export class DashboardComponent implements OnDestroy {
       }, 2000);
     }
   }
+  @Input() set searchErrorMode(value: boolean) {
+    if (this.searchErrorTimer) clearTimeout(this.searchErrorTimer);
+    this.searchErrorModeActive = value;
+    this.searchErrorVisible = false;
+    if (value) {
+      this.pendingSearchTerm = 'John Mark Doe';
+      this.searchErrorTimer = setTimeout(() => {
+        this.searchErrorVisible = true;
+        this.changeDetectorRef.markForCheck();
+      }, 2000);
+    }
+  }
   @Output() leadOpened = new EventEmitter<LeadCardData>();
   @Output() newLeadRequested = new EventEmitter<void>();
   @Output() draftSiRequested = new EventEmitter<void>();
   @Output() loggedOut = new EventEmitter<void>();
+  @Output() retryRequested = new EventEmitter<void>();
   searchTerm = '';
   pendingSearchTerm = '';
   pendingSources: readonly string[] = ['All'];
@@ -101,7 +115,12 @@ export class DashboardComponent implements OnDestroy {
   private readonly desktopMediaQuery: MediaQueryList | null;
   private highlightTimer?: ReturnType<typeof setTimeout>;
   private apiErrorTimer?: ReturnType<typeof setTimeout>;
+  private searchErrorTimer?: ReturnType<typeof setTimeout>;
+  private retryTimer?: ReturnType<typeof setTimeout>;
   apiErrorVisible = false;
+  searchErrorVisible = false;
+  searchErrorModeActive = false;
+  isRetrying = false;
   readonly apiErrorBoardTitles = ['Lead', 'Contacted', 'Appointments', 'Meetings', 'Follow-Up'];
   private activitySequence = 0;
 
@@ -120,6 +139,8 @@ export class DashboardComponent implements OnDestroy {
     this.desktopMediaQuery?.removeEventListener('change', this.handleDesktopBreakpointChange);
     if (this.highlightTimer) clearTimeout(this.highlightTimer);
     if (this.apiErrorTimer) clearTimeout(this.apiErrorTimer);
+    if (this.searchErrorTimer) clearTimeout(this.searchErrorTimer);
+    if (this.retryTimer) clearTimeout(this.retryTimer);
   }
 
   closeSidebarFromOverlay(): void {
@@ -282,6 +303,19 @@ export class DashboardComponent implements OnDestroy {
   clearPageSearch(): void {
     this.searchTerm = '';
     this.pendingSearchTerm = '';
+  }
+
+  requestRetry(): void {
+    const retryingSearch = this.searchErrorVisible;
+    this.apiErrorVisible = false;
+    this.searchErrorVisible = false;
+    if (retryingSearch) this.searchTerm = this.pendingSearchTerm;
+    this.isRetrying = true;
+    this.retryRequested.emit();
+    this.retryTimer = setTimeout(() => {
+      this.isRetrying = false;
+      this.changeDetectorRef.markForCheck();
+    }, 1500);
   }
 
   applyPageSearch(): void {

@@ -100,6 +100,20 @@ export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, On
   @Input() userType: 'Agency' | 'Banca' = 'Banca';
   @Input() fromApplicationsPage = false;
   @Input() showCsaContactRequirement = false;
+  private _loadingErrorMode = false;
+  @Input()
+  set loadingErrorMode(value: boolean) {
+    if (this.loadingErrorTimer) clearTimeout(this.loadingErrorTimer);
+    this.loadingErrorVisible = false;
+    this._loadingErrorMode = value;
+    if (value) {
+      this.loadingErrorTimer = setTimeout(() => {
+        this.loadingErrorVisible = true;
+        this.changeDetectorRef.markForCheck();
+      }, 2000);
+    }
+  }
+  get loadingErrorMode(): boolean { return this._loadingErrorMode; }
   @ViewChild('drawerScroll') private drawerScroll?: ElementRef<HTMLDivElement>;
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly document = inject(DOCUMENT);
@@ -125,6 +139,7 @@ export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, On
   @Output() applicationRequested = new EventEmitter<void>();
   @Output() applicationProposalRequested = new EventEmitter<void>();
   @Output() leadStateChanged = new EventEmitter<LeadStateChangedEvent>();
+  @Output() retryRequested = new EventEmitter<void>();
 
   readonly buttonVariant = TdxButtonVariant;
   readonly buttonEmphasis = TdxButtonEmphasis;
@@ -136,6 +151,8 @@ export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, On
     { id: 'timeline', label: 'Activity Timeline' }
   ];
   activeTab = 'overview';
+  loadingErrorVisible = false;
+  private loadingErrorTimer?: ReturnType<typeof setTimeout>;
   scheduling = false;
   rescheduling = false;
   cancellingAppointment = false;
@@ -439,6 +456,16 @@ export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, On
 
   ngOnDestroy(): void {
     this.hideAgingTooltip();
+    if (this.loadingErrorTimer) clearTimeout(this.loadingErrorTimer);
+  }
+
+  retryLoadingError(): void {
+    this.loadingErrorVisible = false;
+    if (this.loadingErrorTimer) clearTimeout(this.loadingErrorTimer);
+    this.loadingErrorTimer = setTimeout(() => {
+      this._loadingErrorMode = false;
+      this.changeDetectorRef.markForCheck();
+    }, 1500);
   }
 
   requestPrimaryAction(): void {
