@@ -296,7 +296,8 @@ export class AppComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     const navigationEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
-    if (navigationEntry?.type === 'reload') {
+    const isApiErrorScenario = this.router.url.startsWith('/lcam/') && this.router.url.endsWith('-api-error');
+    if (navigationEntry?.type === 'reload' && !isApiErrorScenario) {
       void this.router.navigate(['/lcam']);
       return;
     }
@@ -313,6 +314,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   retryApiError(): void {
+    if (this.router.url === '/lcam/board-loading-api-error') return;
     void this.router.navigate(['/lcam']);
   }
 

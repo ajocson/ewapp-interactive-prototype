@@ -132,7 +132,7 @@
             *ngFor="let board of ((apiErrorVisible || searchErrorVisible) ? apiErrorBoards : filteredBoards); trackBy: trackBoard"
             [board]="board"
             [highlightedLeadId]="highlightedLeadId"
-            [externalLoading]="isRetrying"
+            [externalLoading]="isRetrying || apiErrorMode || searchErrorModeActive"
             [skipInitialLoading]="suppressBoardLoading"
             (leadSelected)="selectLead($event)"
           />

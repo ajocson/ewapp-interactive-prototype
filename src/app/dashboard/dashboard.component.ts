@@ -37,20 +37,27 @@ const DESKTOP_SIDEBAR_QUERY = '(min-width: 1024px)';
 export class DashboardComponent implements OnDestroy {
   @Input() userType: 'Agency' | 'Banca' = 'Banca';
   @Input() suppressBoardLoading = false;
+  private _apiErrorMode = false;
   @Input() set apiErrorMode(value: boolean) {
     if (this.apiErrorTimer) clearTimeout(this.apiErrorTimer);
+    this._apiErrorMode = value;
     this.apiErrorVisible = false;
     if (value) {
       this.apiErrorTimer = setTimeout(() => {
         this.apiErrorVisible = true;
-        this.changeDetectorRef.markForCheck();
+        this.changeDetectorRef.detectChanges();
       }, 2000);
     }
   }
+  get apiErrorMode(): boolean { return this._apiErrorMode; }
   @Input() set searchErrorMode(value: boolean) {
     if (this.searchErrorTimer) clearTimeout(this.searchErrorTimer);
     this.searchErrorModeActive = value;
     this.searchErrorVisible = false;
+    if (!value) {
+      this.searchTerm = '';
+      this.pendingSearchTerm = '';
+    }
     if (value) {
       this.pendingSearchTerm = 'John Mark Doe';
       this.searchErrorTimer = setTimeout(() => {
@@ -307,6 +314,7 @@ export class DashboardComponent implements OnDestroy {
 
   requestRetry(): void {
     const retryingSearch = this.searchErrorVisible;
+    const retryingApiError = this.apiErrorVisible;
     this.apiErrorVisible = false;
     this.searchErrorVisible = false;
     if (retryingSearch) this.searchTerm = this.pendingSearchTerm;
@@ -314,6 +322,7 @@ export class DashboardComponent implements OnDestroy {
     this.retryRequested.emit();
     this.retryTimer = setTimeout(() => {
       this.isRetrying = false;
+      if (retryingApiError) this.apiErrorVisible = true;
       this.changeDetectorRef.markForCheck();
     }, 1500);
   }
