@@ -77,7 +77,7 @@
           *ngFor="let scenario of group.scenarios"
           class="prototype-scenarios__link"
           [class.prototype-scenarios__link--disabled]="scenario.comingSoon"
-          [attr.href]="scenario.path || null"
+          [routerLink]="scenario.path || null"
           [attr.aria-disabled]="scenario.comingSoon ? 'true' : null"
           [attr.tabindex]="scenario.comingSoon ? -1 : 0"
           (click)="scenario.comingSoon ? $event.preventDefault() : closePrototypeMenu()"

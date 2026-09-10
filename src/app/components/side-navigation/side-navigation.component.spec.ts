@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
 import { LamComponentsModule } from '../lam-components.module';
 import { SideNavigationComponent } from './side-navigation.component';
@@ -7,7 +8,7 @@ describe('SideNavigationComponent', () => {
   let fixture: ComponentFixture<SideNavigationComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [LamComponentsModule] }).compileComponents();
+    await TestBed.configureTestingModule({ imports: [LamComponentsModule, RouterTestingModule.withRoutes([])] }).compileComponents();
     fixture = TestBed.createComponent(SideNavigationComponent);
     fixture.detectChanges();
   });
@@ -48,8 +49,11 @@ describe('SideNavigationComponent', () => {
 
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
     expect(fixture.nativeElement.querySelector('.prototype-scenarios__menu').textContent).toContain('LCAM Board loading API error');
-    expect(fixture.nativeElement.querySelector('a[href="/lcam/board-loading-api-error"]')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('a[href="/lcam/page-search-api-error"]')).not.toBeNull();
+    const scenarioLinks = Array.from(fixture.nativeElement.querySelectorAll('a')) as HTMLAnchorElement[];
+    const boardErrorLink = scenarioLinks.find(link => link.textContent?.includes('LCAM Board loading API error')) as HTMLAnchorElement;
+    const pageSearchErrorLink = scenarioLinks.find(link => link.textContent?.includes('LCAM Page search API error')) as HTMLAnchorElement;
+    expect(boardErrorLink.getAttribute('href')).toContain('/lcam/board-loading-api-error');
+    expect(pageSearchErrorLink.getAttribute('href')).toContain('/lcam/page-search-api-error');
     expect(fixture.nativeElement.textContent).toContain('LCAM Page search API error');
     expect(fixture.nativeElement.querySelector('[aria-label="Search prototype scenarios"]')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('.prototype-scenarios__scope')).toBeNull();

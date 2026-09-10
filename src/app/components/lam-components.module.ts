@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { TagModule } from '../shared/components/tag/tag.module';
 import { ButtonModule } from '../shared/components/button/button.module';
 import { StepperModule } from '../shared/components/stepper/stepper.module';
@@ -28,7 +29,7 @@ import { StatusTagComponent } from './status-tag/status-tag.component';
     SideNavigationComponent,
     StatusTagComponent
   ],
-  imports: [ActionCardModule, CommonModule, FormsModule, ButtonModule, FieldControlModule, ScheduledActivityCardModule, SectionMessageModule, StepperModule, TabGroupModule, TagModule],
+  imports: [ActionCardModule, CommonModule, FormsModule, RouterModule, ButtonModule, FieldControlModule, ScheduledActivityCardModule, SectionMessageModule, StepperModule, TabGroupModule, TagModule],
   exports: [
     GlobalHeaderComponent,
     IconButtonComponent,
