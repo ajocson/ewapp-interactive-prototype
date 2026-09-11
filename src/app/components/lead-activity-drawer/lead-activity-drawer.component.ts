@@ -124,6 +124,7 @@ export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, On
   @Output() draftSiRequested = new EventEmitter<void>();
   @Output() editLeadRequested = new EventEmitter<void>();
   @Output() contacted = new EventEmitter<LeadContactedEvent>();
+  @Output() draftSiUpdateRequired = new EventEmitter<void>();
   @Output() appointmentScheduled = new EventEmitter<LeadAppointmentScheduledEvent>();
   @Output() appointmentRescheduled = new EventEmitter<LeadAppointmentScheduledEvent>();
   @Output() appointmentCancelled = new EventEmitter<LeadAppointmentCancelledEvent>();
@@ -385,6 +386,19 @@ export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, On
     return this.salesActivities.length > 0 || this.systemActivities.length > 0;
   }
 
+  hasPolicyNumber(activity: LeadActivityRecord): boolean {
+    return activity.category === 'system' && [
+      'Underwriting Ongoing',
+      'Needs More Info',
+      'Approved',
+      'Unapproved',
+      'Conditionally Accepted',
+      'Withdrawn',
+      'Postponed',
+      'Policy Released'
+    ].includes(activity.label);
+  }
+
   isActivityNoteExpanded(activityId: string): boolean {
     return this.expandedActivityNoteIds.has(activityId);
   }
@@ -486,6 +500,10 @@ export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, On
 
   markAsContacted(): void {
     if (!this.isContacted && !this.isAppointmentSet && !this.isMeeting) {
+      if (this.lead.createdFromDraftSi) {
+        this.draftSiUpdateRequired.emit();
+        return;
+      }
       this.contacted.emit({ lead: this.lead, notes: this.activityNotes });
     }
   }
@@ -774,9 +792,11 @@ export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, On
       '2026-03-12T16:15:00', '2026-03-13T09:00:00', '2026-03-13T09:10:00',
       '2026-03-13T09:15:00', '2026-03-13T10:30:00', '2026-03-14T14:00:00',
       '2026-03-14T14:10:00', '2026-03-15T11:00:00', '2026-03-15T11:10:00',
-      '2026-03-15T11:15:00'
+      '2026-03-15T11:15:00', '2026-03-15T11:20:00'
     ];
     const isGraceKelly = this.lead.name === 'Grace Kelly';
+    const needsUnderwriting = isGraceKelly || ['Underwriting Ongoing', 'Needs More Info', 'Conditionally Accepted', 'Policy Released', 'Approved', 'Unapproved', 'Withdrawn', 'Postponed'].includes(this.rawStatusTag);
+    const hasApprovedTransaction = this.rawStatusTag === 'Policy Released';
     const record = (id: string, category: LeadActivityRecord['category'], label: string, offset: number, extra: Partial<LeadActivityRecord> = {}): LeadActivityRecord => ({
       id: `generic-${this.lead.id}-${id}`,
       category,
@@ -811,18 +831,19 @@ export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, On
       record('parked', 'sales', 'Parked Lead', 12, { ...scheduled(appointmentDates.followUpPresentation), notes: 'Client is not ready to proceed at this time and requested to be contacted later.' }),
       record('reactivated', 'sales', 'Reactivated Lead', 13, scheduled(appointmentDates.followUpPresentation)),
       ...(isGraceKelly ? [] : [record('dropped', 'sales', 'Dropped Lead', 14, { ...scheduled(appointmentDates.followUpPresentation), notes: 'Client is no longer interested in proceeding with the application.' })]),
-      ...(isGraceKelly ? [] : [record('application-start', 'system', 'Application Start', 15)]),
-      ...(isGraceKelly ? [] : [record('application-status', 'system', this.rawStatusTag, 16)]),
-      record('draft-si', 'system', 'Draft SI Generated', 17),
-      record('csa', 'system', 'CSA Created', 18),
-      record('proposal', 'system', 'Proposal Created', 19),
-      record('si', 'system', 'SI Generated', 20),
-      record('converted', 'system', 'Converted to Application', 21),
-      record('submitted', 'system', 'Application Submitted', 22),
-      ...(isGraceKelly ? [
-        record('underwriting', 'system', 'Underwriting Ongoing', 23),
-        record('application-status', 'system', this.rawStatusTag, 24)
-      ] : [])
+      record('draft-si', 'system', 'Draft SI Generated', isGraceKelly ? 18 : 15),
+      record('csa', 'system', 'CSA Created', isGraceKelly ? 19 : 16),
+      record('proposal', 'system', 'Proposal Created', isGraceKelly ? 20 : 17),
+      record('si', 'system', 'SI Generated', isGraceKelly ? 21 : 18),
+      record('converted', 'system', 'Converted to Application', isGraceKelly ? 22 : 19),
+      record('submitted', 'system', 'Application Submitted', isGraceKelly ? 23 : 20),
+      ...(needsUnderwriting ? [
+        record('underwriting', 'system', 'Underwriting Ongoing', isGraceKelly ? 24 : 21)
+      ] : []),
+      ...(hasApprovedTransaction ? [record('approved', 'system', 'Approved', isGraceKelly ? 25 : 22)] : []),
+      ...((isGraceKelly || !['Application Submitted', 'Underwriting Ongoing'].includes(this.rawStatusTag))
+        ? [record('application-status', 'system', this.rawStatusTag, isGraceKelly ? 26 : hasApprovedTransaction ? 23 : 22)]
+        : [])
     ];
   }
 

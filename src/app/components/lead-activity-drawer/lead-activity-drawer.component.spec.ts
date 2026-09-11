@@ -47,6 +47,127 @@ describe('LeadActivityDrawerComponent', () => {
     expect(note.getAttribute('aria-expanded')).toBe('true');
   });
 
+  it('orders application system transactions through submission and underwriting', () => {
+    fixture.componentRef.setInput('fromApplicationsPage', true);
+    fixture.componentRef.setInput('lead', {
+      ...createLead(),
+      id: 'application-3',
+      tags: [{ label: 'Underwriting Ongoing', tone: 'info' }],
+      activities: []
+    });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.systemActivities.map((activity) => activity.label)).toEqual([
+      'Draft SI Generated',
+      'CSA Created',
+      'Proposal Created',
+      'SI Generated',
+      'Converted to Application',
+      'Application Submitted',
+      'Underwriting Ongoing'
+    ]);
+  });
+
+  it.each(['Needs More Info', 'Conditionally Accepted'])('adds %s as the final application system transaction', (status) => {
+    fixture.componentRef.setInput('fromApplicationsPage', true);
+    fixture.componentRef.setInput('lead', {
+      ...createLead(),
+      id: `application-${status}`,
+      tags: [{ label: status, tone: 'neutral' }],
+      activities: []
+    });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.systemActivities.at(-1)?.label).toBe(status);
+  });
+
+  it.each(['Needs More Info', 'Conditionally Accepted'])('adds Underwriting Ongoing before %s', (status) => {
+    fixture.componentRef.setInput('fromApplicationsPage', true);
+    fixture.componentRef.setInput('lead', {
+      ...createLead(),
+      id: `application-${status}-underwriting`,
+      tags: [{ label: status, tone: 'neutral' }],
+      activities: []
+    });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.systemActivities.map((activity) => activity.label).slice(-3)).toEqual([
+      'Application Submitted',
+      'Underwriting Ongoing',
+      status
+    ]);
+  });
+
+  it.each(['Approved', 'Unapproved', 'Withdrawn', 'Postponed'])('adds Underwriting Ongoing before the %s application status', (status) => {
+    fixture.componentRef.setInput('fromApplicationsPage', true);
+    fixture.componentRef.setInput('lead', {
+      ...createLead(),
+      id: `application-${status}`,
+      tags: [{ label: status, tone: status === 'Approved' ? 'success' : 'danger' }],
+      activities: []
+    });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.systemActivities.map((activity) => activity.label).slice(-3)).toEqual([
+      'Application Submitted',
+      'Underwriting Ongoing',
+      status
+    ]);
+  });
+
+  it('adds underwriting and approval before the final Policy Released transaction', () => {
+    fixture.componentRef.setInput('fromApplicationsPage', true);
+    fixture.componentRef.setInput('lead', {
+      ...createLead(),
+      name: 'Grace Kelly',
+      id: 'application-policy-released',
+      tags: [{ label: 'Policy Released', tone: 'success' }],
+      activities: []
+    });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.systemActivities.map((activity) => activity.label).slice(-4)).toEqual([
+      'Application Submitted',
+      'Underwriting Ongoing',
+      'Approved',
+      'Policy Released'
+    ]);
+  });
+
+  it('adds approval to non-Grace Kelly Policy Released applications', () => {
+    fixture.componentRef.setInput('fromApplicationsPage', true);
+    fixture.componentRef.setInput('lead', {
+      ...createLead(),
+      id: 'application-policy-released-other',
+      tags: [{ label: 'Policy Released', tone: 'success' }],
+      activities: []
+    });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.systemActivities.map((activity) => activity.label).slice(-4)).toEqual([
+      'Application Submitted',
+      'Underwriting Ongoing',
+      'Approved',
+      'Policy Released'
+    ]);
+  });
+
+  it('shows the policy number only for the requested application system transactions', () => {
+    const systemActivity = (label: string) => ({
+      id: label,
+      category: 'system' as const,
+      label,
+      dateLabel: 'February 01, 2026',
+      timeLabel: '9:00 AM',
+      occurredAtTimestamp: 0
+    });
+
+    expect(['Underwriting Ongoing', 'Needs More Info', 'Approved', 'Unapproved', 'Conditionally Accepted', 'Withdrawn', 'Postponed', 'Policy Released']
+      .every((label) => fixture.componentInstance.hasPolicyNumber(systemActivity(label)))).toBe(true);
+    expect(fixture.componentInstance.hasPolicyNumber(systemActivity('Application Submitted'))).toBe(false);
+    expect(fixture.componentInstance.hasPolicyNumber({ ...systemActivity('Approved'), category: 'sales' })).toBe(false);
+  });
+
   it('offers only the supported drop reasons', () => {
     expect(fixture.componentInstance.dropReasonOptions.map((option) => option.value)).toEqual([
       'Affordability / Financial Constraints',

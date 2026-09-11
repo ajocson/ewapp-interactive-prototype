@@ -55,6 +55,7 @@ export interface LeadCardData {
   source: string;
   referrer: string;
   productInterested: string;
+  createdFromDraftSi?: boolean;
   tags: readonly LeadTag[];
   appointment?: LeadAppointment;
   activities: readonly LeadActivityRecord[];

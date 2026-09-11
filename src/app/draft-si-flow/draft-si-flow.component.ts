@@ -53,6 +53,10 @@ export class DraftSiFlowComponent implements OnInit {
 
   ngOnInit(): void {
     this.step = this.startStep;
+    if (this.standaloneDraft) {
+      this.firstName = 'Andrei';
+      this.lastName = 'Villanueva';
+    }
     if (this.startStep === 2) {
       this.selectedProduct = this.products[0];
     }

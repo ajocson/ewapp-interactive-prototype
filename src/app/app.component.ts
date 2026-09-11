@@ -41,6 +41,7 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
       [loadingErrorMode]="drawerLoadingErrorMode"
       (closed)="contactDrawerOpen ? closeContactDrawer() : closeLead()"
       (contacted)="markLeadAsContacted($event)"
+      (draftSiUpdateRequired)="openDraftSiContactUpdate()"
       (appointmentScheduled)="scheduleLeadAppointment($event)"
       (appointmentRescheduled)="rescheduleLeadAppointment($event)"
       (appointmentCancelled)="cancelLeadAppointment($event)"
@@ -101,6 +102,19 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
       </div>
       </div>
     </section>
+    <div *ngIf="draftSiContactUpdateOpen" class="draft-si-contact-update-overlay" role="presentation">
+      <section class="draft-si-contact-update-modal" role="dialog" aria-modal="true" aria-labelledby="draft-si-contact-update-title" aria-describedby="draft-si-contact-update-description">
+        <button type="button" class="draft-si-contact-update-modal__close" aria-label="Close update individual information" (click)="closeDraftSiContactUpdate()"><img src="assets/icons/update-info-close.png" alt=""></button>
+        <div class="draft-si-contact-update-modal__icons" aria-hidden="true">
+          <span><img src="assets/icons/update-info-person.png" alt=""></span>
+          <span><img src="assets/icons/update-info-document.png" alt=""></span>
+          <span><img src="assets/icons/update-info-alert.png" alt=""></span>
+        </div>
+        <h2 id="draft-si-contact-update-title">Update Individual Information</h2>
+        <p id="draft-si-contact-update-description">We have detected incomplete details. Incomplete info may impact underwriting success. Ensure that all the provided information is accurate and correct.</p>
+        <button type="button" class="draft-si-contact-update-modal__continue" (click)="continueDraftSiContactUpdate()">Continue to Update</button>
+      </section>
+    </div>
     <div class="confirmation-overlay product-picker-overlay" *ngIf="draftSiProductPickerOpen" (click)="closeDraftSiProductPicker()" role="presentation">
       <section class="product-picker" role="dialog" aria-modal="true" aria-labelledby="draft-si-product-picker-title" (click)="$event.stopPropagation()">
         <header><h2 id="draft-si-product-picker-title">Choose Product</h2><p>Select the insurance plan that best suits your needs. Limit your selection to one plan only.</p></header>
@@ -254,6 +268,7 @@ export class AppComponent implements AfterViewInit {
   ];
   draftSiOpen = false;
   draftSiQuickQuoteOpen = false;
+  draftSiContactUpdateOpen = false;
   draftSiProductPickerOpen = false;
   draftSiFlowStartStep: 1 | 2 = 1;
   draftSiFromSidebar = false;
@@ -269,6 +284,7 @@ export class AppComponent implements AfterViewInit {
   activityRecorded = false;
   activityToastMessage = 'Your activity has been recorded.';
   private pendingHighlightLeadId: string | null = null;
+  private standaloneDraftLeadCreated = false;
   private activityToastTimer?: ReturnType<typeof setTimeout>;
   private activityToastDismissTimer?: ReturnType<typeof setTimeout>;
 
@@ -335,6 +351,7 @@ export class AppComponent implements AfterViewInit {
 
   openDraftSiQuickQuote(): void {
     this.draftSiFromSidebar = true;
+    this.standaloneDraftLeadCreated = false;
     this.draftSiProductPickerOpen = false;
     this.draftSiQuickQuoteOpen = true;
     this.changeDetectorRef.markForCheck();
@@ -343,6 +360,21 @@ export class AppComponent implements AfterViewInit {
   closeDraftSiQuickQuote(): void {
     this.draftSiQuickQuoteOpen = false;
     this.changeDetectorRef.markForCheck();
+  }
+
+  openDraftSiContactUpdate(): void {
+    this.draftSiContactUpdateOpen = true;
+    this.changeDetectorRef.markForCheck();
+  }
+
+  closeDraftSiContactUpdate(): void {
+    this.draftSiContactUpdateOpen = false;
+    this.changeDetectorRef.markForCheck();
+  }
+
+  continueDraftSiContactUpdate(): void {
+    this.draftSiContactUpdateOpen = false;
+    this.editLeadInfo();
   }
 
   openDraftSiProductPicker(): void {
@@ -468,12 +500,34 @@ export class AppComponent implements AfterViewInit {
     if (this.draftSiFromSidebar) {
       this.selectedLead = null;
       this.draftSiFromSidebar = false;
+      this.standaloneDraftLeadCreated = false;
+      if (this.pendingHighlightLeadId) {
+        this.dashboard?.startHighlightTimer();
+        this.pendingHighlightLeadId = null;
+      }
     }
     this.changeDetectorRef.markForCheck();
   }
 
   recordDraftSiGenerated(): void {
     if (!this.selectedLead) return;
+    if (this.draftSiFromSidebar && !this.standaloneDraftLeadCreated) {
+      const newLead = this.dashboard?.addNewLead({
+        name: 'Andrei Villanueva',
+        gender: 'Male',
+        source: 'Self-Generated Leads',
+        referrer: 'Draft SI',
+        createdFromDraftSi: true
+      });
+      if (newLead) {
+        this.selectedLead = this.dashboard?.recordDraftSiGenerated(newLead.leadId) ?? newLead;
+        this.standaloneDraftLeadCreated = true;
+        this.pendingHighlightLeadId = newLead.id;
+        this.dashboard?.highlightLeadCard(newLead.id);
+      }
+      this.changeDetectorRef.markForCheck();
+      return;
+    }
     this.selectedLead = this.dashboard?.recordDraftSiGenerated(this.selectedLead.leadId) ?? this.selectedLead;
     this.changeDetectorRef.markForCheck();
   }

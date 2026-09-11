@@ -50,6 +50,15 @@ describe('DraftSiFlowComponent', () => {
     expect(generated).toBe(true);
   });
 
+  it('uses the standalone Draft SI lead sample name', () => {
+    fixture.componentRef.setInput('standaloneDraft', true);
+    fixture.componentInstance.ngOnInit();
+
+    expect(fixture.componentInstance.firstName).toBe('Andrei');
+    expect(fixture.componentInstance.middleName).toBe('');
+    expect(fixture.componentInstance.lastName).toBe('Villanueva');
+  });
+
   it('opens the individual-information update modal from generated results', () => {
     let proposalRequested = false;
     fixture.componentInstance.proposalRequested.subscribe(() => proposalRequested = true);

@@ -341,7 +341,7 @@ export class DashboardComponent implements OnDestroy {
     this.leadOpened.emit(lead);
   }
 
-  addNewLead(details: { name: string; gender: 'Male' | 'Female'; source: string; referrer?: string }): LeadCardData {
+  addNewLead(details: { name: string; gender: 'Male' | 'Female'; source: string; referrer?: string; createdFromDraftSi?: boolean }): LeadCardData {
     const createdAt = new Date();
     const id = `manual-${createdAt.getTime()}`;
     const newLead: LeadCardData = {
@@ -357,6 +357,7 @@ export class DashboardComponent implements OnDestroy {
       source: details.source,
       referrer: details.referrer ?? 'Manual Entry',
       productInterested: 'Dream Builder',
+      createdFromDraftSi: details.createdFromDraftSi,
       tags: [{ label: 'New Lead', tone: 'primary' }],
       activities: [this.createActivity('sales', 'New Lead Created', createdAt)]
     };

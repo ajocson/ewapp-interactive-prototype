@@ -535,6 +535,12 @@
   line-height: var(--paragraph-sm-line-height);
 }
 
+.activity-group__policy-number {
+  color: var(--text-neutral-primary);
+  font-size: var(--caption-text-size);
+  line-height: var(--caption-line-height);
+}
+
 .activity-group__recorded {
   display: block;
   color: var(--text-neutral-secondary);

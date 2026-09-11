@@ -425,6 +425,7 @@
               <span class="activity-group__marker material-symbols-rounded" aria-hidden="true">check_circle</span>
               <div class="activity-group__content">
                 <span class="activity-group__label">{{ activity.label }}</span>
+                <span *ngIf="hasPolicyNumber(activity)" class="activity-group__policy-number">Policy Number: 810000106199</span>
                 <span *ngIf="activity.scheduledDateLabel && activity.scheduledTimeLabel" class="activity-group__scheduled" [attr.aria-label]="'Scheduled for ' + activity.scheduledDateLabel + ' at ' + activity.scheduledTimeLabel">
                   <span class="material-symbols-rounded" aria-hidden="true">calendar_month</span>
                   <span>{{ activity.scheduledDateLabel }}</span>
