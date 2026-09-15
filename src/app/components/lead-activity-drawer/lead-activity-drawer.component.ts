@@ -246,7 +246,8 @@ export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, On
 
   get isApplicationLead(): boolean {
     return APPLICATION_STATUS_TAGS.has(this.rawStatusTag)
-      || (this.lead.activities?.some((activity) => activity.label === 'Application Created') ?? false);
+      || (this.lead.activities?.some((activity) => activity.label === 'Application Created') ?? false)
+      || ((this.isMeeting || this.isFollowUp) && (this.lead.activities?.some((activity) => activity.label === 'Converted to Application') ?? false));
   }
 
   get canOpenApplicationActions(): boolean {
@@ -309,6 +310,10 @@ export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, On
     }
 
     return this.isContacted ? 'Generate/View Full Proposal' : 'Generate Draft SI';
+  }
+
+  get applicationActionLabel(): string {
+    return this.isMeeting || this.isFollowUp ? 'View Application' : 'View Applications';
   }
 
   get isLeadPaused(): boolean {

@@ -168,6 +168,23 @@ describe('LeadActivityDrawerComponent', () => {
     expect(fixture.componentInstance.hasPolicyNumber({ ...systemActivity('Approved'), category: 'sales' })).toBe(false);
   });
 
+  it.each(['Meeting', 'Follow-up'])('shows application actions and preserves lead actions for a converted %s lead', (status) => {
+    fixture.componentRef.setInput('lead', {
+      ...createLead(),
+      tags: [{ label: status, tone: 'success' }],
+      activities: [activity('converted', 'system', 'Converted to Application', 60)]
+    });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.isApplicationLead).toBe(true);
+    expect(fixture.componentInstance.applicationActionLabel).toBe('View Application');
+    expect(fixture.nativeElement.querySelector('.drawer-lead-actions--application')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.drawer-lead-actions--application')?.textContent).toContain('View Application');
+    expect(fixture.nativeElement.querySelector('.drawer-actions')?.textContent).toContain('Park Lead');
+    expect(fixture.nativeElement.querySelector('.drawer-actions')?.textContent).toContain('Drop Lead');
+    expect(fixture.nativeElement.querySelector('.drawer-lead-actions:not(.drawer-lead-actions--application)')).toBeNull();
+  });
+
   it('offers only the supported drop reasons', () => {
     expect(fixture.componentInstance.dropReasonOptions.map((option) => option.value)).toEqual([
       'Affordability / Financial Constraints',
