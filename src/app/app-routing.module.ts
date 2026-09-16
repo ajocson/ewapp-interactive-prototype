@@ -12,6 +12,7 @@ const routes: Routes = [
   { path: 'lcam/page-search-api-error', pathMatch: 'full', component: LcamRouteComponent },
   { path: 'lcam/side-drawer-loading-api-error', pathMatch: 'full', component: LcamRouteComponent },
   { path: 'lcam/convert-application-api-error', pathMatch: 'full', component: LcamRouteComponent },
+  { path: 'proposals', pathMatch: 'full', component: LcamRouteComponent },
   { path: 'lcam', pathMatch: 'full', component: LcamRouteComponent },
   { path: 'lcam/:leadId', pathMatch: 'full', component: LcamRouteComponent },
   { path: 'lcam/:leadId/profile', pathMatch: 'full', component: LcamRouteComponent },

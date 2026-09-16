@@ -62,6 +62,16 @@ describe('AppComponent LCAM activity feedback', () => {
     expect(fixture.nativeElement.querySelector('.profile-tabs .is-active')?.textContent).toContain('Info');
   });
 
+  it('opens the standalone proposal generator from its route', () => {
+    fixture.componentInstance['openRoute']('/proposals');
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.showProposalGenerator).toBe(true);
+    expect(fixture.componentInstance['navigation'].isSidebarOpen()).toBe(false);
+    expect(fixture.nativeElement.querySelector('lam-proposal-generator')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('#proposal-generator-title')?.textContent).toContain('Generate Proposals');
+  });
+
   it('uses the appointment-specific success message when a contact is scheduled', () => {
     vi.useFakeTimers();
     const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;

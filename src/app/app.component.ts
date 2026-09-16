@@ -28,10 +28,11 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
   selector: 'lam-root',
   template: `
     <router-outlet />
-    <div *ngIf="loggedIn && !showApplications" class="app-dashboard-host" [attr.inert]="selectedLead ? '' : null" [attr.aria-hidden]="selectedLead ? true : null">
-      <lam-dashboard [userType]="userType" [apiErrorMode]="apiErrorMode" [searchErrorMode]="searchErrorMode" [suppressBoardLoading]="drawerLoadingErrorMode" (leadOpened)="openLead($event)" (newLeadRequested)="openNewLead()" (draftSiRequested)="openDraftSiQuickQuote()" (retryRequested)="retryApiError()" (loggedOut)="logOut()" />
+    <div *ngIf="loggedIn && !showApplications && !showProposalGenerator" class="app-dashboard-host" [attr.inert]="selectedLead ? '' : null" [attr.aria-hidden]="selectedLead ? true : null">
+      <lam-dashboard [userType]="userType" [apiErrorMode]="apiErrorMode" [searchErrorMode]="searchErrorMode" [suppressBoardLoading]="drawerLoadingErrorMode" (leadOpened)="openLead($event)" (newLeadRequested)="openNewLead()" (draftSiRequested)="openDraftSiQuickQuote()" (generateProposalRequested)="openProposalGenerator()" (retryRequested)="retryApiError()" (loggedOut)="logOut()" />
     </div>
     <lam-applications *ngIf="loggedIn && showApplications" [userType]="userType" (leadSelected)="openApplicationLead($event)" (loggedOut)="logOut()" />
+    <lam-proposal-generator *ngIf="loggedIn && showProposalGenerator" [userType]="userType" (newLeadRequested)="openNewLead()" (draftSiRequested)="openDraftSiQuickQuote()" (loggedOut)="logOut()" />
     <lam-lead-activity-drawer
       *ngIf="selectedLead && ((!draftSiOpen && !proposalOpen) || contactDrawerOpen)"
       [lead]="selectedLead"
@@ -292,6 +293,10 @@ export class AppComponent implements AfterViewInit {
     return this.navigation.activeDestination() === 'applications';
   }
 
+  get showProposalGenerator(): boolean {
+    return this.navigation.activeDestination() === 'proposal-generator';
+  }
+
   constructor() {
     this.navigation.lcamBoardRequested
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -299,6 +304,9 @@ export class AppComponent implements AfterViewInit {
     this.navigation.applicationsRequested
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.openApplicationsPage());
+    this.navigation.proposalGeneratorRequested
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.openProposalGenerator());
     this.router.events
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(event => {
@@ -313,7 +321,8 @@ export class AppComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     const navigationEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
     const isApiErrorScenario = this.router.url.startsWith('/lcam/') && this.router.url.endsWith('-api-error');
-    if (navigationEntry?.type === 'reload' && !isApiErrorScenario) {
+    const isProposalGeneratorRoute = this.router.url === '/proposals';
+    if (navigationEntry?.type === 'reload' && !isApiErrorScenario && !isProposalGeneratorRoute) {
       void this.router.navigate(['/lcam']);
       return;
     }
@@ -704,6 +713,18 @@ export class AppComponent implements AfterViewInit {
     this.changeDetectorRef.markForCheck();
   }
 
+  openProposalGenerator(): void {
+    this.navigation.setSidebarOpen(false);
+    this.selectedLead = null;
+    this.draftSiOpen = false;
+    this.proposalOpen = false;
+    this.contactDrawerOpen = false;
+    this.leadInfoEditMode = false;
+    this.navigation.activeDestination.set('proposal-generator');
+    if (this.router.url !== '/proposals') void this.router.navigate(['/proposals']);
+    this.changeDetectorRef.markForCheck();
+  }
+
   closeContactDrawer(): void {
     this.contactDrawerOpen = false;
     this.csaContactRequirementOpen = false;
@@ -854,6 +875,16 @@ export class AppComponent implements AfterViewInit {
 
   private openRoute(url: string): void {
     const path = url.split(/[?#]/, 1)[0];
+    if (path === '/proposals') {
+      this.navigation.setSidebarOpen(false);
+      this.selectedLead = null;
+      this.draftSiOpen = false;
+      this.proposalOpen = false;
+      this.contactDrawerOpen = false;
+      this.navigation.activeDestination.set('proposal-generator');
+      this.changeDetectorRef.markForCheck();
+      return;
+    }
     if (path === '/lcam/board-loading-api-error') {
       this.apiErrorMode = true;
       this.searchErrorMode = false;

@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 
 import { LeadCardData } from '../../lead-board.model';
 
-export type AppNavigationDestination = 'lcam-board' | 'lead-flow' | 'applications';
+export type AppNavigationDestination = 'lcam-board' | 'lead-flow' | 'applications' | 'proposal-generator';
 
 @Injectable({ providedIn: 'root' })
 export class AppNavigationStateService {
@@ -12,11 +12,13 @@ export class AppNavigationStateService {
 
   private readonly lcamBoardRequests = new Subject<void>();
   private readonly applicationsRequests = new Subject<void>();
+  private readonly proposalGeneratorRequests = new Subject<void>();
   private readonly submittedApplications: LeadCardData[] = [];
   readonly highlightedApplicationLeadId = signal<string | null>(null);
   private submittedApplicationHighlightTimer?: ReturnType<typeof setTimeout>;
   readonly lcamBoardRequested = this.lcamBoardRequests.asObservable();
   readonly applicationsRequested = this.applicationsRequests.asObservable();
+  readonly proposalGeneratorRequested = this.proposalGeneratorRequests.asObservable();
 
   toggleSidebar(): void {
     this.isSidebarOpen.update(open => !open);
@@ -38,6 +40,12 @@ export class AppNavigationStateService {
   goToApplications(): void {
     this.activeDestination.set('applications');
     this.applicationsRequests.next();
+  }
+
+  goToProposalGenerator(): void {
+    this.setSidebarOpen(false);
+    this.activeDestination.set('proposal-generator');
+    this.proposalGeneratorRequests.next();
   }
 
   submitApplication(lead: LeadCardData): void {

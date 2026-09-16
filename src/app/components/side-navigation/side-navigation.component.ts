@@ -13,6 +13,7 @@ import { AppNavigationStateService } from '../../shared/services/app-navigation-
 export class SideNavigationComponent {
   @Output() newLeadRequested = new EventEmitter<void>();
   @Output() draftSiRequested = new EventEmitter<void>();
+  @Output() generateProposalRequested = new EventEmitter<void>();
   constructor(
     readonly navigation: AppNavigationStateService,
     private readonly elementRef: ElementRef<HTMLElement>

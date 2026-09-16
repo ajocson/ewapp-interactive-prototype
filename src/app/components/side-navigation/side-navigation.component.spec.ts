@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { vi } from 'vitest';
 
 import { LamComponentsModule } from '../lam-components.module';
 import { SideNavigationComponent } from './side-navigation.component';
@@ -39,6 +40,22 @@ describe('SideNavigationComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Sally');
     expect(fixture.nativeElement.textContent).toContain('New Lead');
     expect(fixture.nativeElement.textContent).toContain('Draft SI');
+    expect(fixture.nativeElement.textContent).toContain('Generate Proposal');
+    const proposalButton = Array.from(fixture.nativeElement.querySelectorAll('.side-navigation__action') as NodeListOf<HTMLButtonElement>)
+      .find(button => button.textContent?.includes('Generate Proposal')) as HTMLButtonElement;
+    expect(proposalButton).not.toBeNull();
+    expect(proposalButton.classList).toContain('side-navigation__action--subtle');
+  });
+
+  it('requests the proposal generator when Generate Proposal is selected', () => {
+    const requested = vi.fn();
+    fixture.componentInstance.generateProposalRequested.subscribe(requested);
+    const proposalButton = Array.from(fixture.nativeElement.querySelectorAll('.side-navigation__action') as NodeListOf<HTMLButtonElement>)
+      .find(button => button.textContent?.includes('Generate Proposal')) as HTMLButtonElement;
+
+    proposalButton.click();
+
+    expect(requested).toHaveBeenCalledOnce();
   });
 
   it('opens the prototype scenario navigator with the available API handling link', () => {

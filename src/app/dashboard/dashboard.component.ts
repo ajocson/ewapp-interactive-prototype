@@ -69,6 +69,7 @@ export class DashboardComponent implements OnDestroy {
   @Output() leadOpened = new EventEmitter<LeadCardData>();
   @Output() newLeadRequested = new EventEmitter<void>();
   @Output() draftSiRequested = new EventEmitter<void>();
+  @Output() generateProposalRequested = new EventEmitter<void>();
   @Output() loggedOut = new EventEmitter<void>();
   @Output() retryRequested = new EventEmitter<void>();
   searchTerm = '';
