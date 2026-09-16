@@ -18,7 +18,7 @@ Persistent context for Codex and other coding agents working in this repository.
 - SCSS with a global CSS custom-property token system.
 - Vitest `4` through Angular's `@angular/build:unit-test` builder and JSDOM.
 - Local web fonts: Lato (body), Montserrat Bold (headings), and Material Symbols Rounded.
-- GitHub Actions deploys `main` to GitHub Pages using Node 22 and the base href `/ewapp-interactive-prototype/`.
+- GitHub Actions deploys `main` to GitHub Pages using Node 22 and the base href `/ewapp-interactive-prototype/`; the same workflow also publishes `feature/proposal-revamp` under `/proposal-revamp/` using the matching project-site base href.
 
 Useful commands:
 

@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+      - feature/proposal-revamp
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -20,6 +22,15 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+        with:
+          ref: main
+          path: main-source
+
+      - name: Check out proposal preview branch
+        uses: actions/checkout@v6
+        with:
+          ref: feature/proposal-revamp
+          path: preview-source
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
@@ -28,13 +39,28 @@ jobs:
           cache: npm
 
       - name: Install dependencies
+        working-directory: main-source
         run: npm ci
 
-      - name: Build Angular application
+      - name: Install preview dependencies
+        working-directory: preview-source
+        run: npm ci
+
+      - name: Build main application
+        working-directory: main-source
         run: npm run build -- --configuration production --base-href /ewapp-interactive-prototype/
 
-      - name: Enable GitHub Pages SPA deep links
-        run: cp dist/ewapp-interactive-prototype/browser/index.html dist/ewapp-interactive-prototype/browser/404.html
+      - name: Build proposal preview application
+        working-directory: preview-source
+        run: npm run build -- --configuration production --base-href /ewapp-interactive-prototype/proposal-revamp/
+
+      - name: Assemble GitHub Pages site
+        run: |
+          mkdir -p site/proposal-revamp
+          cp -R main-source/dist/ewapp-interactive-prototype/browser/. site/
+          cp site/index.html site/404.html
+          cp -R preview-source/dist/ewapp-interactive-prototype/browser/. site/proposal-revamp/
+          cp site/proposal-revamp/index.html site/proposal-revamp/404.html
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -42,7 +68,7 @@ jobs:
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: dist/ewapp-interactive-prototype/browser
+          path: site
 
   deploy:
     environment:
