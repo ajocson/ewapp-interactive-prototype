@@ -277,7 +277,6 @@
           <ng-container *ngIf="isContacted">
             <app-section-message description="Schedule an appointment or indicate if you’re unable to set one." />
             <div class="drawer-appointments">
-              <h4>Appointments</h4>
               <lam-action-card title="Schedule Appointment" description="Set a date and time for your client appointment." icon="calendar_month" tone="success" (click)="openScheduler()" />
               <lam-action-card *ngIf="!unableToSetAppointmentOpen" title="Unable to Set Appointment" description="An appointment could not be scheduled with the client." icon="event_busy" tone="neutral" (activated)="openUnableToSetAppointment()" />
             </div>
@@ -302,7 +301,6 @@
           <ng-container *ngIf="isAppointmentSet && !lead.appointment">
             <app-section-message description="Schedule an appointment or indicate if you’re unable to set one." />
             <div class="drawer-appointments">
-              <h4>Appointments</h4>
               <lam-action-card title="Schedule Appointment" description="Set a date and time for your client appointment." icon="calendar_month" tone="success" (activated)="openScheduler()" />
               <lam-action-card *ngIf="!unableToSetAppointmentOpen" title="Unable to Set Appointment" description="An appointment could not be scheduled with the client." icon="event_busy" tone="neutral" (activated)="openUnableToSetAppointment()" />
             </div>
