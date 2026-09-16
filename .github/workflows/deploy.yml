@@ -37,6 +37,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: |
+            main-source/package-lock.json
+            preview-source/package-lock.json
 
       - name: Install dependencies
         working-directory: main-source
