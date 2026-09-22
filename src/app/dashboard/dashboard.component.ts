@@ -643,7 +643,7 @@ export class DashboardComponent implements OnDestroy {
       ...leadWithoutAppointment,
       lastActivityTimestamp: activityDate.getTime(),
       tags: [{ label: 'Follow-up', tone: 'success' }],
-      activities: [...lead.activities, this.createActivity('sales', 'Follow-up Presentation Completed', activityDate, notes)]
+      activities: [...lead.activities, this.createActivity('sales', 'Follow-up Mtg. Completed', activityDate, notes)]
     };
 
     followUpBoard.leads = [updatedLead, ...followUpBoard.leads.filter((candidate) => candidate.id !== leadId)];

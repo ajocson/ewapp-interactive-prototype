@@ -203,7 +203,7 @@ describe('DashboardComponent sidebar', () => {
     const completed = component.completeFollowUpAppointment(lead.id, 'Appointment result recorded.');
     expect(completed?.appointment).toBeUndefined();
     expect(completed?.tags).toEqual([{ label: 'Follow-up', tone: 'success' }]);
-    expect(completed?.activities.at(-1)).toMatchObject({ label: 'Follow-up Presentation Completed', notes: 'Appointment result recorded.' });
+    expect(completed?.activities.at(-1)).toMatchObject({ label: 'Follow-up Mtg. Completed', notes: 'Appointment result recorded.' });
 
     const updated = component.recordLeadUpdate(lead.id, 'Client prefers an afternoon call.');
     expect(updated?.activities.at(-1)).toMatchObject({ label: 'Follow-up', notes: 'Client prefers an afternoon call.' });

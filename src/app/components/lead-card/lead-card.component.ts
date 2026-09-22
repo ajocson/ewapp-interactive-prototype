@@ -32,7 +32,7 @@ export class LeadCardComponent implements OnDestroy {
       : this.lead.tags;
 
     const activities = this.lead.activities ?? [];
-    const followUpCompleted = activities.some((activity) => activity.label === 'Follow-up Presentation Completed');
+    const followUpCompleted = activities.some((activity) => activity.label === 'Follow-up Mtg. Completed');
     return tags.map((tag, index) => {
       if (index !== 0 || tag.label !== 'Follow-up') return tag;
       const scheduledActivities = this.lead.activities.filter((activity) => activity.label === 'Follow Up Scheduled');

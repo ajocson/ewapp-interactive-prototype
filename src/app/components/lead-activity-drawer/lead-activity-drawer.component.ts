@@ -239,7 +239,7 @@ export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, On
       return 'Follow-up Mtg. Rescheduled';
     }
     if (this.lead.appointment) return 'Follow-up Mtg. Scheduled';
-    return this.lead.activities.some((activity) => activity.label === 'Follow-up Presentation Completed')
+    return this.lead.activities.some((activity) => activity.label === 'Follow-up Mtg. Completed')
       ? 'Follow-up Mtg. Completed'
       : tag;
   }
@@ -832,7 +832,7 @@ export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, On
       record('follow-up-scheduled', 'sales', 'Follow Up Scheduled', 8, scheduled(appointmentDates.followUp)),
       record('follow-up-canceled', 'sales', 'Follow Up Canceled', 9, scheduled(appointmentDates.followUp)),
       record('follow-up-rescheduled', 'sales', 'Follow Up Scheduled', 10, scheduled(appointmentDates.followUpRescheduled)),
-      record('follow-up-presentation', 'sales', 'Follow-up Presentation Completed', 11, scheduled(appointmentDates.followUpPresentation)),
+      record('follow-up-presentation', 'sales', 'Follow-up Mtg. Completed', 11, scheduled(appointmentDates.followUpPresentation)),
       record('parked', 'sales', 'Parked Lead', 12, { ...scheduled(appointmentDates.followUpPresentation), notes: 'Client is not ready to proceed at this time and requested to be contacted later.' }),
       record('reactivated', 'sales', 'Reactivated Lead', 13, scheduled(appointmentDates.followUpPresentation)),
       ...(isGraceKelly ? [] : [record('dropped', 'sales', 'Dropped Lead', 14, { ...scheduled(appointmentDates.followUpPresentation), notes: 'Client is no longer interested in proceeding with the application.' })]),
