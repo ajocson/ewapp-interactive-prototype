@@ -78,9 +78,9 @@ jobs:
             fs.writeFileSync(file, html.replace('</head>', `${restoreScript}  </head>`));
           }
           NODE
-          cp .github/pages-route-restore.js site/pages-route-restore.js
-          cp .github/pages-404.html site/404.html
-          cp .github/pages-404.html site/proposal-revamp/404.html
+          cp preview-source/.github/pages-route-restore.js site/pages-route-restore.js
+          cp preview-source/.github/pages-404.html site/404.html
+          cp preview-source/.github/pages-404.html site/proposal-revamp/404.html
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
