@@ -163,9 +163,13 @@ export class FieldControlComponent implements AfterViewInit, OnDestroy {
     if (!this.disabled) {
       this.isOpen = !this.isOpen;
       this.openChange.emit(this.isOpen);
+      this.changeDetectorRef.markForCheck();
       if (this.isOpen) {
         this.announceOpen();
-        setTimeout(() => this.positionOptionsMenu());
+        setTimeout(() => {
+          this.positionOptionsMenu();
+          this.changeDetectorRef.markForCheck();
+        });
       } else {
         this.menuPosition = null;
       }
@@ -262,7 +266,8 @@ export class FieldControlComponent implements AfterViewInit, OnDestroy {
     const belowTop = controlRect.bottom + gap;
     const availableBelow = viewport.innerHeight - belowTop - gutter;
     const availableAbove = controlRect.top - gap - gutter;
-    const openBelow = availableBelow >= naturalHeight || availableBelow >= availableAbove;
+    const preferAboveOnMobile = viewport.innerWidth <= 639 && availableAbove >= naturalHeight;
+    const openBelow = !preferAboveOnMobile && (availableBelow >= naturalHeight || availableBelow >= availableAbove);
     const maxHeight = Math.max(0, Math.min(624, openBelow ? availableBelow : availableAbove));
     let left = controlRect.right - width;
 

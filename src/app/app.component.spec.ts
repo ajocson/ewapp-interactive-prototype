@@ -69,7 +69,16 @@ describe('AppComponent LCAM activity feedback', () => {
     expect(fixture.componentInstance.showProposalGenerator).toBe(true);
     expect(fixture.componentInstance['navigation'].isSidebarOpen()).toBe(false);
     expect(fixture.nativeElement.querySelector('lam-proposal-generator')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('#proposal-generator-title')?.textContent).toContain('Generate Proposals');
+    expect(fixture.nativeElement.querySelector('#proposal-generator-title')?.textContent).toContain('Find a plan that fits your needs');
+  });
+
+  it('opens recommended proposals directly from its test route', () => {
+    fixture.componentInstance['openRoute']('/proposals/recommended');
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.showProposalGenerator).toBe(true);
+    expect(fixture.componentInstance.proposalGeneratorInitialView).toBe('recommendations');
+    expect(fixture.nativeElement.querySelector('#proposal-recommendations-title')?.textContent).toContain('We’ve prepared three proposals for you');
   });
 
   it('uses the appointment-specific success message when a contact is scheduled', () => {

@@ -9,16 +9,17 @@
       (generateProposalRequested)="navigation.goToProposalGenerator()"
     />
 
-    <section class="proposal-generator__content" [class.proposal-generator__content--questionnaire]="showQuestionnaire" aria-labelledby="proposal-generator-title">
+    <section class="proposal-generator__content" [class.proposal-generator__content--questionnaire]="showQuestionnaire" [class.proposal-generator__content--recommendations]="showRecommendations" [class.proposal-generator__content--proposal-detail]="showProposalDetails" [attr.aria-labelledby]="showProposalDetails ? 'proposal-detail-title' : showRecommendations ? 'proposal-recommendations-title' : 'proposal-generator-title'">
       <ng-container *ngIf="!showQuestionnaire; else questionnaire">
         <section class="proposal-generator__hero">
-        <img src="assets/proposal-generator-hero.png" alt="" aria-hidden="true">
-        <div class="proposal-generator__hero-overlay" aria-hidden="true"></div>
-        <div class="proposal-generator__hero-copy">
-          <h1 id="proposal-generator-title">Generate Proposals</h1>
-          <p>Answer a few questions to quickly create recommended proposal options based on the information provided.</p>
-          <app-button label="Get Recommended Proposals" rightIcon="arrow_forward" [variant]="buttonVariant.Secondary" [size]="buttonSize.Medium" (clicked)="openProposalGenerator()" />
-        </div>
+          <div class="proposal-generator__hero-copy">
+            <div class="proposal-generator__hero-text">
+              <h1 id="proposal-generator-title">Find a plan that fits your needs</h1>
+              <p>Answer a few simple questions about your goals, budget, and preferences, and we’ll show you options that may fit.</p>
+            </div>
+            <app-button label="Find Plans for Me" rightIcon="arrow_forward" [variant]="buttonVariant.Secondary" [size]="buttonSize.Medium" (clicked)="openProposalGenerator()" />
+          </div>
+          <img src="assets/proposal-generator-family.png" alt="" aria-hidden="true">
         </section>
 
         <div class="proposal-generator__divider" aria-hidden="true"><span>OR</span></div>
@@ -40,40 +41,213 @@
       </ng-container>
 
       <ng-template #questionnaire>
-        <section class="proposal-questionnaire" aria-labelledby="proposal-question-title">
+        <section *ngIf="isGeneratingProposals" class="proposal-generation-loading" aria-labelledby="proposal-loading-title" aria-live="polite" aria-busy="true">
+          <div class="proposal-generation-loading__content">
+            <div class="proposal-generation-loading__heading">
+              <h1 id="proposal-loading-title">Finding suitable options...</h1>
+              <p>We’re matching the needs, budget, and preferences provided with suitable product options.</p>
+            </div>
+            <div class="proposal-generation-loading__cards" aria-hidden="true">
+              <div class="proposal-generation-loading__cards-track">
+                <div *ngFor="let card of loadingCards; let index = index" class="proposal-generation-loading__card" [class.is-featured]="index === 1">
+                  <span class="proposal-generation-loading__skeleton proposal-generation-loading__skeleton--short"></span>
+                  <span class="proposal-generation-loading__skeleton proposal-generation-loading__skeleton--title"></span>
+                  <span class="proposal-generation-loading__skeleton proposal-generation-loading__skeleton--label"></span>
+                  <span class="proposal-generation-loading__skeleton proposal-generation-loading__skeleton--body"></span>
+                  <span class="proposal-generation-loading__skeleton proposal-generation-loading__skeleton--action"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section *ngIf="showRecommendations" class="proposal-recommendations" aria-labelledby="proposal-recommendations-title">
+          <div class="proposal-recommendations__content">
+            <div class="proposal-recommendations__intro">
+              <button type="button" class="proposal-recommendations__back" (click)="returnToQuestionnaire()">
+                <span class="material-symbols-rounded" aria-hidden="true">chevron_left</span>
+                Back to Questionnaire
+              </button>
+
+              <header class="proposal-recommendations__heading">
+                <p>RECOMMENDED PROPOSALS</p>
+                <h1 id="proposal-recommendations-title">We’ve prepared three proposals for you</h1>
+                <span>Based on your goals and priorities, we’ve selected three proposals to explore.</span>
+              </header>
+            </div>
+
+            <div class="proposal-recommendations__carousel">
+              <section #recommendationCards class="proposal-recommendations__cards" aria-label="Recommended proposals" aria-roledescription="carousel" tabindex="0" (scroll)="updateActiveRecommendation($event)">
+                <article *ngFor="let recommendation of recommendations; let index = index" class="proposal-recommendation-card" [class.is-best-match]="recommendation.isBestMatch" [class.is-centered]="activeRecommendationIndex === index" role="group" aria-roledescription="slide" [attr.aria-label]="(index + 1) + ' of ' + recommendations.length + ': ' + recommendation.name">
+                  <span *ngIf="recommendation.isBestMatch" class="proposal-recommendation-card__best-match">★ Best Match</span>
+                  <img [src]="recommendation.icon" alt="" aria-hidden="true">
+                  <h2>{{ recommendation.name }}</h2>
+                  <p class="proposal-recommendation-card__subtitle">{{ recommendation.subtitle }}</p>
+                  <dl class="proposal-recommendation-card__details">
+                    <div>
+                      <dt>Benefit Amount</dt>
+                      <dd>{{ recommendation.benefitAmount }}</dd>
+                    </div>
+                    <div>
+                      <dt>Annual Premium</dt>
+                      <dd>{{ recommendation.annualPremium }}</dd>
+                    </div>
+                  </dl>
+                  <p class="proposal-recommendation-card__description">
+                    <span class="material-symbols-rounded" aria-hidden="true">info</span>
+                    {{ recommendation.description }}
+                  </p>
+                  <app-button label="View Proposal" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" (clicked)="openProposalDetail(index)" />
+                </article>
+              </section>
+              <nav class="proposal-recommendations__carousel-dots" aria-label="Choose a recommended proposal">
+                <button *ngFor="let recommendation of recommendations; let index = index" type="button" [class.is-active]="activeRecommendationIndex === index" [attr.aria-label]="'Show ' + recommendation.name" [attr.aria-pressed]="activeRecommendationIndex === index" (click)="showRecommendation(index)"></button>
+              </nav>
+            </div>
+
+            <section class="proposal-recommendations__comparison" aria-labelledby="proposal-comparison-title">
+              <header>
+                <h2 id="proposal-comparison-title">Compare Your Options</h2>
+                <p>See how the recommended proposals differ.</p>
+              </header>
+              <div class="proposal-comparison-table__scroll">
+                <table class="proposal-comparison-table">
+                  <thead>
+                    <tr>
+                      <th scope="col"></th>
+                      <th *ngFor="let recommendation of recommendations" scope="col" [class.is-best-match]="recommendation.isBestMatch">
+                        <span *ngIf="recommendation.isBestMatch" class="material-symbols-rounded" aria-hidden="true">star</span>
+                        {{ recommendation.name }}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let row of comparisonRows">
+                      <th scope="row">{{ row.label }}</th>
+                      <td *ngFor="let value of row.values">{{ value }}</td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <th scope="row"></th>
+                      <td *ngFor="let recommendation of recommendations; let index = index">
+                        <app-button label="View Proposal" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="openProposalDetail(index)" />
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <section class="proposal-comparison-cards" aria-label="Recommended proposal comparison">
+                <article *ngFor="let card of mobileComparisonCards" class="proposal-comparison-card" [class.is-best-match]="card.recommendation.isBestMatch">
+                  <span *ngIf="card.recommendation.isBestMatch" class="proposal-comparison-card__best-match">★ Best Match</span>
+                  <header>
+                    <h3>
+                      <span *ngIf="card.recommendation.isBestMatch" class="material-symbols-rounded" aria-hidden="true">star</span>
+                      {{ card.recommendation.name }}
+                    </h3>
+                    <p>{{ card.bestFor }}</p>
+                  </header>
+                  <dl>
+                    <div *ngFor="let row of card.rows">
+                      <dt>{{ row.label }}</dt>
+                      <dd>{{ row.value }}</dd>
+                    </div>
+                  </dl>
+                  <p class="proposal-comparison-card__description">
+                    <span class="material-symbols-rounded" aria-hidden="true">info</span>
+                    {{ card.recommendation.description }}
+                  </p>
+                  <app-button label="View Proposal" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="openProposalDetail(recommendations.indexOf(card.recommendation))" />
+                </article>
+              </section>
+            </section>
+
+            <aside class="proposal-recommendations__more-options" aria-labelledby="proposal-more-options-title">
+              <app-mesh-gradient mode="banner" aria-hidden="true"></app-mesh-gradient>
+              <div class="proposal-recommendations__copy">
+                <h2 id="proposal-more-options-title">Not quite what you’re looking for?</h2>
+                <p>Adjust answers or explore products for more options that fit your needs.</p>
+              </div>
+              <div class="proposal-recommendations__actions">
+                <app-button label="Edit My Answers" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" (clicked)="editAnswers()" />
+                <app-button label="Browse All Products" [variant]="buttonVariant.Secondary" [size]="buttonSize.Medium" (clicked)="browseAllProducts()" />
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <lam-proposal-recommendation-detail
+          *ngIf="showProposalDetails"
+          [proposal]="selectedRecommendation"
+          [maximumCoveragePeriod]="selectedMaximumCoveragePeriod"
+          [paymentPeriod]="selectedPaymentPeriod"
+          [riderCount]="selectedRiderCount"
+          [fundCount]="selectedFundCount"
+          [insuredInfo]="insuredSummary"
+          [selectedProtections]="selectedProtections"
+          [investmentPreference]="selectedInvestmentPreference || 'A Mix of Both'"
+          (backRequested)="returnToRecommendations()"
+        />
+
+        <section *ngIf="!isGeneratingProposals && !showRecommendations && !showProposalDetails" class="proposal-questionnaire" aria-labelledby="proposal-question-title">
+          <div class="proposal-questionnaire__progress" [attr.aria-label]="'Question ' + questionStep + ' of 7'">
+            <span [style.width.%]="progressPercent"></span>
+          </div>
           <div class="proposal-questionnaire__main">
             <div class="proposal-questionnaire__intro">
-              <div class="proposal-questionnaire__progress" [attr.aria-label]="'Question ' + questionStep + ' of 5'">
-                <span [style.width.%]="progressPercent"></span>
-              </div>
               <div class="proposal-questionnaire__heading">
                 <ng-container [ngSwitch]="questionStep">
                   <ng-container *ngSwitchCase="1">
-                    <p class="proposal-questionnaire__eyebrow">QUESTION 1 OF 5</p>
+                    <p class="proposal-questionnaire__eyebrow">QUESTION 1 OF 7</p>
                     <h1 id="proposal-question-title">Who will be covered by the plan?</h1>
                     <p>Let’s start by identifying the person the plan will cover.</p>
                   </ng-container>
                   <ng-container *ngSwitchCase="2">
-                    <p class="proposal-questionnaire__eyebrow">QUESTION 2 OF 5</p>
+                    <p class="proposal-questionnaire__eyebrow">QUESTION 2 OF 7</p>
                     <h1 id="proposal-question-title">What would you like the plan to help with?</h1>
                     <p>Choose the goals and priorities you’d like the plan to support.</p>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="3">
+                    <p class="proposal-questionnaire__eyebrow">QUESTION 3 OF 7</p>
+                    <h1 id="proposal-question-title">How much would you like to set aside each year?</h1>
+                    <p>This helps us find options that fit within a comfortable budget.</p>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="4">
+                    <p class="proposal-questionnaire__eyebrow">QUESTION 4 OF 7</p>
+                    <h1 id="proposal-question-title">Tell us a bit about the person being covered.</h1>
+                    <p>This helps us understand their life stage and current priorities.</p>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="6">
+                    <p class="proposal-questionnaire__eyebrow">QUESTION 6 OF 7</p>
+                    <h1 id="proposal-question-title">How comfortable are you with investment risk?</h1>
+                    <p>Choose how comfortable you are with changes in investment value over time.</p>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="7">
+                    <p class="proposal-questionnaire__eyebrow">QUESTION 7 OF 7</p>
+                    <h1 id="proposal-question-title">Where would you prefer to invest?</h1>
+                    <p>Choose the option that best matches your investment preference.</p>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="5">
+                    <p class="proposal-questionnaire__eyebrow">QUESTION 5 OF 7</p>
+                    <h1 id="proposal-question-title">What else would you like protection for?</h1>
+                    <p>Select all that apply.</p>
                   </ng-container>
                 </ng-container>
               </div>
             </div>
 
             <ng-container [ngSwitch]="questionStep">
-              <ng-container *ngSwitchCase="1">
+              <section *ngSwitchCase="1" class="proposal-questionnaire__step proposal-questionnaire__step--coverage" aria-labelledby="proposal-details-title">
                 <div class="proposal-questionnaire__coverage-options" role="group" aria-label="Coverage selection">
-                  <button type="button" class="proposal-coverage-card" [class.is-selected]="selectedCoverage === 'myself'" [attr.aria-pressed]="selectedCoverage === 'myself'" (click)="selectedCoverage = 'myself'">
-                    <span class="material-symbols-rounded proposal-coverage-card__icon" aria-hidden="true">person</span>
+                  <button type="button" class="proposal-coverage-card" [class.is-selected]="selectedCoverage === 'myself'" [attr.aria-pressed]="selectedCoverage === 'myself'" (click)="selectCoverage('myself')">
+                    <img class="proposal-coverage-card__illustration proposal-coverage-card__illustration--myself" src="assets/proposal-coverage-myself.png" alt="" aria-hidden="true">
                     <span class="proposal-coverage-card__text">
                       <strong>Myself</strong>
                       <span>I’ll be covered by the plan.</span>
                     </span>
                   </button>
-                  <button type="button" class="proposal-coverage-card" [class.is-selected]="selectedCoverage === 'someone-else'" [attr.aria-pressed]="selectedCoverage === 'someone-else'" (click)="selectedCoverage = 'someone-else'">
-                    <span class="material-symbols-rounded proposal-coverage-card__icon" aria-hidden="true">person_heart</span>
+                  <button type="button" class="proposal-coverage-card" [class.is-selected]="selectedCoverage === 'someone-else'" [attr.aria-pressed]="selectedCoverage === 'someone-else'" (click)="selectCoverage('someone-else')">
+                    <img class="proposal-coverage-card__illustration proposal-coverage-card__illustration--someone-else" src="assets/proposal-coverage-someone-else.png" alt="" aria-hidden="true">
                     <span class="proposal-coverage-card__text">
                       <strong>Someone else</strong>
                       <span>Another person will be covered by the plan.</span>
@@ -81,16 +255,16 @@
                   </button>
                 </div>
 
-                <section *ngIf="selectedCoverage" class="proposal-details-card" aria-labelledby="proposal-details-title">
+                <section *ngIf="selectedCoverage" #proposalDetails class="proposal-details-card">
                   <div class="proposal-details-card__heading">
-                    <h2 id="proposal-details-title">Few Details to Get Started</h2>
-                    <p>Please provide a few details to help us get started with your proposal.</p>
+                    <h2 id="proposal-details-title">A few details about the person being covered</h2>
+                    <p>These details help us find suitable proposal options.</p>
                   </div>
                   <div class="proposal-details-card__fields">
                     <label class="proposal-form-field">
                       <span>Birthdate</span>
-                      <span class="proposal-form-field__control">
-                        <input type="date" aria-label="Birthdate" [(ngModel)]="birthdate">
+                      <span class="proposal-form-field__control" (click)="openBirthdatePicker(birthdateInput)">
+                        <input #birthdateInput type="date" aria-label="Birthdate" [(ngModel)]="birthdate" (click)="openBirthdatePicker(birthdateInput); $event.stopPropagation()">
                       </span>
                     </label>
                     <label class="proposal-form-field">
@@ -107,32 +281,162 @@
                     </label>
                   </div>
                 </section>
-              </ng-container>
+              </section>
 
-              <div *ngSwitchCase="2" class="proposal-goal-grid" role="group" aria-label="Plan goals">
-                <button
-                  *ngFor="let goal of proposalGoals"
-                  type="button"
-                  class="proposal-goal-card"
-                  [class.is-selected]="selectedGoals.includes(goal.title)"
-                  [attr.aria-pressed]="selectedGoals.includes(goal.title)"
-                  (click)="toggleGoal(goal.title)"
-                >
-                  <span class="proposal-goal-card__checkbox" [class.is-checked]="selectedGoals.includes(goal.title)" aria-hidden="true">
-                    <span *ngIf="selectedGoals.includes(goal.title)" class="material-symbols-rounded">check</span>
-                  </span>
-                  <span class="proposal-goal-card__text">
-                    <strong>{{ goal.title }}</strong>
-                    <span>{{ goal.description }}</span>
-                  </span>
-                </button>
-              </div>
+              <section *ngSwitchCase="2" class="proposal-questionnaire__step proposal-questionnaire__step--goals" aria-label="Plan goals">
+                <p class="proposal-goal-selection-note">You can select more than one.</p>
+                <div class="proposal-goal-grid" role="group" aria-label="Plan goals">
+                  <button
+                    *ngFor="let goal of proposalGoals"
+                    type="button"
+                    class="proposal-goal-card"
+                    [class.is-selected]="selectedGoals.includes(goal.title)"
+                    [attr.aria-pressed]="selectedGoals.includes(goal.title)"
+                    (click)="toggleGoal(goal.title)"
+                  >
+                    <span *ngIf="selectedGoals.includes(goal.title)" class="proposal-goal-card__selection material-symbols-rounded" aria-hidden="true">check_circle</span>
+                    <img class="proposal-goal-card__illustration" [src]="goal.illustration" alt="" aria-hidden="true">
+                    <span class="proposal-goal-card__text">
+                      <strong>{{ goal.title }}</strong>
+                      <span>{{ goal.description }}</span>
+                    </span>
+                  </button>
+                </div>
+              </section>
+
+              <section *ngSwitchCase="3" class="proposal-questionnaire__step proposal-questionnaire__step--budget" aria-labelledby="proposal-budget-title">
+                <div class="proposal-budget-card">
+                  <div class="proposal-budget-card__content">
+                    <p class="proposal-budget-card__instruction">Move the slider or enter an amount</p>
+                    <div class="proposal-budget-card__value">
+                      <strong>{{ formatBudget(budgetAmount) }}</strong>
+                      <span>/ year</span>
+                    </div>
+                    <div class="proposal-budget-card__slider-group">
+                      <label class="proposal-budget-card__range-label" for="proposal-budget-range">
+                        <input
+                          id="proposal-budget-range"
+                          type="range"
+                          min="50000"
+                          max="500000"
+                          step="50000"
+                          [value]="budgetAmount"
+                          [style.--proposal-budget-progress]="((budgetAmount - 50000) / 450000 * 100) + '%'"
+                          (input)="setBudget(+$any($event.target).value)"
+                        >
+                        <img class="proposal-budget-card__thumb" src="assets/proposal-budget-slider-thumb.svg" alt="" aria-hidden="true" [style.left.%]="(budgetAmount - 50000) / 450000 * 100">
+                      </label>
+                      <div class="proposal-budget-card__range-values" aria-hidden="true">
+                        <span>₱50,000</span>
+                        <span>₱500,000</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="proposal-budget-card__quick-select">
+                    <strong>Quick select</strong>
+                      <div role="group" aria-label="Quick select yearly budget">
+                      <app-button
+                        *ngFor="let option of budgetOptions"
+                        class="proposal-budget-card__quick-select-button"
+                        [class.is-selected]="budgetAmount === option"
+                        [label]="formatBudget(option)"
+                        [variant]="buttonVariant.Subtle"
+                        [size]="buttonSize.Small"
+                        [ariaLabel]="formatBudget(option)"
+                        (click)="setBudget(option)"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <aside class="proposal-budget-info">
+                  <span class="proposal-budget-info__icon material-symbols-rounded" aria-hidden="true">lightbulb</span>
+                  <h2 id="proposal-budget-title">Good to know</h2>
+                  <p>Your budget helps us narrow down suitable options. You can still adjust this amount later before finalizing your proposal.</p>
+                </aside>
+              </section>
+
+              <section *ngSwitchCase="4" class="proposal-questionnaire__step proposal-questionnaire__step--life-stage" aria-label="Life stage">
+                <div class="proposal-life-stage-grid" role="group" aria-label="Life stage">
+                  <button
+                    *ngFor="let stage of lifeStages"
+                    type="button"
+                    class="proposal-life-stage-card"
+                    [class.is-selected]="selectedLifeStage === stage.title"
+                    [attr.aria-pressed]="selectedLifeStage === stage.title"
+                    (click)="selectedLifeStage = stage.title"
+                  >
+                    <img class="proposal-life-stage-card__illustration" [src]="stage.illustration" alt="" aria-hidden="true">
+                    <span class="proposal-life-stage-card__text">
+                      <strong>{{ stage.title }}</strong>
+                      <span>{{ stage.description }}</span>
+                    </span>
+                  </button>
+                </div>
+              </section>
+
+              <section *ngSwitchCase="5" class="proposal-questionnaire__step proposal-questionnaire__step--protection" aria-label="Additional protection needs">
+                <div class="proposal-protection-grid" role="group" aria-label="Additional protection needs">
+                  <button
+                    *ngFor="let protection of protectionOptions"
+                    type="button"
+                    class="proposal-goal-card proposal-protection-card"
+                    [class.is-selected]="selectedProtections.includes(protection.title)"
+                    [attr.aria-pressed]="selectedProtections.includes(protection.title)"
+                    (click)="toggleProtection(protection.title)"
+                  >
+                    <span *ngIf="selectedProtections.includes(protection.title)" class="proposal-goal-card__selection material-symbols-rounded" aria-hidden="true">check_circle</span>
+                    <img class="proposal-goal-card__illustration" [src]="protection.illustration" alt="" aria-hidden="true">
+                    <span class="proposal-goal-card__text">
+                      <strong>{{ protection.title }}</strong>
+                      <span>{{ protection.description }}</span>
+                    </span>
+                  </button>
+                </div>
+              </section>
+
+              <section *ngSwitchCase="6" class="proposal-questionnaire__step proposal-questionnaire__step--risk" aria-label="Investment risk preference">
+                <div class="proposal-risk-grid" role="group" aria-label="Investment risk preference">
+                  <button
+                    *ngFor="let preference of riskPreferences"
+                    type="button"
+                    class="proposal-risk-card"
+                    [class.is-selected]="selectedRiskPreference === preference.title"
+                    [attr.aria-pressed]="selectedRiskPreference === preference.title"
+                    (click)="selectedRiskPreference = preference.title"
+                  >
+                    <img class="proposal-risk-card__illustration" [src]="preference.illustration" alt="" aria-hidden="true">
+                    <span class="proposal-risk-card__text">
+                      <strong>{{ preference.title }}</strong>
+                      <span>{{ preference.description }}</span>
+                    </span>
+                  </button>
+                </div>
+              </section>
+
+              <section *ngSwitchCase="7" class="proposal-questionnaire__step proposal-questionnaire__step--investment" aria-label="Investment preference">
+                <div class="proposal-investment-grid" role="group" aria-label="Investment preference">
+                  <button
+                    *ngFor="let preference of investmentPreferences"
+                    type="button"
+                    class="proposal-investment-card"
+                    [class.is-selected]="selectedInvestmentPreference === preference.title"
+                    [attr.aria-pressed]="selectedInvestmentPreference === preference.title"
+                    (click)="selectedInvestmentPreference = preference.title"
+                  >
+                    <img class="proposal-investment-card__illustration" [src]="preference.illustration" alt="" aria-hidden="true">
+                    <span class="proposal-investment-card__text">
+                      <strong>{{ preference.title }}</strong>
+                      <span>{{ preference.description }}</span>
+                    </span>
+                  </button>
+                </div>
+              </section>
             </ng-container>
           </div>
 
           <footer class="proposal-questionnaire__footer">
-            <app-button label="Back" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Medium" (clicked)="cancelQuestionnaire()" />
-            <app-button label="Continue" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" [disabled]="questionStep === 1 ? !isQuestionOneComplete : !isQuestionTwoComplete" (clicked)="continueQuestionnaire()" />
+            <app-button [label]="questionStep === 1 ? 'Cancel' : 'Back'" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Medium" (clicked)="questionStep === 1 ? cancelQuestionnaire() : questionStep === 7 ? questionStep = 6 : questionStep === 6 ? questionStep = 5 : questionStep === 5 ? questionStep = 4 : questionStep === 4 ? questionStep = 3 : questionStep === 3 ? questionStep = 2 : questionStep = 1" />
+            <app-button [label]="questionStep === 7 ? 'Generate Proposals' : 'Next'" rightIcon="arrow_forward" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" [disabled]="questionStep === 1 ? !isQuestionOneComplete : questionStep === 2 ? !isQuestionTwoComplete : questionStep === 3 ? !isQuestionThreeComplete : questionStep === 4 ? !isQuestionFourComplete : questionStep === 5 ? !isQuestionFiveComplete : questionStep === 6 ? !isQuestionSixComplete : !isQuestionSevenComplete" (clicked)="continueQuestionnaire()" />
           </footer>
         </section>
       </ng-template>

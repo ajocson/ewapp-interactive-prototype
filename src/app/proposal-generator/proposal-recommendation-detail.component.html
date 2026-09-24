@@ -1,0 +1,179 @@
+<section class="proposal-detail" aria-labelledby="proposal-detail-title">
+  <div class="proposal-detail__content">
+    <div class="proposal-detail__overview">
+      <div class="proposal-detail__topline">
+        <button type="button" class="proposal-detail__back" (click)="backRequested.emit()">
+          <span class="material-symbols-rounded" aria-hidden="true">chevron_left</span>
+          Back to Recommended Proposals
+        </button>
+        <p class="proposal-detail__meta">
+          <span>Proposal No. 802978</span>
+          <span class="proposal-detail__meta-divider" aria-hidden="true"></span>
+          <span>Valid Until: September 30, 2026</span>
+        </p>
+      </div>
+
+      <header class="proposal-detail__header">
+        <div class="proposal-detail__intro">
+          <div class="proposal-detail__heading">
+            <h4 id="proposal-detail-title">{{ proposal.name }}</h4>
+            <p class="proposal-detail__description">Future Assure is a peso-denominated variable life solution, which gives you insurance coverage and investment options.</p>
+          </div>
+          <div class="proposal-detail__header-actions">
+            <app-button label="Edit Proposal" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" />
+            <app-button label="Proceed With This Proposal" [variant]="buttonVariant.Secondary" [size]="buttonSize.Medium" />
+          </div>
+        </div>
+        <img class="proposal-detail__family" src="assets/future-assure-banner.png" alt="A family reviewing a plan together" />
+      </header>
+
+      <section class="proposal-detail__highlights" aria-labelledby="proposal-highlights-title">
+        <h2 id="proposal-highlights-title">Key Highlights</h2>
+        <div class="proposal-detail__highlight-grid">
+          <article class="proposal-detail__highlight">
+            <div class="proposal-detail__highlight-heading">
+              <div><p>Benefit Amount</p><strong>{{ proposal.benefitAmount }}</strong></div>
+              <span class="proposal-detail__highlight-icon material-symbols-rounded" aria-hidden="true">verified_user</span>
+            </div>
+            <span>Provides financial protection for you and your loved ones.</span>
+          </article>
+          <article class="proposal-detail__highlight">
+            <div class="proposal-detail__highlight-heading">
+              <div><p>Annual Premium</p><strong>{{ proposal.annualPremium }}</strong></div>
+              <span class="proposal-detail__highlight-icon material-symbols-rounded" aria-hidden="true">payments</span>
+            </div>
+            <span>Includes investment-linked funds whose value may change.</span>
+          </article>
+          <article class="proposal-detail__highlight">
+            <div class="proposal-detail__highlight-heading">
+              <div><p>Maximum Coverage Period</p><strong>{{ maximumCoveragePeriod }}</strong></div>
+              <span class="proposal-detail__highlight-icon material-symbols-rounded" aria-hidden="true">schedule</span>
+            </div>
+            <span>Long-term protection for greater financial security.</span>
+          </article>
+          <article class="proposal-detail__highlight">
+            <div class="proposal-detail__highlight-heading">
+              <div><p>Payment Period</p><strong>{{ paymentPeriod }}</strong></div>
+              <span class="proposal-detail__highlight-icon material-symbols-rounded" aria-hidden="true">finance_mode</span>
+            </div>
+            <span>Pay for a limited time, be covered for longer.</span>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <div class="proposal-detail__tab-bar">
+      <nav #proposalTabs class="proposal-detail__tabs" role="tablist" aria-label="Proposal details">
+        <button *ngFor="let tab of tabs; let index = index" type="button" role="tab" [id]="'proposal-tab-' + tab.id" [attr.aria-selected]="activeTab === tab.id" [attr.aria-controls]="'proposal-panel-' + tab.id" [class.is-active]="activeTab === tab.id" [class.is-overflowed]="index >= 2" (click)="selectTab(tab.id)">{{ tab.label }}</button>
+      </nav>
+      <div class="proposal-detail__tab-overflow" (click)="$event.stopPropagation()">
+        <button #tabOverflowButton type="button" class="proposal-detail__tab-overflow-trigger" aria-label="More proposal detail tabs" aria-haspopup="menu" [attr.aria-expanded]="overflowMenuOpen" (click)="toggleOverflowMenu($event)">
+          <span class="material-symbols-rounded" aria-hidden="true">more_horiz</span>
+        </button>
+        <div *ngIf="overflowMenuOpen" class="proposal-detail__tab-overflow-menu" role="menu" aria-label="More proposal detail tabs">
+          <button *ngFor="let tab of overflowTabs" type="button" role="menuitem" (click)="selectOverflowTab(tab.id)">{{ tab.label }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="proposal-detail__layout">
+      <section class="proposal-detail__panel" role="tabpanel" [id]="'proposal-panel-' + activeTab" [attr.aria-labelledby]="'proposal-tab-' + activeTab">
+        <ng-container [ngSwitch]="activeTab">
+          <div *ngSwitchCase="'benefits'" class="proposal-detail__tab-content">
+            <header>
+              <h2>Benefits and Premiums</h2>
+              <p>See the plan's core benefits and premium details.</p>
+            </header>
+            <dl class="proposal-detail__benefit-table">
+              <div *ngFor="let row of benefitRows"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+            </dl>
+          </div>
+
+          <div *ngSwitchCase="'protection'" class="proposal-detail__tab-content">
+            <header>
+              <h2>Added Protection</h2>
+              <p>Protection options you selected in the questionnaire.</p>
+            </header>
+            <div class="proposal-detail__protection-table-scroll" role="region" aria-label="Added protection details" tabindex="0">
+              <table class="proposal-detail__protection-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Rider</th>
+                    <th scope="col">Benefit Amount</th>
+                    <th scope="col">Coverage Period</th>
+                    <th scope="col">Additional Annual Premium</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let row of addedProtectionRows">
+                    <th scope="row">
+                      <strong>{{ row.name }}</strong>
+                      <span>{{ row.description }}</span>
+                    </th>
+                    <td>{{ row.benefitAmount }}</td>
+                    <td>{{ row.coveragePeriod }}</td>
+                    <td>{{ row.additionalAnnualPremium }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div *ngSwitchCase="'funds'" class="proposal-detail__tab-content">
+            <header>
+              <h2>Fund Allocation</h2>
+              <p>Your premium will be allocated to the following funds based on the selected risk preference.</p>
+            </header>
+            <div class="proposal-detail__protection-table-scroll" role="region" aria-label="Fund allocation details" tabindex="0">
+              <table class="proposal-detail__protection-table proposal-detail__protection-table--funds">
+                <thead>
+                  <tr>
+                    <th scope="col">Fund Name</th>
+                    <th scope="col">Allocation</th>
+                    <th scope="col">Risk Level</th>
+                    <th scope="col">Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let fund of fundAllocationRows">
+                    <th scope="row">{{ fund.name }}</th>
+                    <td>{{ fund.allocation }}</td>
+                    <td>{{ fund.riskLevel }}</td>
+                    <td class="proposal-detail__fund-description">{{ fund.description }}</td>
+                  </tr>
+                  <tr class="proposal-detail__fund-total">
+                    <th scope="row">Total Allocation</th>
+                    <td>100%</td>
+                    <td colspan="2"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div *ngSwitchCase="'about'" class="proposal-detail__tab-content">
+            <header>
+              <h2>About {{ proposal.name }}</h2>
+              <p>Learn more about this product and how it can work for you.</p>
+            </header>
+            <div class="proposal-detail__about-list">
+              <article *ngFor="let section of aboutProductSections">
+                <h3>{{ section.title }}</h3>
+                <p>{{ section.description }}</p>
+              </article>
+            </div>
+          </div>
+        </ng-container>
+      </section>
+    </div>
+
+    <aside class="proposal-detail__next-step">
+      <app-mesh-gradient mode="banner" aria-hidden="true"></app-mesh-gradient>
+      <div class="proposal-detail__next-copy"><h2>Ready to continue?</h2><p>The proposal is ready to move forward. Let’s take the next step.</p></div>
+      <div class="proposal-detail__next-actions">
+        <app-button label="View Other Proposals" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" (clicked)="backRequested.emit()" />
+        <app-button label="Proceed With This Proposal" rightIcon="arrow_forward" [variant]="buttonVariant.Secondary" [size]="buttonSize.Medium" />
+      </div>
+    </aside>
+  </div>
+</section>

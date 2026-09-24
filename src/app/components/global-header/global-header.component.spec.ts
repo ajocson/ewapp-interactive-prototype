@@ -23,6 +23,17 @@ describe('GlobalHeaderComponent', () => {
     expect(fixture.nativeElement.querySelector('[aria-label="Open EA profile"]')?.textContent).toBe('BA');
   });
 
+  it('uses the design-system small subtle icon-only Search button for the mobile header', () => {
+    const iconButton = fixture.nativeElement.querySelector('.global-header__search-icon button') as HTMLButtonElement;
+    expect(iconButton).not.toBeNull();
+    expect(iconButton.getAttribute('aria-label')).toBe('Search');
+    expect(iconButton.querySelector('.material-symbols-rounded')?.textContent).toBe('search');
+    expect(iconButton.classList.contains('tdx-button--icon-only')).toBe(true);
+    expect(iconButton.getAttribute('data-variant')).toBe('subtle');
+    expect(iconButton.getAttribute('data-emphasis')).toBe('default');
+    expect(iconButton.getAttribute('data-size')).toBe('small');
+  });
+
   it('updates the shared state when navigation is toggled', () => {
     expect(fixture.componentInstance.navigation.isSidebarOpen()).toBe(false);
     (fixture.nativeElement.querySelector('[aria-controls="primary-navigation"]') as HTMLButtonElement).click();

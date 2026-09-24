@@ -17,7 +17,17 @@
   <div class="global-header__actions">
     <div class="global-header__search">
       <app-button
+        class="global-header__search-labeled"
         label="Search"
+        ariaLabel="Search"
+        leftIcon="search"
+        [filledIcons]="true"
+        [variant]="buttonVariant.Subtle"
+        [size]="buttonSize.Small"
+      />
+      <app-button
+        class="global-header__search-icon"
+        label=""
         ariaLabel="Search"
         leftIcon="search"
         [filledIcons]="true"

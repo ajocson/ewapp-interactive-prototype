@@ -32,7 +32,7 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
       <lam-dashboard [userType]="userType" [apiErrorMode]="apiErrorMode" [searchErrorMode]="searchErrorMode" [suppressBoardLoading]="drawerLoadingErrorMode" (leadOpened)="openLead($event)" (newLeadRequested)="openNewLead()" (draftSiRequested)="openDraftSiQuickQuote()" (generateProposalRequested)="openProposalGenerator()" (retryRequested)="retryApiError()" (loggedOut)="logOut()" />
     </div>
     <lam-applications *ngIf="loggedIn && showApplications" [userType]="userType" (leadSelected)="openApplicationLead($event)" (loggedOut)="logOut()" />
-    <lam-proposal-generator *ngIf="loggedIn && showProposalGenerator" [userType]="userType" (newLeadRequested)="openNewLead()" (draftSiRequested)="openDraftSiQuickQuote()" (loggedOut)="logOut()" />
+    <lam-proposal-generator *ngIf="loggedIn && showProposalGenerator" [userType]="userType" [initialView]="proposalGeneratorInitialView" (newLeadRequested)="openNewLead()" (draftSiRequested)="openDraftSiQuickQuote()" (loggedOut)="logOut()" />
     <lam-lead-activity-drawer
       *ngIf="selectedLead && ((!draftSiOpen && !proposalOpen) || contactDrawerOpen)"
       [lead]="selectedLead"
@@ -282,6 +282,7 @@ export class AppComponent implements AfterViewInit {
   activeRecordTab: LeadRecordTab = 'info';
   leadInfoEditMode = false;
   applicationLeadContext = false;
+  proposalGeneratorInitialView: 'landing' | 'recommendations' = 'landing';
   activityRecorded = false;
   activityToastMessage = 'Your activity has been recorded.';
   private pendingHighlightLeadId: string | null = null;
@@ -321,7 +322,7 @@ export class AppComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     const navigationEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
     const isApiErrorScenario = this.router.url.startsWith('/lcam/') && this.router.url.endsWith('-api-error');
-    const isProposalGeneratorRoute = this.router.url === '/proposals';
+    const isProposalGeneratorRoute = this.router.url === '/proposals' || this.router.url === '/proposals/recommended' || this.router.url === '/lcam/proposal/recommended';
     if (navigationEntry?.type === 'reload' && !isApiErrorScenario && !isProposalGeneratorRoute) {
       void this.router.navigate(['/lcam']);
       return;
@@ -720,6 +721,7 @@ export class AppComponent implements AfterViewInit {
     this.proposalOpen = false;
     this.contactDrawerOpen = false;
     this.leadInfoEditMode = false;
+    this.proposalGeneratorInitialView = 'landing';
     this.navigation.activeDestination.set('proposal-generator');
     if (this.router.url !== '/proposals') void this.router.navigate(['/proposals']);
     this.changeDetectorRef.markForCheck();
@@ -875,12 +877,13 @@ export class AppComponent implements AfterViewInit {
 
   private openRoute(url: string): void {
     const path = url.split(/[?#]/, 1)[0];
-    if (path === '/proposals') {
+    if (path === '/proposals' || path === '/proposals/recommended' || path === '/lcam/proposal/recommended') {
       this.navigation.setSidebarOpen(false);
       this.selectedLead = null;
       this.draftSiOpen = false;
       this.proposalOpen = false;
       this.contactDrawerOpen = false;
+      this.proposalGeneratorInitialView = path === '/proposals' ? 'landing' : 'recommendations';
       this.navigation.activeDestination.set('proposal-generator');
       this.changeDetectorRef.markForCheck();
       return;
