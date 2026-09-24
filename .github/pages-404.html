@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Loading EWApp…</title>
+  </head>
+  <body>
+    <script>
+      (() => {
+        const mainBase = '/ewapp-interactive-prototype/';
+        const previewBase = '/ewapp-interactive-prototype/proposal-revamp/';
+        const base = location.pathname.startsWith(previewBase) ? previewBase : mainBase;
+        const route = `${location.pathname.slice(base.length)}${location.search}${location.hash}`;
+
+        try {
+          sessionStorage.setItem('ewapp-pages-route', route);
+        } catch {
+          // Continue to the app root if browser storage is unavailable.
+        }
+
+        location.replace(base);
+      })();
+    </script>
+  </body>
+</html>

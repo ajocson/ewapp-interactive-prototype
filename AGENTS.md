@@ -308,7 +308,7 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - `Presentation Completed` gates conversion. Appointment completion moves to Meetings; follow-up presentation completion stays on Follow-up.
 - Underwriting submission adds the lead to Applications → In Progress with `Application Submitted` status.
 - The login screen is Figma-aligned and accepts the prototype credentials `Banca/Banca` and `Agency/Agency`.
-- GitHub Pages deployment copies the built `index.html` to `404.html` so direct nested-route access and refreshes load the Angular SPA instead of returning a 404.
+- GitHub Pages uses a custom 404 route handoff for the main site and the `/proposal-revamp/` preview. Keep the fallback and generated-index restore hook aligned: the fallback saves the requested SPA path, redirects to the correct site base, and the hook restores that path before Angular starts. Do not replace this with a copied `index.html` fallback, which cannot distinguish the two deployment bases.
 - Login state and the selected Agency/Banca user type persist across browser reloads in the current session. Logout clears the authenticated view.
 - The login password field supports show/hide behavior.
 - The shared TDX button component supports the Figma Secondary Large filled pink contract: 52px height, 20px horizontal padding, 12px vertical padding, 18px Lato Bold text, and 24px icons.
@@ -331,7 +331,7 @@ Verified on **2026-08-29**:
 - Production build: succeeds via `npm run build`.
 - Current initial production bundle reported by Angular: approximately 531.42 kB raw / 102.62 kB estimated transfer (`main` 484.57 kB plus global styles 46.86 kB).
 - The worktree contains the current EWApp journey, login, shared button, lead overview, and update-log changes. Preserve and inspect the worktree before editing; do not reset, discard, or overwrite unrelated changes.
-- The GitHub Pages workflow copies the production `index.html` to `404.html`, preserving Angular SPA behavior for direct access and refreshes of nested `/lcam` routes.
+- The GitHub Pages workflow supports direct access and refreshes of nested Angular routes for both `/lcam` and the `/proposal-revamp/` preview while keeping the two base paths distinct.
 - `angular.json` allows a 20 kB component-style maximum error budget so deployment is not blocked by the current proposal-flow style size; the 8 kB warning budget remains active.
 
 ## Latest Prototype Updates — 2026-09-03

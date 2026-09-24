@@ -61,9 +61,26 @@ jobs:
         run: |
           mkdir -p site/proposal-revamp
           cp -R main-source/dist/ewapp-interactive-prototype/browser/. site/
-          cp site/index.html site/404.html
           cp -R preview-source/dist/ewapp-interactive-prototype/browser/. site/proposal-revamp/
-          cp site/proposal-revamp/index.html site/proposal-revamp/404.html
+          node <<'NODE'
+          const fs = require('node:fs');
+          const indexFiles = [
+            'site/index.html',
+            'site/proposal-revamp/index.html',
+          ];
+          const restoreScript = '    <script src="/ewapp-interactive-prototype/pages-route-restore.js"></script>\n';
+
+          for (const file of indexFiles) {
+            const html = fs.readFileSync(file, 'utf8');
+            if (!html.includes('</head>')) {
+              throw new Error(`Could not find </head> in ${file}`);
+            }
+            fs.writeFileSync(file, html.replace('</head>', `${restoreScript}  </head>`));
+          }
+          NODE
+          cp .github/pages-route-restore.js site/pages-route-restore.js
+          cp .github/pages-404.html site/404.html
+          cp .github/pages-404.html site/proposal-revamp/404.html
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
