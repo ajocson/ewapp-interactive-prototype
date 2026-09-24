@@ -63,6 +63,7 @@ export class ProposalGeneratorComponent implements AfterViewInit, OnDestroy {
   @Output() loggedOut = new EventEmitter<void>();
   @Output() newLeadRequested = new EventEmitter<void>();
   @Output() draftSiRequested = new EventEmitter<void>();
+  @ViewChild('proposalContent') proposalContent?: ElementRef<HTMLElement>;
   @ViewChild('proposalDetails') proposalDetails?: ElementRef<HTMLElement>;
   @ViewChild('recommendationCards') recommendationCards?: ElementRef<HTMLElement>;
 
@@ -397,12 +398,14 @@ export class ProposalGeneratorComponent implements AfterViewInit, OnDestroy {
     this.showQuestionnaire = true;
     this.showRecommendations = false;
     this.showProposalDetails = true;
+    this.resetProposalContentScroll();
   }
 
   returnToRecommendations(): void {
     this.showProposalDetails = false;
     this.showRecommendations = true;
     this.showQuestionnaire = true;
+    this.resetProposalContentScroll();
   }
 
   updateActiveRecommendation(event: Event): void {
@@ -446,6 +449,10 @@ export class ProposalGeneratorComponent implements AfterViewInit, OnDestroy {
     requestAnimationFrame(() => {
       document.querySelector<HTMLElement>('.proposal-questionnaire__main')?.scrollTo({ top: 0, behavior: 'smooth' });
     });
+  }
+
+  private resetProposalContentScroll(): void {
+    if (this.proposalContent) this.proposalContent.nativeElement.scrollTop = 0;
   }
 
   private scrollRecommendationToCenter(index: number, behavior: ScrollBehavior): void {

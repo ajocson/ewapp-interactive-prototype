@@ -9,7 +9,7 @@
       (generateProposalRequested)="navigation.goToProposalGenerator()"
     />
 
-    <section class="proposal-generator__content" [class.proposal-generator__content--questionnaire]="showQuestionnaire" [class.proposal-generator__content--recommendations]="showRecommendations" [class.proposal-generator__content--proposal-detail]="showProposalDetails" [attr.aria-labelledby]="showProposalDetails ? 'proposal-detail-title' : showRecommendations ? 'proposal-recommendations-title' : 'proposal-generator-title'">
+    <section #proposalContent class="proposal-generator__content" [class.proposal-generator__content--questionnaire]="showQuestionnaire" [class.proposal-generator__content--recommendations]="showRecommendations" [class.proposal-generator__content--proposal-detail]="showProposalDetails" [attr.aria-labelledby]="showProposalDetails ? 'proposal-detail-title' : showRecommendations ? 'proposal-recommendations-title' : 'proposal-generator-title'">
       <ng-container *ngIf="!showQuestionnaire; else questionnaire">
         <section class="proposal-generator__hero">
           <div class="proposal-generator__hero-copy">

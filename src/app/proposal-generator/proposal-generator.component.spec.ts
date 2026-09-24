@@ -61,21 +61,26 @@ describe('ProposalGeneratorComponent', () => {
     fixture.componentRef.setInput('initialView', 'recommendations');
     fixture.detectChanges();
 
+    const proposalContent = fixture.nativeElement.querySelector('.proposal-generator__content') as HTMLElement;
+    proposalContent.scrollTop = 480;
     const viewProposal = Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)
       .find(button => button.textContent?.includes('View Proposal')) as HTMLButtonElement;
     viewProposal.click();
     fixture.detectChanges();
 
     expect(fixture.componentInstance.showProposalDetails).toBe(true);
+    expect(proposalContent.scrollTop).toBe(0);
     expect(fixture.nativeElement.querySelector('#proposal-detail-title')?.textContent).toContain('Dream Builder');
     expect(fixture.nativeElement.querySelector('.proposal-detail__summary')).toBeNull();
     expect(fixture.nativeElement.textContent).toContain('Benefits and Premiums');
     expect(fixture.nativeElement.textContent).toContain('₱250,000');
 
+    proposalContent.scrollTop = 480;
     (fixture.nativeElement.querySelector('.proposal-detail__back') as HTMLButtonElement).click();
     fixture.detectChanges();
 
     expect(fixture.componentInstance.showProposalDetails).toBe(false);
+    expect(proposalContent.scrollTop).toBe(0);
     expect(fixture.nativeElement.querySelector('#proposal-recommendations-title')).not.toBeNull();
   });
 

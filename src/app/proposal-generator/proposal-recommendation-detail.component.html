@@ -62,7 +62,7 @@
       </section>
     </div>
 
-    <div class="proposal-detail__tab-bar">
+    <div class="proposal-detail__tab-bar" [class.is-overflow-open]="overflowMenuOpen">
       <nav #proposalTabs class="proposal-detail__tabs" role="tablist" aria-label="Proposal details">
         <button *ngFor="let tab of tabs; let index = index" type="button" role="tab" [id]="'proposal-tab-' + tab.id" [attr.aria-selected]="activeTab === tab.id" [attr.aria-controls]="'proposal-panel-' + tab.id" [class.is-active]="activeTab === tab.id" [class.is-overflowed]="index >= 2" (click)="selectTab(tab.id)">{{ tab.label }}</button>
       </nav>

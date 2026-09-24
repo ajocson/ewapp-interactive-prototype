@@ -134,6 +134,7 @@
   .proposal-detail__highlight-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .proposal-detail__highlight { padding: 16px; }
   .proposal-detail__tab-bar { position: relative; overflow: visible; }
+  .proposal-detail__tab-bar.is-overflow-open { z-index: 1; }
   .proposal-detail__tabs { overflow-x: auto; overflow-y: hidden; }
   .proposal-detail__tabs > button[role='tab'] { min-height: 46px; padding: 8px; font-size: 14px; line-height: 20px; }
   .proposal-detail__tab-overflow { position: relative; display: flex; flex: 0 0 46px; height: 46px; }
