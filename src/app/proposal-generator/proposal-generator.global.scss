@@ -1,0 +1,5 @@
+@use './proposal-generator.styles' as proposal-generator;
+
+lam-proposal-generator {
+  @include proposal-generator.styles();
+}

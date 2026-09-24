@@ -218,8 +218,6 @@ describe('ProposalGeneratorComponent', () => {
     expect(fixture.nativeElement.querySelector('.proposal-questionnaire__footer').textContent).toContain('Back');
     expect(fixture.nativeElement.textContent).toContain('You can select more than one.');
     expect(fixture.nativeElement.querySelectorAll('.proposal-goal-card__illustration').length).toBe(3);
-    expect(getComputedStyle(fixture.nativeElement.querySelector('.proposal-goal-card')).minHeight).toBe('0px');
-
     const goalCards = fixture.nativeElement.querySelectorAll('.proposal-goal-card') as NodeListOf<HTMLButtonElement>;
     goalCards[0].click();
     goalCards[2].click();

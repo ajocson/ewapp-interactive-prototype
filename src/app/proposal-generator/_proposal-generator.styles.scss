@@ -1,4 +1,5 @@
-:host { display: block; height: 100%; }
+@mixin styles {
+& { display: block; height: 100%; }
 
 .proposal-generator { --proposal-content-reveal-duration: 500ms; --proposal-content-reveal-stagger: 140ms; display: flex; height: 100%; min-height: 0; flex-direction: column; background: var(--surface-default); color: var(--text-neutral-primary); }
 .proposal-generator__body { display: flex; min-height: 0; flex: 1 1 auto; }
@@ -176,7 +177,7 @@
 .proposal-recommendation-card__description { display: flex; min-height: 0; align-items: flex-start; gap: var(--space-xs); margin: var(--space-lg) 0 var(--space-2xl); color: var(--text-neutral-primary); font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
 .proposal-recommendation-card__description .material-symbols-rounded { flex: 0 0 auto; color: var(--color-cyan-700); font-size: var(--icon-2xl); line-height: 1; }
 .proposal-recommendation-card app-button { display: block; width: 100%; margin-top: 0; }
-.proposal-recommendation-card app-button ::ng-deep .tdx-button { width: 100%; }
+.proposal-recommendation-card app-button .tdx-button { width: 100%; }
 .proposal-recommendations__comparison { display: flex; flex-direction: column; gap: var(--space-5xl); }
 .proposal-recommendations__comparison > header { text-align: center; }
 .proposal-recommendations__comparison h2 { font-size: var(--h5-text-size); line-height: var(--h5-line-height); }
@@ -190,7 +191,7 @@
 .proposal-comparison-table thead th:first-child, .proposal-comparison-table tbody th { width: 22%; text-align: left; }
 .proposal-comparison-table tbody th { font-weight: var(--font-weight-bold); }
 .proposal-comparison-table thead .material-symbols-rounded { margin-right: var(--space-2xs); color: var(--color-magenta-700); font-size: var(--icon-md); font-variation-settings: 'FILL' 1; vertical-align: text-bottom; }
-.proposal-comparison-table tfoot app-button ::ng-deep .tdx-button { --button-height: var(--button-height-sm); font-size: var(--paragraph-sm-text-size); }
+.proposal-comparison-table tfoot app-button .tdx-button { --button-height: var(--button-height-sm); font-size: var(--paragraph-sm-text-size); }
 .proposal-comparison-cards { display: none; }
 .proposal-comparison-card { position: relative; display: flex; flex-direction: column; gap: var(--space-md); padding: var(--space-2xl); border: var(--border-width-xs-1) solid var(--border-neutral-default-secondary); border-radius: var(--radius-xl); background: var(--surface-default); }
 .proposal-comparison-card.is-best-match { border: var(--border-width-xs-2) solid var(--color-magenta-700); }
@@ -206,7 +207,7 @@
 .proposal-comparison-card__description { display: flex; align-items: flex-start; gap: var(--space-xs); margin: 0; padding-top: var(--space-sm); border-top: var(--border-width-xs-1) solid var(--border-neutral-subtle); color: var(--text-neutral-primary); font-size: var(--caption-text-size); line-height: var(--paragraph-sm-line-height); }
 .proposal-comparison-card__description .material-symbols-rounded { align-self: flex-start; flex: 0 0 20px; color: var(--color-cyan-700); font-size: var(--icon-xl); line-height: 1; }
 .proposal-comparison-card app-button { display: block; width: 100%; }
-.proposal-comparison-card app-button ::ng-deep .tdx-button { width: 100%; --button-height: var(--button-height-sm); font-size: var(--paragraph-sm-text-size); }
+.proposal-comparison-card app-button .tdx-button { width: 100%; --button-height: var(--button-height-sm); font-size: var(--paragraph-sm-text-size); }
 .proposal-recommendations__more-options { position: relative; display: flex; align-items: center; justify-content: space-between; gap: var(--space-4xl); overflow: hidden; padding: 44px 40px; border-radius: var(--radius-xl); background: var(--color-purple-50); }
 .proposal-recommendations__more-options::before { position: absolute; z-index: 1; inset: 0; background: color-mix(in srgb, var(--color-purple-50) 78%, transparent); content: ''; pointer-events: none; }
 .proposal-recommendations__more-options > div,
@@ -351,8 +352,8 @@
 .proposal-budget-card__quick-select strong { font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
 .proposal-budget-card__quick-select > div { display: flex; flex-wrap: wrap; gap: var(--space-md); }
 .proposal-budget-card__quick-select-button { display: inline-flex; }
-.proposal-budget-card__quick-select-button ::ng-deep .tdx-button { font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
-.proposal-budget-card__quick-select-button.is-selected ::ng-deep .tdx-button { background: var(--button-subtle-filled-bg-pressed); }
+.proposal-budget-card__quick-select-button .tdx-button { font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
+.proposal-budget-card__quick-select-button.is-selected .tdx-button { background: var(--button-subtle-filled-bg-pressed); }
 .proposal-budget-info { display: flex; width: 325px; box-sizing: border-box; flex: 0 0 325px; flex-direction: column; gap: var(--space-xl); padding: var(--space-3xl); border: var(--border-width-xs-1) solid var(--tag-info-border); border-radius: var(--radius-xl); background: var(--section-message-bg-info); color: var(--text-neutral-primary); }
 .proposal-budget-info__icon { display: grid; width: 60px; height: 60px; place-items: center; border-radius: var(--radius-round); background: var(--color-cyan-300); color: var(--color-cyan-700); font-size: 32px; line-height: 1; }
 .proposal-budget-info h2 { margin: 0; color: var(--color-cyan-700); font-size: var(--paragraph-lg-text-size); line-height: var(--paragraph-lg-line-height); }
@@ -403,7 +404,7 @@
   .proposal-recommendations__actions { width: 100%; justify-content: center; flex-direction: row; }
   .proposal-recommendations__actions app-button { width: auto; flex: 0 0 auto; }
   .proposal-recommendations__actions app-button,
-  .proposal-recommendations__actions app-button ::ng-deep .tdx-button { width: auto; }
+  .proposal-recommendations__actions app-button .tdx-button { width: auto; }
   .proposal-generation-loading__cards { overflow-x: clip; overflow-y: visible; }
   .proposal-generation-loading__cards-track { width: max-content; justify-content: flex-start; gap: var(--space-4xl); transform: translateX(calc((100vw - 80px - 300px) / 2 - 332px)); }
   .proposal-generation-loading__card,
@@ -484,7 +485,7 @@
   .proposal-recommendations__more-options h2 { font-size: var(--paragraph-lg-text-size); line-height: var(--paragraph-lg-line-height); }
   .proposal-recommendations__actions { width: 100%; flex-direction: column; }
   .proposal-recommendations__actions app-button { width: 100%; }
-  .proposal-recommendations__actions app-button ::ng-deep .tdx-button { width: 100%; }
+  .proposal-recommendations__actions app-button .tdx-button { width: 100%; }
   .proposal-questionnaire__intro { padding: var(--space-3xl) var(--space-xl); }
   .proposal-questionnaire__step { padding: 0 var(--space-xl); }
   .proposal-questionnaire__eyebrow { font-size: var(--caption-text-size); line-height: var(--paragraph-sm-line-height); }
@@ -536,10 +537,11 @@
   .proposal-coverage-card__text { min-width: 0; align-items: flex-start; text-align: left; }
   .proposal-goal-card__text { min-width: 0; align-items: flex-start; text-align: left; }
   .proposal-questionnaire__footer { position: sticky; bottom: 0; z-index: var(--layer-header); padding: var(--space-xl) var(--space-xl); }
-  .proposal-questionnaire__footer ::ng-deep .tdx-button--medium { --button-height: var(--button-height-sm); --button-icon-size: var(--button-icon-size-sm); --button-padding-x: var(--button-padding-x-sm); --button-padding-y: var(--button-padding-y-sm); font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
+  .proposal-questionnaire__footer .tdx-button--medium { --button-height: var(--button-height-sm); --button-icon-size: var(--button-icon-size-sm); --button-padding-x: var(--button-padding-x-sm); --button-padding-y: var(--button-padding-y-sm); font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
 }
 
 @media (max-width: 639px) and (prefers-reduced-motion: reduce) {
   .proposal-recommendations__cards { scroll-behavior: auto; }
   .proposal-recommendation-card { transition: none; }
+}
 }

@@ -47,7 +47,6 @@ type ProposalQuestionStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 @Component({
   selector: 'lam-proposal-generator',
   templateUrl: './proposal-generator.component.html',
-  styleUrl: './proposal-generator.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: false
 })
