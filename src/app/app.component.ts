@@ -63,9 +63,9 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
       (retryRequested)="retryDrawerLoading()"
     />
     <main *ngIf="!loggedIn" class="login-screen">
-      <img class="login-screen__bg login-screen__bg--left" src="https://www.figma.com/api/mcp/asset/fbd3a5a3-ade6-4a22-a213-1698ce7f245d.svg" alt="" aria-hidden="true">
-      <img class="login-screen__bg login-screen__bg--right" src="https://www.figma.com/api/mcp/asset/e7ce5cbc-ab90-43cf-8de0-dbbdd365f565.svg" alt="" aria-hidden="true">
-      <div class="login-brand"><img src="https://www.figma.com/api/mcp/asset/a4bb8717-19f1-4fdc-8a44-81b39b332253.svg" alt="EastWest Ageas Life Insurance"><span></span><strong>EWApp</strong></div>
+      <div class="login-screen__bg login-screen__bg--left" aria-hidden="true"></div>
+      <div class="login-screen__bg login-screen__bg--right" aria-hidden="true"></div>
+      <div class="login-brand"><img src="assets/ewapp-ageas-logo.svg" alt="EastWest Ageas Life Insurance"><span></span><strong>EWApp</strong></div>
       <section class="login-card" aria-labelledby="login-title">
         <h1 id="login-title">Sign in to your account</h1>
         <label>Agent Code<input [(ngModel)]="agentCode" placeholder="Input your Agent Code"></label>
@@ -73,8 +73,10 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
         <div class="login-card__password"><input [type]="passwordVisible ? 'text' : 'password'" [(ngModel)]="password" placeholder="Input your password"><button type="button" [attr.aria-label]="passwordVisible ? 'Hide password' : 'Show password'" (click)="passwordVisible = !passwordVisible"><span class="material-symbols-rounded" aria-hidden="true">{{ passwordVisible ? 'visibility_off' : 'visibility' }}</span></button></div>
         <app-button class="login-card__continue" label="Continue" [variant]="buttonVariant.Secondary" [size]="buttonSize.Large" (clicked)="logIn()" />
       </section>
-      <div class="login-support"><p>Having trouble logging in? Please contact</p><div><span>✉ AgencySupport@ewageas.com.ph</span><span>✉ BancaSupport@ewageas.com.ph</span></div></div>
-      <div class="login-footer"><span>Copyright © 2026. East West Ageas Life Insurance Corporation.</span><span>Legal&nbsp; · &nbsp;Privacy&nbsp; · &nbsp;Security</span></div>
+      <footer class="login-footer-group">
+        <div class="login-support"><p>Having trouble logging in? Please contact</p><div><span>✉ AgencySupport@ewageas.com.ph</span><span>✉ BancaSupport@ewageas.com.ph</span></div></div>
+        <div class="login-footer"><span>Copyright © 2026. East West Ageas Life Insurance Corporation.</span><span>Legal&nbsp; · &nbsp;Privacy&nbsp; · &nbsp;Security</span></div>
+      </footer>
     </main>
     <app-section-message
       *ngIf="activityRecorded"
