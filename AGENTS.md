@@ -258,14 +258,9 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - This is a presentation-only correction. Preserve all scheduling, cancellation, rescheduling, board movement, activity recording, and navigation flows.
 - Verified with the lead activity drawer tests: **8 tests passing**.
 
-### Latest Agency New Lead source fields correction — 2026-09-03
+### New Lead role-specific source fields — updated 2026-09-29
 
-- Agency users now see the Agency-specific New Lead Step 2 fields: Source of Lead, Product Interested, Store Name, Store ID, and Unit Name.
-- Agency defaults are `Self-Generated Lead`, `Dream Builder`, `198 G. ARANETA AVENUE`, `384768653`, and `PURPLE BLAZE_JDELACRUZ` respectively.
-- Agency Source of Lead, Store ID, and Unit Name are standard non-editable fields; Store Name remains a dropdown using the existing field-control component.
-- Banca users retain their separate source-specific fields and defaults, including `Family and Friends` for the manually created lead's Manual Source.
-- This is a scoped presentation/input-state correction. Preserve the existing New Lead creation, navigation, and lifecycle flows.
-- Verified with the app component tests: **17 tests passing**.
+- Agency Step 2 shows Source of Lead, Product Interested, Store/Branch Name, and Store/Branch ID; Unit Name is omitted. Banca retains its source-specific fields with the same Store/Branch labels. Preserve the existing sample values and lead-creation flow.
 
 ### Latest Applications timeline update — 2026-09-01
 
@@ -317,10 +312,10 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - The Figma-matched Unable to Set Appointment state hides unrelated drawer actions while open, uses a 100px notes field, and provides equal-width Cancel/Save buttons. Cancel Appointment also uses equal-width action buttons.
 - Standard drawer notes fields are 20px taller than the earlier baseline.
 - New Lead Step 1 Continue is disabled until First Name and Last Name are filled.
-- New Lead Step 2 conditionally shows source-specific fields. Self-Generated Lead keeps Product Interested and Manual Source static; other sources show Product Interested, Referral Date, Referrer ID/Name, Store Name, and Store ID.
-- New Lead static fields retain their chevrons without rendering dropdown menus. Store Name uses the existing TDX field-control dropdown; Referrer Name and Store ID use the shared disabled-field styling.
+- New Lead Step 2 conditionally shows source-specific fields. Self-Generated Lead keeps Product Interested and Manual Source static; other sources show Product Interested, Referral Date, Referrer ID/Name, Store/Branch Name, and Store/Branch ID.
+- New Lead static fields retain their chevrons without rendering dropdown menus. Store/Branch Name uses the existing TDX field-control dropdown; Referrer Name and Store/Branch ID use the shared disabled-field styling.
 - Successful New Lead creation shows the existing success toast with the exact message `Lead successfully created` and dismisses it after four seconds.
-- Applications drawer buttons remain visually enabled for `Withdrawn`, `Postponed`, and `Unapproved`, but View Applications and Generate/View Full Proposal do not redirect or trigger actions for those statuses.
+- Applications drawer buttons remain visually enabled for `Withdrawn`, `Postponed`, and `Declined`, but View Applications and Generate/View Full Proposal do not redirect or trigger actions for those statuses.
 - Focused app-component tests pass: **1 file, 17 tests passing**.
 
 Verified on **2026-08-29**:

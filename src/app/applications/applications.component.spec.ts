@@ -26,7 +26,7 @@ describe('ApplicationsComponent page filters', () => {
       'Conditionally Accepted',
       'Policy Released',
       'Approved',
-      'Unapproved',
+      'Declined',
       'Withdrawn',
       'Postponed'
     ]);

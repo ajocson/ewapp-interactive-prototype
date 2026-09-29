@@ -98,7 +98,7 @@ describe('LeadActivityDrawerComponent', () => {
     ]);
   });
 
-  it.each(['Approved', 'Unapproved', 'Withdrawn', 'Postponed'])('adds Underwriting Ongoing before the %s application status', (status) => {
+  it.each(['Approved', 'Declined', 'Withdrawn', 'Postponed'])('adds Underwriting Ongoing before the %s application status', (status) => {
     fixture.componentRef.setInput('fromApplicationsPage', true);
     fixture.componentRef.setInput('lead', {
       ...createLead(),
@@ -107,6 +107,8 @@ describe('LeadActivityDrawerComponent', () => {
       activities: []
     });
     fixture.detectChanges();
+
+    expect(fixture.componentInstance.canOpenApplicationActions).toBe(status === 'Approved');
 
     expect(fixture.componentInstance.systemActivities.map((activity) => activity.label).slice(-3)).toEqual([
       'Application Submitted',
@@ -162,7 +164,7 @@ describe('LeadActivityDrawerComponent', () => {
       occurredAtTimestamp: 0
     });
 
-    expect(['Underwriting Ongoing', 'Needs More Info', 'Approved', 'Unapproved', 'Conditionally Accepted', 'Withdrawn', 'Postponed', 'Policy Released']
+    expect(['Underwriting Ongoing', 'Needs More Info', 'Approved', 'Declined', 'Conditionally Accepted', 'Withdrawn', 'Postponed', 'Policy Released']
       .every((label) => fixture.componentInstance.hasPolicyNumber(systemActivity(label)))).toBe(true);
     expect(fixture.componentInstance.hasPolicyNumber(systemActivity('Application Submitted'))).toBe(false);
     expect(fixture.componentInstance.hasPolicyNumber({ ...systemActivity('Approved'), category: 'sales' })).toBe(false);

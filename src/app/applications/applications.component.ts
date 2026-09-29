@@ -48,7 +48,7 @@ export class ApplicationsComponent implements OnDestroy {
     'Conditionally Accepted',
     'Policy Released',
     'Approved',
-    'Unapproved',
+    'Declined',
     'Withdrawn',
     'Postponed'
   ];
@@ -216,7 +216,7 @@ export class ApplicationsComponent implements OnDestroy {
     const statusesByBoard: Record<string, readonly string[]> = {
       'applications-in-progress': ['Application Submitted', 'Underwriting Ongoing'],
       'applications-action-required': ['Needs More Info', 'Conditionally Accepted'],
-      'applications-completed': ['Policy Released', 'Approved', 'Unapproved', 'Withdrawn', 'Postponed']
+      'applications-completed': ['Policy Released', 'Approved', 'Declined', 'Withdrawn', 'Postponed']
     };
     return [
       { label: 'All', value: 'All' },
@@ -265,8 +265,8 @@ export class ApplicationsComponent implements OnDestroy {
         this.createLead('application-10', '22751', 'Audrey Hepburn', 'Female', { label: 'Policy Released', tone: 'success' }),
         this.createLead('application-11', '22752', 'Clara Belle', 'Female', { label: 'Approved', tone: 'success' }),
         this.createLead('application-12', '22753', 'Emma Watson', 'Female', { label: 'Approved', tone: 'success' }),
-        this.createLead('application-13', '22754', 'Oliver Twist', 'Male', { label: 'Unapproved', tone: 'danger' }),
-        this.createLead('application-14', '22755', 'Charles Dickens', 'Male', { label: 'Unapproved', tone: 'danger' }),
+        this.createLead('application-13', '22754', 'Oliver Twist', 'Male', { label: 'Declined', tone: 'danger' }),
+        this.createLead('application-14', '22755', 'Charles Dickens', 'Male', { label: 'Declined', tone: 'danger' }),
         this.createLead('application-15', '22756', 'Benjamin Franklin', 'Male', { label: 'Withdrawn', tone: 'danger' }),
         this.createLead('application-16', '22757', 'Nikola Tesla', 'Male', { label: 'Withdrawn', tone: 'danger' }),
         this.createLead('application-17', '22758', 'Leonardo DiCaprio', 'Male', { label: 'Postponed', tone: 'neutral' }),

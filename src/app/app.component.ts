@@ -154,25 +154,24 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
           <ng-container *ngIf="userType === 'Agency'; else bancaSourceFields">
             <label class="new-lead-source new-lead-source--readonly"><span>Source of Lead</span><input class="new-lead-source__input" [value]="newLeadSource" disabled /></label>
             <label class="new-lead-source new-lead-source--readonly"><span>Product Interested</span><tdx-field-control name="new-lead-product" ariaLabel="Product Interested" [label]="newLeadProduct" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
-            <label class="new-lead-source"><span>Store Name</span><tdx-field-control name="new-lead-store" ariaLabel="Store Name" [label]="agencyStoreName" [value]="agencyStoreName" [options]="agencyStoreOptions" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
-            <label class="new-lead-source new-lead-source--readonly"><span>Store ID</span><input class="new-lead-source__input" [value]="agencyStoreId" disabled /></label>
-            <label class="new-lead-source new-lead-source--readonly"><span>Unit Name</span><input class="new-lead-source__input" [value]="agencyUnitName" disabled /></label>
+            <label class="new-lead-source"><span>Store/Branch Name</span><tdx-field-control name="new-lead-store" ariaLabel="Store/Branch Name" [label]="agencyStoreName" [value]="agencyStoreName" [options]="agencyStoreOptions" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
+            <label class="new-lead-source new-lead-source--readonly"><span>Store/Branch ID</span><input class="new-lead-source__input" [value]="agencyStoreId" disabled /></label>
           </ng-container>
           <ng-template #bancaSourceFields>
           <label class="new-lead-source"><span>Source of Lead</span><tdx-field-control name="new-lead-source" ariaLabel="Source of Lead" label="Select your source of lead" [value]="newLeadSource" [options]="newLeadSourceOptions" trailingIcon="keyboard_arrow_down" [fluid]="true" (valueChange)="newLeadSource = $event" /></label>
           <ng-container *ngIf="newLeadSource === 'Self-Generated Lead'">
             <label class="new-lead-source new-lead-source--readonly"><span>Product Interested</span><tdx-field-control name="new-lead-product" ariaLabel="Product Interested" [label]="newLeadProduct" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
             <label class="new-lead-source new-lead-source--readonly"><span>Manual Source</span><tdx-field-control name="new-lead-manual-source" ariaLabel="Manual Source" [label]="newLeadManualSource" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
-            <label class="new-lead-source"><span>Store Name</span><tdx-field-control name="new-lead-store" ariaLabel="Store Name" [label]="newLeadStoreName" [value]="newLeadStoreName" [options]="newLeadStoreOptions" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
-            <label class="new-lead-source new-lead-source--readonly"><span>Store ID</span><input class="new-lead-source__input" [value]="newLeadStoreId" disabled /></label>
+            <label class="new-lead-source"><span>Store/Branch Name</span><tdx-field-control name="new-lead-store" ariaLabel="Store/Branch Name" [label]="newLeadStoreName" [value]="newLeadStoreName" [options]="newLeadStoreOptions" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
+            <label class="new-lead-source new-lead-source--readonly"><span>Store/Branch ID</span><input class="new-lead-source__input" [value]="newLeadStoreId" disabled /></label>
           </ng-container>
           <ng-container *ngIf="newLeadSource !== 'Self-Generated Lead'">
             <label class="new-lead-source new-lead-source--readonly"><span>Product Interested</span><tdx-field-control name="new-lead-product" ariaLabel="Product Interested" [label]="newLeadProduct" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
             <label class="new-lead-source"><span>Referral Date</span><input class="new-lead-source__input" type="date" [value]="newLeadReferralDate" readonly /></label>
             <label class="new-lead-source"><span>Referrer ID</span><input class="new-lead-source__input" [value]="newLeadReferrerId" readonly /></label>
             <label class="new-lead-source new-lead-source--readonly"><span>Referrer Name</span><input class="new-lead-source__input" [value]="newLeadReferrerName" disabled /></label>
-            <label class="new-lead-source"><span>Store Name</span><tdx-field-control name="new-lead-store" ariaLabel="Store Name" [label]="newLeadStoreName" [value]="newLeadStoreName" [options]="newLeadStoreOptions" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
-            <label class="new-lead-source new-lead-source--readonly"><span>Store ID</span><input class="new-lead-source__input" [value]="newLeadStoreId" disabled /></label>
+            <label class="new-lead-source"><span>Store/Branch Name</span><tdx-field-control name="new-lead-store" ariaLabel="Store/Branch Name" [label]="newLeadStoreName" [value]="newLeadStoreName" [options]="newLeadStoreOptions" trailingIcon="keyboard_arrow_down" [fluid]="true" /></label>
+            <label class="new-lead-source new-lead-source--readonly"><span>Store/Branch ID</span><input class="new-lead-source__input" [value]="newLeadStoreId" disabled /></label>
           </ng-container>
           </ng-template>
           <footer class="new-lead-modal__step-actions"><app-button label="Back" leftIcon="chevron_left" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Medium" (clicked)="newLeadStep = 1" /><app-button label="Create Lead" rightIcon="chevron_right" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" [disabled]="!newLeadSource" (clicked)="openNewLeadConfirmation()" /></footer>
@@ -251,7 +250,6 @@ export class AppComponent implements AfterViewInit {
   newLeadStoreId = 'RBG0380';
   readonly agencyStoreName = '198 G. ARANETA AVENUE';
   readonly agencyStoreId = '384768653';
-  readonly agencyUnitName = 'PURPLE BLAZE_JDELACRUZ';
   readonly newLeadSourceOptions: readonly TdxFieldControlOption[] = [
     'Alternative Distribution', 'CBG (Consumer Banking Group)', 'CLC (Consumer Lending Cluster)',
     'PBG (Partnership Banking Group)', 'Self-Generated Lead'

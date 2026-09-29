@@ -22,7 +22,7 @@ const APPLICATION_STATUS_TAGS = new Set([
   'Conditionally Accepted',
   'Policy Released',
   'Approved',
-  'Unapproved',
+  'Declined',
   'Withdrawn',
   'Postponed'
 ]);
@@ -251,7 +251,7 @@ export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, On
   }
 
   get canOpenApplicationActions(): boolean {
-    return !new Set(['Withdrawn', 'Postponed', 'Unapproved']).has(this.rawStatusTag);
+    return !new Set(['Withdrawn', 'Postponed', 'Declined']).has(this.rawStatusTag);
   }
 
   get statusVariant(): TdxTagVariant {
@@ -396,7 +396,7 @@ export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, On
       'Underwriting Ongoing',
       'Needs More Info',
       'Approved',
-      'Unapproved',
+      'Declined',
       'Conditionally Accepted',
       'Withdrawn',
       'Postponed',
@@ -800,7 +800,7 @@ export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, On
       '2026-03-15T11:15:00', '2026-03-15T11:20:00'
     ];
     const isGraceKelly = this.lead.name === 'Grace Kelly';
-    const needsUnderwriting = isGraceKelly || ['Underwriting Ongoing', 'Needs More Info', 'Conditionally Accepted', 'Policy Released', 'Approved', 'Unapproved', 'Withdrawn', 'Postponed'].includes(this.rawStatusTag);
+    const needsUnderwriting = isGraceKelly || ['Underwriting Ongoing', 'Needs More Info', 'Conditionally Accepted', 'Policy Released', 'Approved', 'Declined', 'Withdrawn', 'Postponed'].includes(this.rawStatusTag);
     const hasApprovedTransaction = this.rawStatusTag === 'Policy Released';
     const record = (id: string, category: LeadActivityRecord['category'], label: string, offset: number, extra: Partial<LeadActivityRecord> = {}): LeadActivityRecord => ({
       id: `generic-${this.lead.id}-${id}`,

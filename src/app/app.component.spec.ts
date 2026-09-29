@@ -16,6 +16,30 @@ describe('AppComponent LCAM activity feedback', () => {
     fixture.detectChanges();
   });
 
+  it('shows Store/Branch labels for both roles and omits Agency Unit Name', () => {
+    fixture.componentInstance.agentCode = 'Agency';
+    fixture.componentInstance.password = 'Agency';
+    fixture.componentInstance.logIn();
+    fixture.componentInstance.openNewLead();
+    fixture.componentInstance.newLeadStep = 2;
+    fixture.componentInstance.userType = 'Agency';
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.new-lead-modal')?.textContent).not.toContain('Unit Name');
+    expect(fixture.nativeElement.querySelector('.new-lead-modal')?.textContent).toContain('Store/Branch Name');
+    expect(fixture.nativeElement.querySelector('.new-lead-modal')?.textContent).toContain('Store/Branch ID');
+
+    fixture.componentInstance.agentCode = 'Banca';
+    fixture.componentInstance.password = 'Banca';
+    fixture.componentInstance.logIn();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.new-lead-modal')?.textContent).toContain('Manual Source');
+    expect(fixture.nativeElement.querySelector('.new-lead-modal')?.textContent).toContain('Store/Branch Name');
+    expect(fixture.nativeElement.querySelector('.new-lead-modal')?.textContent).toContain('Store/Branch ID');
+    expect(fixture.nativeElement.querySelector('.new-lead-modal')?.textContent).not.toContain('Unit Name');
+  });
+
   it('highlights the moved lead immediately and starts the fade timer when the drawer closes', () => {
     vi.useFakeTimers();
     const dashboard = fixture.debugElement.query(By.directive(DashboardComponent)).componentInstance as DashboardComponent;
