@@ -20,7 +20,7 @@
     </div>
   </header>
 
-  <app-tab-group [tabs]="tabs" [activeId]="activeTab" ariaLabel="Lead activity sections" (activeIdChange)="activeTab = $event; scheduling = false; rescheduling = false; cancellingAppointment = false; followUpRecording = false" />
+  <app-tab-group [tabs]="tabs" [activeId]="activeTab" ariaLabel="Lead activity sections" (activeIdChange)="selectTab($event)" />
   <ng-container *ngIf="!loadingErrorMode; else drawerLoadingError">
 
   <div #drawerScroll class="drawer-scroll">

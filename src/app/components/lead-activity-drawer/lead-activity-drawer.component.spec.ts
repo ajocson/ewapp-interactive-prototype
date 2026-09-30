@@ -20,16 +20,20 @@ describe('LeadActivityDrawerComponent', () => {
     fixture.detectChanges();
   });
 
-  it('lists every activity chronologically within its group and displays saved notes', () => {
-    fixture.componentInstance.activeTab = 'timeline';
+  it('lists newest activities first within each group and displays saved notes', () => {
+    const scrollElement = fixture.nativeElement.querySelector('.drawer-scroll') as HTMLDivElement;
+    scrollElement.scrollTop = 100;
+    (fixture.nativeElement.querySelectorAll('[role="tab"]')[1] as HTMLButtonElement).click();
     fixture.detectChanges();
 
+    expect(scrollElement.scrollTop).toBe(0);
     expect(fixture.componentInstance.salesActivities.map((activity) => activity.label)).toEqual([
-      'New Lead Created',
-      'Appointment Scheduled',
+      'Appointment Canceled',
       'Contacted',
-      'Appointment Canceled'
+      'Appointment Scheduled',
+      'New Lead Created'
     ]);
+    expect(fixture.nativeElement.querySelector('.activity-group .activity-group__label')?.textContent).toBe('Appointment Canceled');
     expect(fixture.componentInstance.systemActivities.map((activity) => activity.label)).toEqual([
       'Draft SI Generated'
     ]);
@@ -47,7 +51,7 @@ describe('LeadActivityDrawerComponent', () => {
     expect(note.getAttribute('aria-expanded')).toBe('true');
   });
 
-  it('orders application system transactions through submission and underwriting', () => {
+  it('shows application system transactions newest first through underwriting', () => {
     fixture.componentRef.setInput('fromApplicationsPage', true);
     fixture.componentRef.setInput('lead', {
       ...createLead(),
@@ -58,17 +62,17 @@ describe('LeadActivityDrawerComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.componentInstance.systemActivities.map((activity) => activity.label)).toEqual([
-      'Draft SI Generated',
-      'CSA Created',
-      'Proposal Created',
-      'SI Generated',
-      'Converted to Application',
+      'Underwriting Ongoing',
       'Application Submitted',
-      'Underwriting Ongoing'
+      'Converted to Application',
+      'SI Generated',
+      'Proposal Created',
+      'CSA Created',
+      'Draft SI Generated'
     ]);
   });
 
-  it.each(['Needs More Info', 'Conditionally Accepted'])('adds %s as the final application system transaction', (status) => {
+  it.each(['Needs More Info', 'Conditionally Accepted'])('shows %s first as the latest application system transaction', (status) => {
     fixture.componentRef.setInput('fromApplicationsPage', true);
     fixture.componentRef.setInput('lead', {
       ...createLead(),
@@ -78,7 +82,7 @@ describe('LeadActivityDrawerComponent', () => {
     });
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.systemActivities.at(-1)?.label).toBe(status);
+    expect(fixture.componentInstance.systemActivities[0]?.label).toBe(status);
   });
 
   it.each(['Needs More Info', 'Conditionally Accepted'])('adds Underwriting Ongoing before %s', (status) => {
@@ -91,10 +95,10 @@ describe('LeadActivityDrawerComponent', () => {
     });
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.systemActivities.map((activity) => activity.label).slice(-3)).toEqual([
-      'Application Submitted',
+    expect(fixture.componentInstance.systemActivities.map((activity) => activity.label).slice(0, 3)).toEqual([
+      status,
       'Underwriting Ongoing',
-      status
+      'Application Submitted'
     ]);
   });
 
@@ -110,10 +114,10 @@ describe('LeadActivityDrawerComponent', () => {
 
     expect(fixture.componentInstance.canOpenApplicationActions).toBe(status === 'Approved');
 
-    expect(fixture.componentInstance.systemActivities.map((activity) => activity.label).slice(-3)).toEqual([
-      'Application Submitted',
+    expect(fixture.componentInstance.systemActivities.map((activity) => activity.label).slice(0, 3)).toEqual([
+      status,
       'Underwriting Ongoing',
-      status
+      'Application Submitted'
     ]);
   });
 
@@ -128,12 +132,13 @@ describe('LeadActivityDrawerComponent', () => {
     });
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.systemActivities.map((activity) => activity.label).slice(-4)).toEqual([
-      'Application Submitted',
-      'Underwriting Ongoing',
+    expect(fixture.componentInstance.systemActivities.map((activity) => activity.label).slice(0, 4)).toEqual([
+      'Policy Released',
       'Approved',
-      'Policy Released'
+      'Underwriting Ongoing',
+      'Application Submitted'
     ]);
+    expect(Number.isFinite(fixture.componentInstance.systemActivities[0].occurredAtTimestamp)).toBe(true);
   });
 
   it('adds approval to non-Grace Kelly Policy Released applications', () => {
@@ -146,11 +151,11 @@ describe('LeadActivityDrawerComponent', () => {
     });
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.systemActivities.map((activity) => activity.label).slice(-4)).toEqual([
-      'Application Submitted',
-      'Underwriting Ongoing',
+    expect(fixture.componentInstance.systemActivities.map((activity) => activity.label).slice(0, 4)).toEqual([
+      'Policy Released',
       'Approved',
-      'Policy Released'
+      'Underwriting Ongoing',
+      'Application Submitted'
     ]);
   });
 

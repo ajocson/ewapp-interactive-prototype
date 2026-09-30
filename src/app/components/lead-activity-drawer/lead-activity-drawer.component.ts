@@ -449,6 +449,17 @@ export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, On
     if (scrollElement) scrollElement.scrollTop = scrollElement.scrollHeight;
   }
 
+  selectTab(tabId: string): void {
+    this.activeTab = tabId;
+    this.scheduling = false;
+    this.rescheduling = false;
+    this.cancellingAppointment = false;
+    this.followUpRecording = false;
+
+    const scrollElement = this.drawerScroll?.nativeElement;
+    if (tabId === 'timeline' && scrollElement) scrollElement.scrollTop = 0;
+  }
+
   showAgingTooltip(event: MouseEvent, message: string): void {
     this.hideAgingTooltip();
 
@@ -781,7 +792,7 @@ export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, On
 
     return [...activities]
       .filter((activity) => activity.category === category)
-      .sort((first, second) => first.occurredAtTimestamp - second.occurredAtTimestamp);
+      .sort((first, second) => second.occurredAtTimestamp - first.occurredAtTimestamp);
   }
 
   private genericApplicationActivities(): readonly LeadActivityRecord[] {
@@ -797,7 +808,7 @@ export class LeadActivityDrawerComponent implements AfterViewInit, OnChanges, On
       '2026-03-12T16:15:00', '2026-03-13T09:00:00', '2026-03-13T09:10:00',
       '2026-03-13T09:15:00', '2026-03-13T10:30:00', '2026-03-14T14:00:00',
       '2026-03-14T14:10:00', '2026-03-15T11:00:00', '2026-03-15T11:10:00',
-      '2026-03-15T11:15:00', '2026-03-15T11:20:00'
+      '2026-03-15T11:15:00', '2026-03-15T11:20:00', '2026-03-15T11:25:00'
     ];
     const isGraceKelly = this.lead.name === 'Grace Kelly';
     const needsUnderwriting = isGraceKelly || ['Underwriting Ongoing', 'Needs More Info', 'Conditionally Accepted', 'Policy Released', 'Approved', 'Declined', 'Withdrawn', 'Postponed'].includes(this.rawStatusTag);

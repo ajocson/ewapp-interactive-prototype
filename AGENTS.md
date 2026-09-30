@@ -86,7 +86,7 @@ Each reusable component normally has a component class, HTML template, SCSS file
 - `AppComponent` translates typed drawer events into dashboard mutations. Successful activities keep the drawer open, return the active destination to LCAM Board, and show a centered top success message after an 800 ms delay; the message dismisses after four seconds. The updated lead ID is held until the user closes the drawer, at which point the card is highlighted in its destination/current board.
 - The implemented pipeline transitions are `Lead` → `Contacted` → `Appointments` → `Meetings` → `Follow-Up`. Rescheduling and cancellation update a lead within `Appointments`; parking and dropping keep the lead in its current board while changing its `leadType`. Parked leads can be reactivated in place; dropped leads are reference-only and do not expose reactivation.
 - `LeadCardData` carries source/referrer/product metadata, gender, creation and last-activity timestamps, optional appointment details, and typed sales/system activity records. Each record carries an `occurredAtTimestamp`, a display date/time, and optional notes. Display titles are derived with `leadDisplayName()` (`Mr.` for male sample data and `Ms.` for female sample data).
-- `DashboardComponent` appends activity records as lifecycle mutations occur. `LeadActivityDrawerComponent` groups them by category and displays each group in chronological order (earliest to latest) using `occurredAtTimestamp`; appointment activities use the scheduled start–end range in their display time.
+- `DashboardComponent` appends activity records as lifecycle mutations occur. `LeadActivityDrawerComponent` groups them by category and displays each group newest first using `occurredAtTimestamp`; appointment activities use the scheduled start–end range in their display time.
 - Page filters and board-level filters use separate pending/draft and applied state. Page filtering combines name, source, lead status, lead state, referrer, and sort; board filtering combines local search, lead state, and sort.
 - `ApplicationsComponent` owns three in-memory application boards and its page-level filter state. It reuses `LeadBoardComponent` with board-specific status options and shared search, field-control, radio, and button components.
 - `DraftSiFlowComponent` is a local finite-state flow (`1 | 2 | 3 | 4 | 'results'`). It nests `ProposalFlowComponent` after “Convert to Proposal.”
@@ -176,7 +176,7 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - Added sample-only aging states: a Lead-board Parked lead not contacted for 30 days (`person_cancel`, `30d`), plus Meetings and Follow-Up Dropped leads auto-dropped after 90 days (`person_off`, `91d`). Their drawer error banners use the shared section-message component with the `warning` icon. These samples do not alter lifecycle flows.
 - Park and Drop are available across boards, use local state-specific SVG assets, require confirmation, append activities, and preserve the lead's board stage. Drop uses a fixed list of supported reasons. Parked leads can be reactivated across boards and use the `Reactivated` state; dropped leads do not expose reactivation.
 - Successful lifecycle actions keep the drawer open and show a responsive-width success message. Closing the drawer then highlights the affected card at the top of its board.
-- The timeline uses chronological Sales Activities and System Transactions. Initial sample histories reflect the required journey for their board/state, including the lead creation, contact, appointment/meeting/follow-up, park/drop/reactivate, and SI/CSA/proposal system records that apply to that lead.
+- The timeline shows Sales Activities and System Transactions separately, newest first within each group. Initial sample histories reflect the required journey for their board/state, including lead creation, contact, appointment/meeting/follow-up, park/drop/reactivate, and applicable SI/CSA/proposal system records.
 
 ### Draft Sales Illustration
 
@@ -213,7 +213,7 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - Board width must not change when board search opens; the board retains its responsive width contract.
 - Empty search results remain visually blank; do not reintroduce a “No matches were found” state unless explicitly requested.
 - Recent board ordering is activity-based: a lead changed or moved by an activity belongs first in its board, and page/board “Recently Created” sorting uses `lastActivityTimestamp` when present.
-- Lead activity timelines are grouped by Sales Activities/System Transactions and rendered chronologically within each group by `occurredAtTimestamp`. Keep timestamps, displayed date/time ranges, optional notes, and the lead's current board/state mutually consistent when adding sample data or mutations.
+- Lead activity timelines are grouped by Sales Activities/System Transactions and rendered newest first within each group by `occurredAtTimestamp`. Keep timestamps, displayed date/time ranges, optional notes, and the lead's current board/state mutually consistent when adding sample data or mutations.
 - Parked/dropped/reactivated state is independent of pipeline stage. Park/drop/reactivate must not move a lead to a different board; paused leads keep their stage tag and hide appointment schedule tags. Only parked leads can be reactivated, which sets their state to `Reactivated`; dropped leads remain reference-only.
 - Lifecycle completion actions keep the drawer open while the delayed top toast appears. Defer the card highlight until the drawer is explicitly closed so users can review the updated activity before locating the changed card.
 - LCAM Board navigation returns to the board from inner flows and is only active when `activeDestination` is `lcam-board`.
@@ -229,9 +229,9 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - Sales Activities use the final wording `Contacted- No Appointment`, `Follow Up`, `Follow Up Scheduled`, `Follow-up Presentation Completed`, `Follow Up Canceled`, and `Follow-up` for follow-up updates.
 - Appointment-board presentation completion remains `Presentation Completed`; Follow-Up-board presentation completion is `Follow-up Presentation Completed`.
 - Saving Lead Information records `Leads Info Updated` in Sales Activities.
-- Automatic timeline records are seeded for 30-day auto-parked leads and 90-day auto-dropped leads. These automatic records appear after the lead's other activities; manual `Parked Lead`/`Dropped Lead` records remain for manual actions.
+- Automatic timeline records are seeded for 30-day auto-parked leads and 90-day auto-dropped leads. These records occur after the lead's earlier activities and display above them in the newest-first timeline; manual `Parked Lead`/`Dropped Lead` records remain for manual actions.
 - `Application Start` is a System Transaction. `Application Created` is displayed and recorded as `Converted to Application`.
-- System Transactions are ordered Draft SI Generated, CSA Created, Proposal Created, then SI Generated.
+- System Transactions occur in the sequence Draft SI Generated, CSA Created, Proposal Created, then SI Generated; the timeline displays them newest first.
 - Creating a proposal through product selection and Continue navigates to the Proposals tab; saving does not duplicate the Proposal Created transaction.
 - Unable to Set Appointment Save resolves the lead on its current board and preserves the existing lifecycle behavior.
 - Park Lead and Drop Lead action buttons render only on the drawer Overview tab, not Activity Timeline.
@@ -267,7 +267,7 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 - Grace Kelly's Applications Activity Timeline uses varied, realistic sample dates and times; this is display-only sample data and does not change any user flow.
 - Grace Kelly's Appointment Canceled and Appointment Rescheduled records share the same scheduled appointment date/time.
 - Grace Kelly's timeline excludes the sample Dropped Lead and Application Start records.
-- Grace Kelly's System Transactions include Underwriting Ongoing immediately before Policy Released, with Policy Released as the final transaction.
+- Grace Kelly's System Transactions include Underwriting Ongoing and Approved before Policy Released; Policy Released is the latest transaction and displays first.
 - Preserve these Applications timeline distinctions when editing the drawer; do not generalize Grace Kelly-only sample corrections to other leads without an explicit requirement.
 
 ### Latest LCAM search and Follow-Up demo update — 2026-09-03
@@ -290,7 +290,7 @@ The repository does not currently store direct Figma URLs. If a task requires pi
 
 - Inactive leads opened from the LCAM board cannot continue from Info to Add Profile (CSA); that action emits the existing contact-required event so the side drawer presents `Mark as Contacted`.
 - This guard is scoped to the inactive-lead Add Profile action. Preserve the existing Info save behavior and all active/contacted lead CSA flows.
-- The lead activity drawer opens scrolled to its bottom so the relevant activity actions are immediately visible; preserve action behavior while maintaining this presentation convention.
+- The lead activity drawer opens its Overview scrolled to the bottom so the relevant actions are immediately visible; switching to Activity Timeline scrolls to the top so the newest records are visible first.
 
 - Verified on **2026-09-01** after the latest timeline, proposal-navigation, Drop Lead, and drawer updates.
 
