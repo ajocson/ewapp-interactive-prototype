@@ -43,7 +43,6 @@ export class AppNavigationStateService {
   }
 
   goToProposalGenerator(): void {
-    this.setSidebarOpen(false);
     this.activeDestination.set('proposal-generator');
     this.proposalGeneratorRequests.next();
   }

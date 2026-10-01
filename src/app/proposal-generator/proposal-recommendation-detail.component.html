@@ -1,34 +1,27 @@
-<section class="proposal-detail" aria-labelledby="proposal-detail-title">
+<section *ngIf="!isSalesIllustrationPreviewOpen" class="proposal-detail" aria-labelledby="proposal-detail-title">
   <div class="proposal-detail__content">
     <div class="proposal-detail__overview">
-      <div class="proposal-detail__topline">
-        <button type="button" class="proposal-detail__back" (click)="backRequested.emit()">
-          <span class="material-symbols-rounded" aria-hidden="true">chevron_left</span>
-          Back to Recommended Proposals
-        </button>
-        <p class="proposal-detail__meta">
-          <span>Proposal No. 802978</span>
-          <span class="proposal-detail__meta-divider" aria-hidden="true"></span>
-          <span>Valid Until: September 30, 2026</span>
-        </p>
-      </div>
-
       <header class="proposal-detail__header">
         <div class="proposal-detail__intro">
           <div class="proposal-detail__heading">
-            <h4 id="proposal-detail-title">{{ proposal.name }}</h4>
-            <p class="proposal-detail__description">Future Assure is a peso-denominated variable life solution, which gives you insurance coverage and investment options.</p>
-          </div>
-          <div class="proposal-detail__header-actions">
-            <app-button label="Edit Proposal" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" />
-            <app-button label="Proceed With This Proposal" [variant]="buttonVariant.Secondary" [size]="buttonSize.Medium" />
+            <p class="proposal-detail__meta">PROPOSAL NO. {{ proposalNumber }}</p>
+            <div class="proposal-detail__title-group">
+              <h4 id="proposal-detail-title">{{ proposal.name }}</h4>
+              <p class="proposal-detail__value-proposition">Life Protection + Investments</p>
+            </div>
+            <p class="proposal-detail__description">A peso-denominated variable life solution, which gives you insurance coverage and investment options.</p>
           </div>
         </div>
         <img class="proposal-detail__family" src="assets/future-assure-banner.png" alt="A family reviewing a plan together" />
       </header>
 
       <section class="proposal-detail__highlights" aria-labelledby="proposal-highlights-title">
-        <h2 id="proposal-highlights-title">Key Highlights</h2>
+        <div class="proposal-detail__highlights-heading">
+          <h2 id="proposal-highlights-title">Your Plan At A Glance</h2>
+          <div class="proposal-detail__date-meta" aria-label="Proposal validity">
+            <p>Valid Until: {{ validUntilDate }}</p>
+          </div>
+        </div>
         <div class="proposal-detail__highlight-grid">
           <article class="proposal-detail__highlight">
             <div class="proposal-detail__highlight-heading">
@@ -46,7 +39,7 @@
           </article>
           <article class="proposal-detail__highlight">
             <div class="proposal-detail__highlight-heading">
-              <div><p>Maximum Coverage Period</p><strong>{{ maximumCoveragePeriod }}</strong></div>
+              <div><p>Coverage Period</p><strong>{{ maximumCoveragePeriod }}</strong></div>
               <span class="proposal-detail__highlight-icon material-symbols-rounded" aria-hidden="true">schedule</span>
             </div>
             <span>Long-term protection for greater financial security.</span>
@@ -65,34 +58,50 @@
     <div class="proposal-detail__tab-bar" [class.is-overflow-open]="overflowMenuOpen">
       <nav #proposalTabs class="proposal-detail__tabs" role="tablist" aria-label="Proposal details">
         <button *ngFor="let tab of tabs; let index = index" type="button" role="tab" [id]="'proposal-tab-' + tab.id" [attr.aria-selected]="activeTab === tab.id" [attr.aria-controls]="'proposal-panel-' + tab.id" [class.is-active]="activeTab === tab.id" [class.is-overflowed]="index >= 2" (click)="selectTab(tab.id)">{{ tab.label }}</button>
-      </nav>
-      <div class="proposal-detail__tab-overflow" (click)="$event.stopPropagation()">
-        <button #tabOverflowButton type="button" class="proposal-detail__tab-overflow-trigger" aria-label="More proposal detail tabs" aria-haspopup="menu" [attr.aria-expanded]="overflowMenuOpen" (click)="toggleOverflowMenu($event)">
-          <span class="material-symbols-rounded" aria-hidden="true">more_horiz</span>
-        </button>
-        <div *ngIf="overflowMenuOpen" class="proposal-detail__tab-overflow-menu" role="menu" aria-label="More proposal detail tabs">
-          <button *ngFor="let tab of overflowTabs" type="button" role="menuitem" (click)="selectOverflowTab(tab.id)">{{ tab.label }}</button>
+        </nav>
+        <div class="proposal-detail__tab-overflow" (click)="$event.stopPropagation()">
+          <button #tabOverflowButton type="button" class="proposal-detail__tab-overflow-trigger" aria-label="More proposal detail tabs" aria-haspopup="menu" [attr.aria-expanded]="overflowMenuOpen" (click)="toggleOverflowMenu($event)">
+            <span class="material-symbols-rounded" aria-hidden="true">more_horiz</span>
+          </button>
+          <div *ngIf="overflowMenuOpen" class="proposal-detail__tab-overflow-menu" role="menu" aria-label="More proposal detail tabs">
+            <button *ngFor="let tab of overflowTabs" type="button" role="menuitem" (click)="selectOverflowTab(tab.id)">{{ tab.label }}</button>
+          </div>
         </div>
       </div>
-    </div>
 
     <div class="proposal-detail__layout">
       <section class="proposal-detail__panel" role="tabpanel" [id]="'proposal-panel-' + activeTab" [attr.aria-labelledby]="'proposal-tab-' + activeTab">
         <ng-container [ngSwitch]="activeTab">
+          <div *ngSwitchCase="'proposal-info'" class="proposal-detail__tab-content proposal-detail__tab-content--proposal-info">
+            <header>
+              <h2>Who This Plan Is For</h2>
+            </header>
+            <section aria-labelledby="proposed-insured-heading">
+              <h3 id="proposed-insured-heading">Proposed Insured</h3>
+              <dl class="proposal-detail__benefit-table">
+                <div *ngFor="let row of proposedInsuredRows"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+              </dl>
+            </section>
+            <section aria-labelledby="proposed-owner-heading">
+              <h3 id="proposed-owner-heading">Proposed Owner</h3>
+              <dl class="proposal-detail__benefit-table">
+                <div *ngFor="let row of proposedOwnerRows"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+              </dl>
+            </section>
+          </div>
+
           <div *ngSwitchCase="'benefits'" class="proposal-detail__tab-content">
             <header>
-              <h2>Benefits and Premiums</h2>
-              <p>See the plan's core benefits and premium details.</p>
+              <h2>What This Plan Offers</h2>
             </header>
             <dl class="proposal-detail__benefit-table">
               <div *ngFor="let row of benefitRows"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
             </dl>
           </div>
 
-          <div *ngSwitchCase="'protection'" class="proposal-detail__tab-content">
+          <div *ngSwitchCase="'protection'" class="proposal-detail__tab-content proposal-detail__tab-content--protection">
             <header>
-              <h2>Added Protection</h2>
-              <p>Protection options you selected in the questionnaire.</p>
+              <h2>Added Protection for Life’s What-Ifs</h2>
             </header>
             <div class="proposal-detail__protection-table-scroll" role="region" aria-label="Added protection details" tabindex="0">
               <table class="proposal-detail__protection-table">
@@ -121,30 +130,28 @@
 
           <div *ngSwitchCase="'funds'" class="proposal-detail__tab-content">
             <header>
-              <h2>Fund Allocation</h2>
-              <p>Your premium will be allocated to the following funds based on the selected risk preference.</p>
+              <h2>Where Your Funds Go</h2>
             </header>
             <div class="proposal-detail__protection-table-scroll" role="region" aria-label="Fund allocation details" tabindex="0">
               <table class="proposal-detail__protection-table proposal-detail__protection-table--funds">
                 <thead>
                   <tr>
                     <th scope="col">Fund Name</th>
-                    <th scope="col">Allocation</th>
-                    <th scope="col">Risk Level</th>
                     <th scope="col">Description</th>
+                    <th scope="col">Risk Level</th>
+                    <th scope="col">Allocation</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let fund of fundAllocationRows">
                     <th scope="row">{{ fund.name }}</th>
-                    <td>{{ fund.allocation }}</td>
-                    <td>{{ fund.riskLevel }}</td>
                     <td class="proposal-detail__fund-description">{{ fund.description }}</td>
+                    <td>{{ fund.riskLevel }}</td>
+                    <td>{{ fund.allocation }}</td>
                   </tr>
                   <tr class="proposal-detail__fund-total">
-                    <th scope="row">Total Allocation</th>
+                    <th scope="row" colspan="3">Total Allocation</th>
                     <td>100%</td>
-                    <td colspan="2"></td>
                   </tr>
                 </tbody>
               </table>
@@ -153,27 +160,86 @@
 
           <div *ngSwitchCase="'about'" class="proposal-detail__tab-content">
             <header>
-              <h2>About {{ proposal.name }}</h2>
-              <p>Learn more about this product and how it can work for you.</p>
+              <h2>Get to Know the Product</h2>
             </header>
             <div class="proposal-detail__about-list">
-              <article *ngFor="let section of aboutProductSections">
-                <h3>{{ section.title }}</h3>
-                <p>{{ section.description }}</p>
+              <article *ngFor="let section of aboutProductSections; let index = index" class="proposal-detail__about-card">
+                <h3>
+                  <button type="button" class="proposal-detail__about-trigger" [attr.aria-expanded]="expandedAboutSections.has(index)" [attr.aria-controls]="'proposal-about-panel-' + index" (click)="toggleAboutSection(index)">
+                    <span>{{ section.title }}</span>
+                    <span class="material-symbols-rounded" aria-hidden="true">{{ expandedAboutSections.has(index) ? 'expand_less' : 'expand_more' }}</span>
+                  </button>
+                </h3>
+                <p *ngIf="expandedAboutSections.has(index)" [id]="'proposal-about-panel-' + index">{{ section.description }}</p>
               </article>
             </div>
           </div>
         </ng-container>
       </section>
     </div>
+  </div>
+  <footer class="proposal-detail__actions">
+    <app-button label="Back" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Medium" (clicked)="backRequested.emit()" />
+    <div class="proposal-detail__actions-group">
+      <ng-container *ngIf="savedProposal; else recommendationActions">
+        <app-button #generateSalesIllustrationTrigger [label]="hasGeneratedSalesIllustration ? 'View Sales Illustration' : 'Generate Sales Illustration'" [variant]="buttonVariant.Secondary" [size]="buttonSize.Medium" [loading]="isGeneratingSalesIllustration" [disabled]="isGeneratingSalesIllustration" (clicked)="generateSalesIllustration()" />
+        <app-button #proceedTrigger label="Convert to Application" rightIcon="arrow_forward" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" [disabled]="!hasGeneratedSalesIllustration" (clicked)="applicationRequested.emit()" />
+      </ng-container>
+      <ng-template #recommendationActions>
+        <app-button label="Edit Proposal" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" (clicked)="editRequested.emit()" />
+        <app-button #proceedTrigger label="Proceed With This Proposal" rightIcon="arrow_forward" [variant]="buttonVariant.Secondary" [size]="buttonSize.Medium" (clicked)="openProceedModal()" />
+      </ng-template>
+    </div>
+  </footer>
+</section>
 
-    <aside class="proposal-detail__next-step">
-      <app-mesh-gradient mode="banner" aria-hidden="true"></app-mesh-gradient>
-      <div class="proposal-detail__next-copy"><h2>Ready to continue?</h2><p>The proposal is ready to move forward. Let’s take the next step.</p></div>
-      <div class="proposal-detail__next-actions">
-        <app-button label="View Other Proposals" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" (clicked)="backRequested.emit()" />
-        <app-button label="Proceed With This Proposal" rightIcon="arrow_forward" [variant]="buttonVariant.Secondary" [size]="buttonSize.Medium" />
+<section *ngIf="isSalesIllustrationPreviewOpen" class="proposal-si-preview" aria-label="Sales illustration preview">
+  <header class="proposal-si-preview__toolbar">
+    <button type="button" class="proposal-si-preview__back" (click)="returnToProposalSummary()">
+      <span class="material-symbols-rounded" aria-hidden="true">chevron_left</span>
+      <span>Back to Proposal Details</span>
+    </button>
+    <div class="proposal-si-preview__toolbar-actions">
+      <app-button #previewConvertTrigger label="Convert to Application" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" [disabled]="!hasGeneratedSalesIllustration" (clicked)="applicationRequested.emit()" />
+      <app-button label="" ariaLabel="Download sales illustration" rightIcon="download" [variant]="buttonVariant.Subtle" [size]="buttonSize.Small" [disabled]="!hasGeneratedSalesIllustration" (clicked)="downloadSalesIllustration()" />
+    </div>
+  </header>
+
+  <div *ngIf="isGeneratingSalesIllustration" class="proposal-si-loading-overlay" role="presentation">
+    <section class="proposal-si-loading" role="status" aria-live="polite" aria-busy="true" aria-label="Generating sales illustration">
+      <div class="proposal-si-loading__top-row">
+        <div class="proposal-si-loading__message">
+          <p>{{ hasGeneratedSalesIllustration ? 'Loading your Sales Illustration' : 'Generating your Sales Illustration' }} <strong>#24470.</strong></p>
+          <p>Please wait and do not close your browser.</p>
+        </div>
+        <strong class="proposal-si-loading__percentage">0%</strong>
       </div>
-    </aside>
+      <div class="proposal-si-loading__track" role="progressbar" aria-label="Sales illustration generation progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <span></span>
+      </div>
+    </section>
+  </div>
+
+  <div *ngIf="hasGeneratedSalesIllustration" class="proposal-si-preview__document" aria-label="Generated sales illustration pages">
+    <img *ngFor="let page of salesIllustrationPages; let index = index" [src]="page" [alt]="'Sales illustration, page ' + (index + 1)" />
   </div>
 </section>
+
+<div *ngIf="proceedModalOpen" class="proposal-detail__modal-overlay" role="presentation" (click)="closeProceedModalFromBackdrop($event)">
+  <section #proceedModal class="proposal-detail__modal" role="dialog" aria-modal="true" aria-labelledby="complete-individual-information-title" aria-describedby="complete-individual-information-description" tabindex="-1" (keydown)="trapProceedModalFocus($event)">
+    <button #proceedModalClose type="button" class="proposal-detail__modal-close" aria-label="Close" (click)="closeProceedModal()">
+      <img src="assets/icons/update-info-close.png" alt="">
+    </button>
+    <div class="proposal-detail__modal-icons" aria-hidden="true">
+      <span class="proposal-detail__modal-icon proposal-detail__modal-icon--left"><img src="assets/icons/update-info-document.png" alt=""></span>
+      <span class="proposal-detail__modal-icon proposal-detail__modal-icon--center"><img src="assets/icons/update-info-person.png" alt=""></span>
+      <span class="proposal-detail__modal-icon proposal-detail__modal-icon--right"><img src="assets/icons/update-info-alert.png" alt=""></span>
+    </div>
+    <h2 id="complete-individual-information-title">Complete Individual Information</h2>
+    <div id="complete-individual-information-description" class="proposal-detail__modal-description">
+      <p>Complete the required details to proceed with the CSA and Sales process.</p>
+      <p>Please ensure all information provided is accurate and up to date.</p>
+    </div>
+    <app-button #proceedModalContinue class="proposal-detail__modal-continue" label="Continue to Complete Details" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" (clicked)="continueToIndividualInfo()" />
+  </section>
+</div>
