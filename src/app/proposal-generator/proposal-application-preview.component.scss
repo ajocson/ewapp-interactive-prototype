@@ -1,0 +1,18 @@
+:host { display: block; min-height: 100%; background: var(--surface-default); }
+.proposal-application-preview { min-height: 100%; color: var(--text-neutral-primary); }
+.proposal-application-preview__tabs { display: flex; height: var(--proposal-profile-tabs-height); align-items: stretch; justify-content: center; border-bottom: var(--border-width-xs-1) solid var(--border-neutral-subtle); background: var(--surface-default); }
+.proposal-application-preview__tabs button { width: var(--proposal-tab-width); padding: var(--space-md); border: 0; border-bottom: var(--border-width-xs-2) solid transparent; background: transparent; color: var(--text-neutral-primary); cursor: pointer; font-family: var(--typography-font-family-heading); font-size: var(--paragraph-sm-text-size); font-weight: var(--font-weight-semibold); line-height: var(--paragraph-sm-line-height); }
+.proposal-application-preview__tabs button.is-active { border-bottom-color: var(--color-magenta-700); color: var(--color-magenta-700); font-weight: var(--font-weight-bold); }
+.proposal-application-preview__tabs button:disabled { color: var(--color-grey-400); cursor: default; }
+.proposal-application-preview__tabs button:focus-visible, .proposal-application-preview__check:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring-color); outline-offset: var(--focus-ring-offset); }
+.proposal-application-preview__check { display: flex; min-width: 202px; height: var(--button-small-height); align-items: center; justify-content: center; gap: var(--space-xs); margin: var(--space-3xl) auto 0; padding: var(--button-small-padding-y) var(--button-small-padding-x); border: 0; border-radius: var(--radius-round); background: var(--color-purple-200); color: var(--text-neutral-inverse); font-family: var(--typography-font-family-paragraph); font-size: var(--caption-sm-text-size); font-weight: var(--font-weight-bold); }
+.proposal-application-preview__check .material-symbols-rounded { font-size: var(--space-xl); }
+.proposal-application-preview__check:disabled { opacity: 1; }
+.proposal-application-preview .application-workspace { margin-top: var(--space-3xl); }
+
+@media (max-width: 720px) {
+  .proposal-application-preview__tabs { overflow-x: auto; justify-content: flex-start; }
+  .proposal-application-preview__tabs button { min-width: 116px; width: auto; flex: 0 0 auto; }
+  .proposal-application-preview .application-workspace { margin-top: var(--space-xl); }
+  .proposal-application-preview .application-id-fields { grid-template-columns: 1fr; }
+}

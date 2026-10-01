@@ -409,6 +409,7 @@ export class AppComponent implements AfterViewInit {
   activityToastMessage = 'Your activity has been recorded.';
   private pendingHighlightLeadId: string | null = null;
   private standaloneDraftLeadCreated = false;
+  private preserveSidebarOnProposalEntry = false;
   private activityToastTimer?: ReturnType<typeof setTimeout>;
   private activityToastDismissTimer?: ReturnType<typeof setTimeout>;
 
@@ -987,7 +988,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   openProposalGenerator(): void {
-    this.navigation.setSidebarOpen(false);
+    this.preserveSidebarOnProposalEntry = true;
     this.selectedLead = null;
     this.draftSiOpen = false;
     this.proposalOpen = false;
@@ -996,6 +997,7 @@ export class AppComponent implements AfterViewInit {
     this.proposalGeneratorInitialView = 'landing';
     this.navigation.activeDestination.set('proposal-generator');
     if (this.router.url !== '/proposals') void this.router.navigate(['/proposals']);
+    else this.preserveSidebarOnProposalEntry = false;
     this.changeDetectorRef.markForCheck();
   }
 
@@ -1170,7 +1172,9 @@ export class AppComponent implements AfterViewInit {
     }
     this.passwordResetLinkOpen = false;
     if (path === '/proposals' || path === '/proposals/recommended' || path === '/lcam/proposal/recommended') {
-      this.navigation.setSidebarOpen(false);
+      const preserveSidebar = path === '/proposals' && this.preserveSidebarOnProposalEntry;
+      this.preserveSidebarOnProposalEntry = false;
+      if (!preserveSidebar) this.navigation.setSidebarOpen(false);
       this.selectedLead = null;
       this.draftSiOpen = false;
       this.proposalOpen = false;

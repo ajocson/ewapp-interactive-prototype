@@ -9,12 +9,12 @@
       (generateProposalRequested)="navigation.goToProposalGenerator()"
     />
 
-    <section #proposalContent class="proposal-generator__content" [class.proposal-generator__content--questionnaire]="showQuestionnaire" [class.proposal-generator__content--recommendations]="showRecommendations" [class.proposal-generator__content--proposal-detail]="showProposalDetails" [attr.aria-labelledby]="showProposalDetails ? 'proposal-detail-title' : showRecommendations ? 'proposal-recommendations-title' : 'proposal-generator-title'">
+    <section #proposalContent class="proposal-generator__content" [class.proposal-generator__content--questionnaire]="showQuestionnaire" [class.proposal-generator__content--product-info]="showProductInfo" [class.proposal-generator__content--create-review]="showCreateProposalReview" [class.proposal-generator__content--recommendations]="showRecommendations" [class.proposal-generator__content--proposal-detail]="showProposalDetails || showProposalApplication" [class.proposal-generator__content--application]="showProposalApplication" [class.proposal-generator__content--individual-info]="showProposalIndividualInfo" [class.proposal-generator__content--proposal-build]="showProposalBuilderInfo || showProposalBenefitEditor" [class.proposal-generator__content--benefit-editor]="showProposalBenefitEditor" [class.proposal-generator__content--proposal-saved-list]="showProposalBuilderSavedList" [attr.aria-labelledby]="showCreateProposalReview ? 'proposal-create-review-title' : showProposalApplication ? 'proposal-application-title' : showProposalBuilderSavedList ? 'proposal-builder-saved-list-title' : showProposalBenefitEditor ? 'proposal-benefit-editor-title' : showProposalBuilderInfo ? 'proposal-builder-info-title' : showProposalCsa ? 'proposal-csa-title' : showProposalIndividualInfoSummary ? 'proposal-individual-summary-title' : showProposalIndividualInfo ? 'proposal-individual-info-title' : showProposalDetails ? 'proposal-detail-title' : showRecommendations ? 'proposal-recommendations-title' : 'proposal-generator-title'">
       <ng-container *ngIf="!showQuestionnaire; else questionnaire">
         <section class="proposal-generator__hero">
           <div class="proposal-generator__hero-copy">
             <div class="proposal-generator__hero-text">
-              <h1 id="proposal-generator-title">Find a plan that fits your needs</h1>
+              <h1 id="proposal-generator-title"><span>Find a plan that fits</span> <span>your needs</span></h1>
               <p>Answer a few simple questions about your goals, budget, and preferences, and we’ll show you options that may fit.</p>
             </div>
             <app-button label="Find Plans for Me" rightIcon="arrow_forward" [variant]="buttonVariant.Secondary" [size]="buttonSize.Medium" (clicked)="openProposalGenerator()" />
@@ -27,20 +27,260 @@
         <section id="proposal-products" class="proposal-generator__products" aria-labelledby="proposal-products-title">
           <header>
             <h2 id="proposal-products-title">Choose a Product</h2>
-            <p>Browse available products and choose one to start a proposal.</p>
+            <p>Select one or more products to create proposals.</p>
           </header>
-          <div class="proposal-generator__grid">
-            <article *ngFor="let product of products" class="proposal-product-card">
-              <img [src]="product.icon" alt="" aria-hidden="true">
-              <h3>{{ product.name }}</h3>
-              <p>Life Protection + Guaranteed Payouts</p>
-              <button type="button" class="proposal-product-card__action">Create Proposal <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span></button>
-            </article>
+          <div class="proposal-generator__grid" role="group" aria-label="Available products">
+            <label *ngFor="let product of visibleProducts" class="proposal-product-card" [class.is-selected]="selectedProductNames.includes(product.name)">
+              <span class="proposal-product-card__top-row">
+                <img [src]="product.icon" alt="" aria-hidden="true">
+                <input class="proposal-product-card__checkbox" type="checkbox" [checked]="selectedProductNames.includes(product.name)" [attr.aria-label]="'Select ' + product.name" (change)="toggleProductSelection(product.name, $any($event.target).checked)">
+              </span>
+              <div class="proposal-product-card__copy">
+                <h3>{{ product.name }}</h3>
+                <p>Life Protection + Guaranteed Payouts</p>
+              </div>
+            </label>
+          </div>
+          <div class="proposal-generator__products-footer">
+            <p class="proposal-generator__selection-count" aria-live="polite">
+              <strong>{{ selectedProductNames.length }}</strong>
+              {{ selectedProductNames.length === 1 ? 'product selected' : 'products selected' }}
+            </p>
+            <app-button label="Proceed" rightIcon="arrow_forward" [variant]="buttonVariant.Secondary" [size]="buttonSize.Medium" [disabled]="selectedProductNames.length === 0" (clicked)="openSelectedProductProposal()" />
           </div>
         </section>
       </ng-container>
 
       <ng-template #questionnaire>
+        <section *ngIf="showProductInfo" class="proposal-product-info" [class.proposal-product-info--saved-create]="startedFromSavedProposalList" aria-labelledby="proposal-product-info-title">
+          <div class="proposal-questionnaire__progress" role="progressbar" aria-label="Create proposal progress" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="productInfoProgressPercent">
+            <span [style.width.%]="productInfoProgressPercent"></span>
+          </div>
+          <div class="proposal-product-info__scroll">
+            <div class="proposal-product-info__layout" [class.proposal-product-info__layout--product-selection]="productInfoStep === 'products'">
+              <div class="proposal-product-info__main" [class.proposal-product-info__main--funds]="productInfoStep === 'funds'">
+              <ng-container *ngIf="productInfoStep === 'products'">
+                <header class="proposal-product-info__heading">
+                  <p class="proposal-product-info__eyebrow">CREATE PROPOSAL</p>
+                  <div>
+                    <h1 id="proposal-product-info-title">Choose a Product</h1>
+                    <p>Select one or more products to create proposals.</p>
+                  </div>
+                </header>
+                <div class="proposal-generator__grid proposal-product-info__product-grid" role="group" aria-label="Available products">
+                  <label *ngFor="let product of visibleProducts" class="proposal-product-card" [class.is-selected]="selectedProductNames.includes(product.name)">
+                    <span class="proposal-product-card__top-row">
+                      <img [src]="product.icon" alt="" aria-hidden="true">
+                      <input class="proposal-product-card__checkbox" type="checkbox" [checked]="selectedProductNames.includes(product.name)" [attr.aria-label]="'Select ' + product.name" (change)="toggleProductSelection(product.name, $any($event.target).checked)">
+                    </span>
+                    <div class="proposal-product-card__copy">
+                      <h3>{{ product.name }}</h3>
+                      <p>Life Protection + Guaranteed Payouts</p>
+                    </div>
+                  </label>
+                </div>
+              </ng-container>
+              <header *ngIf="productInfoStep === 'info'" class="proposal-product-info__heading">
+                <p class="proposal-product-info__eyebrow">CREATE PROPOSAL</p>
+                <div>
+                  <h1 id="proposal-product-info-title">Info</h1>
+                  <p>Provide the key details needed to build the proposal.</p>
+                </div>
+              </header>
+
+              <div *ngIf="productInfoStep === 'info'" class="proposal-product-info__identity-cards">
+              <section class="proposal-product-info__card" aria-labelledby="proposal-product-info-card-title">
+                <h2 id="proposal-product-info-card-title">Basic Lead Info</h2>
+                <div class="proposal-product-info__fields proposal-product-info__fields--identity">
+                  <label class="proposal-form-field">
+                    <span>First Name</span>
+                    <span class="proposal-form-field__control"><input type="text" aria-label="First Name" autocomplete="given-name" placeholder="Please input first name" [ngModel]="proposalIndividualInfo.firstName" (ngModelChange)="proposalIndividualInfo.firstName = capitalizeName($event)" name="productFirstName"></span>
+                  </label>
+                  <div class="proposal-middle-name-field">
+                    <label class="proposal-form-field">
+                      <span>Middle Name</span>
+                      <span class="proposal-form-field__control" [class.is-disabled]="noMiddleName"><input type="text" aria-label="Middle Name" autocomplete="additional-name" [placeholder]="noMiddleName ? '' : 'Please input middle name'" [ngModel]="proposalIndividualInfo.middleName" (ngModelChange)="proposalIndividualInfo.middleName = capitalizeName($event)" [disabled]="noMiddleName" name="productMiddleName"></span>
+                    </label>
+                    <label class="proposal-middle-name-field__checkbox"><input type="checkbox" name="productNoMiddleName" [ngModel]="noMiddleName" (ngModelChange)="setNoMiddleName($event)"><span>No Middle Name</span></label>
+                  </div>
+                  <label class="proposal-form-field">
+                    <span>Last Name</span>
+                    <span class="proposal-form-field__control"><input type="text" aria-label="Last Name" autocomplete="family-name" placeholder="Please input last name" [ngModel]="proposalIndividualInfo.lastName" (ngModelChange)="proposalIndividualInfo.lastName = capitalizeName($event)" name="productLastName"></span>
+                  </label>
+                </div>
+              </section>
+              <section class="proposal-product-info__card" aria-labelledby="proposal-product-info-personal-title">
+                <h2 id="proposal-product-info-personal-title">Basic Insured Info</h2>
+                <div class="proposal-product-info__fields">
+                  <label class="proposal-form-field">
+                    <span>Birthdate</span>
+                    <span class="proposal-form-field__control" (click)="openBirthdatePicker(birthdateInput)">
+                      <input #birthdateInput type="date" aria-label="Birthdate" [(ngModel)]="birthdate" (click)="openBirthdatePicker(birthdateInput); $event.stopPropagation()">
+                    </span>
+                  </label>
+                  <label class="proposal-form-field">
+                    <span>Gender</span>
+                    <app-field-control label="Select Gender" ariaLabel="Gender" [value]="gender" [options]="genderOptions" [fluid]="true" trailingIcon="keyboard_arrow_down" (valueChange)="gender = $event" />
+                  </label>
+                </div>
+              </section>
+              </div>
+
+              <ng-container *ngIf="productInfoStep === 'benefits'">
+                <header class="proposal-product-info__heading">
+                  <p class="proposal-product-info__eyebrow">CREATE PROPOSAL</p>
+                  <div>
+                    <h1 id="proposal-product-info-title">Benefits</h1>
+                    <p>Set the benefit details and available options for this proposal.</p>
+                  </div>
+                </header>
+
+                <div class="proposal-product-info__benefit-cards" aria-label="Product benefit details">
+                  <section *ngFor="let productName of selectedProductNames; let productIndex = index" class="proposal-product-info__benefit-card" [attr.aria-label]="productName + ' benefit details'">
+                    <button type="button" class="proposal-product-info__benefit-product-toggle" [attr.aria-expanded]="expandedCreateProposalBenefitProduct === productName" [attr.aria-controls]="'proposal-benefit-content-' + productIndex" (click)="toggleCreateProposalBenefitProduct(productName, productIndex)">
+                      <span>{{ productName }}</span>
+                      <span class="material-symbols-rounded" aria-hidden="true">{{ expandedCreateProposalBenefitProduct === productName ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</span>
+                    </button>
+                    <div *ngIf="expandedCreateProposalBenefitProduct === productName" [id]="'proposal-benefit-content-' + productIndex" class="proposal-product-info__benefit-content">
+                      <div class="proposal-product-info__benefit-fields">
+                        <div *ngFor="let field of getProductBenefitFields(productName)" class="proposal-product-info__benefit-field">
+                          <span>{{ field.label }}</span>
+                          <span *ngIf="field.type === 'select'; else currencyField" class="proposal-product-info__payment-select-wrap">
+                            <select
+                              class="proposal-product-info__payment-select"
+                              [class.is-placeholder]="!getProductBenefitValue(productName, field.key)"
+                              [attr.aria-label]="field.label + ' for ' + productName"
+                              (change)="setProductBenefitField(productName, field.key, $any($event.target).value)"
+                            >
+                              <option value="" disabled [selected]="!getProductBenefitValue(productName, field.key)">Please select {{ field.label.toLowerCase() }}</option>
+                              <option *ngFor="let option of field.options" [value]="option.value" [selected]="getProductBenefitValue(productName, field.key) === option.value">{{ option.label }}</option>
+                            </select>
+                            <span class="material-symbols-rounded" aria-hidden="true">keyboard_arrow_down</span>
+                          </span>
+                          <ng-template #currencyField>
+                            <app-field-control
+                              [label]="field.label + ' for ' + productName"
+                              [ariaLabel]="field.label + ' for ' + productName"
+                              inputType="number"
+                              [inputPrefix]="getProductBenefitCurrencyPrefix(productName)"
+                              [inputValue]="getProductBenefitValue(productName, field.key)"
+                              [min]="0"
+                              [step]="1"
+                              [fluid]="true"
+                              (inputValueChange)="setProductBenefitValue(productName, field.key, $event)"
+                            />
+                          </ng-template>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+              </ng-container>
+
+              <ng-container *ngIf="productInfoStep === 'riders'">
+                <header class="proposal-product-info__heading">
+                  <p class="proposal-product-info__eyebrow">CREATE PROPOSAL</p>
+                  <div>
+                    <h1 id="proposal-product-info-title">Riders</h1>
+                    <p>Choose the additional protection to include with each proposal.</p>
+                  </div>
+                </header>
+
+                <div class="proposal-product-info__rider-products" aria-label="Rider selections by proposal">
+                  <section *ngFor="let productName of selectedProductNames; let productIndex = index" class="proposal-product-info__rider-product" [attr.aria-label]="productName + ' riders'">
+                    <button type="button" class="proposal-product-info__rider-product-toggle" [attr.aria-expanded]="expandedCreateProposalRiderProduct === productName" [attr.aria-controls]="'proposal-rider-product-content-' + productIndex" (click)="toggleCreateProposalRiderProduct(productName, productIndex)">
+                      <span>{{ productName }}</span>
+                      <span class="material-symbols-rounded" aria-hidden="true">{{ expandedCreateProposalRiderProduct === productName ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</span>
+                    </button>
+                    <div *ngIf="expandedCreateProposalRiderProduct === productName" [id]="'proposal-rider-product-content-' + productIndex" class="proposal-product-info__rider-groups">
+                      <section *ngIf="getCreateProposalRiders(productName, true).length" class="proposal-product-info__rider-group" [attr.aria-label]="'Included riders for ' + productName">
+                        <h3>INCLUDED RIDERS</h3>
+                        <article *ngFor="let rider of getCreateProposalRiders(productName, true)" class="proposal-product-info__rider-card proposal-product-info__rider-card--included">
+                          <div class="proposal-product-info__rider-card-heading">
+                            <strong>{{ rider.name }}</strong>
+                            <button *ngIf="rider.addedByUser" type="button" class="proposal-product-info__rider-remove" [attr.aria-label]="'Remove ' + rider.name + ' from ' + productName" (click)="toggleCreateProposalRider(productName, rider)"><span class="material-symbols-rounded" aria-hidden="true">remove</span><span>Remove Rider</span></button>
+                          </div>
+                          <div class="proposal-product-info__rider-details">
+                            <div><span>Benefit Amount</span><b>{{ rider.benefit }}</b></div>
+                            <div *ngIf="rider.paymentPeriod"><span>Payment Period</span><b>{{ rider.paymentPeriod }}</b></div>
+                          </div>
+                        </article>
+                      </section>
+                      <section *ngIf="getCreateProposalRiders(productName, false).length" class="proposal-product-info__rider-group" [attr.aria-label]="'Optional riders for ' + productName">
+                        <h3>OPTIONAL RIDERS</h3>
+                        <article *ngFor="let rider of getCreateProposalRiders(productName, false)" class="proposal-product-info__rider-card">
+                          <div class="proposal-product-info__rider-card-heading">
+                            <strong>{{ rider.name }}</strong>
+                            <button type="button" (click)="toggleCreateProposalRider(productName, rider)" [attr.aria-label]="'Add ' + rider.name + ' to ' + productName"><span class="material-symbols-rounded" aria-hidden="true">add</span><span>Add Rider</span></button>
+                          </div>
+                          <p>Provides additional financial support for you and your family when you need it most.</p>
+                        </article>
+                      </section>
+                    </div>
+                  </section>
+                </div>
+              </ng-container>
+
+              <ng-container *ngIf="productInfoStep === 'funds'">
+                <header class="proposal-product-info__heading">
+                  <p class="proposal-product-info__eyebrow">CREATE PROPOSAL</p>
+                  <div>
+                    <h1 id="proposal-product-info-title">Funds</h1>
+                    <p>Select the preferred funds and customize the investment allocation.</p>
+                  </div>
+                </header>
+                <div *ngIf="createProposalFundProductNames.length" class="proposal-product-info__fund-products" aria-label="Fund allocation by product">
+                  <section *ngFor="let productName of createProposalFundProductNames; let productIndex = index" class="proposal-product-info__fund-product">
+                    <button type="button" class="proposal-product-info__fund-product-toggle" [attr.aria-expanded]="expandedCreateProposalFundsProduct === productName" [attr.aria-controls]="'proposal-funds-content-' + productIndex" (click)="toggleCreateProposalFundsProduct(productName, productIndex)">
+                      <span>{{ productName }}</span>
+                      <span class="material-symbols-rounded" aria-hidden="true">{{ expandedCreateProposalFundsProduct === productName ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</span>
+                    </button>
+                    <div *ngIf="expandedCreateProposalFundsProduct === productName" [id]="'proposal-funds-content-' + productIndex" class="proposal-product-info__fund-product-content">
+                      <section class="proposal-product-info__card proposal-product-info__funds-card" [attr.aria-label]="'Premium allocation for ' + productName">
+                        <div class="proposal-product-info__funds-heading"><h2>Premium Allocation</h2><p>Allocate the premium across the selected funds. Total allocation must equal 100%.</p></div>
+                        <div class="proposal-product-info__fund-fields">
+                          <label *ngFor="let fund of getCreateProposalFunds(productName)" class="proposal-product-info__fund-row">
+                            <span>{{ fund.name }}</span>
+                            <span class="proposal-product-info__fund-percent"><input type="number" min="0" max="100" step="1" [attr.aria-label]="productName + ' ' + fund.name + ' allocation'" [(ngModel)]="fund.allocation"><span>%</span></span>
+                          </label>
+                        </div>
+                        <div class="proposal-product-info__fund-totals"><span>Remaining: <strong>{{ 100 - getCreateProposalTotalAllocation(productName) }}%</strong></span><span>Total Allocation: <strong>{{ getCreateProposalTotalAllocation(productName) }}%</strong></span></div>
+                      </section>
+                      <section class="proposal-product-info__card proposal-product-info__funds-top-up" [attr.aria-label]="'Optional projection top up for ' + productName">
+                        <div class="proposal-product-info__funds-heading"><h2>Adhoc top up in projection (Optional)</h2><p>Add an additional amount to include in the projection.</p></div>
+                        <label class="proposal-product-info__fund-top-up"><span>Top up Amount</span><span class="proposal-benefit-editor__currency proposal-product-info__fund-top-up-currency"><span aria-hidden="true">₱</span><input type="number" min="0" step="0.01" [attr.aria-label]="productName + ' top up amount'" [(ngModel)]="createProposalTopUpByProduct[productName]"></span></label>
+                      </section>
+                    </div>
+                  </section>
+                </div>
+                <p *ngIf="!createProposalFundProductNames.length" class="proposal-product-info__no-funds">The selected products do not require fund allocation.</p>
+              </ng-container>
+
+              </div>
+              <aside *ngIf="productInfoStep !== 'products'" class="proposal-product-info__summary" aria-labelledby="proposal-product-summary-title">
+                <h2 id="proposal-product-summary-title">PROPOSAL SUMMARY</h2>
+                <div class="proposal-product-info__summary-insured"><span>Insured Info</span><strong>{{ gender || '—' }}<ng-container *ngIf="productInfoInsuredAge !== '—'"> • {{ productInfoInsuredAge }} years old</ng-container></strong></div>
+                <hr>
+                <div class="proposal-product-info__summary-products">
+                  <div *ngFor="let productName of selectedProductNames" class="proposal-product-info__summary-item">
+                    <button type="button" [attr.aria-expanded]="expandedProposalProduct === productName" (click)="toggleProposalProductSummary(productName)">
+                      <span>{{ productName }}</span>
+                      <span class="material-symbols-rounded" aria-hidden="true">{{ expandedProposalProduct === productName ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</span>
+                    </button>
+                    <dl *ngIf="expandedProposalProduct === productName">
+                      <div *ngFor="let row of getProductSummaryRows(productName)"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+                    </dl>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </div>
+          <footer class="proposal-product-info__actions proposal-questionnaire__footer">
+            <app-button [label]="productInfoStep === 'products' || (productInfoStep === 'info' && startedFromSavedProposalList) ? 'Back' : productInfoStep === 'info' ? 'Cancel' : 'Back'" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Medium" (clicked)="productInfoStep === 'products' ? cancelSavedProposalCreate() : productInfoStep === 'info' ? (startedFromSavedProposalList ? backToSavedProposalProducts() : returnToProductSelection()) : productInfoStep === 'benefits' ? goBackToProductInfo() : productInfoStep === 'riders' ? backToProductBenefits() : backToProductRiders()" />
+            <app-button [label]="productInfoContinueLabel" rightIcon="chevron_right" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" [disabled]="(productInfoStep === 'products' && selectedProductNames.length === 0) || (productInfoStep === 'info' && (!birthdate || !gender)) || (productInfoStep === 'funds' && !startedFromSavedProposalList && !isMultiProductProposalCompletionFlow && !(startedFromProductSelection && selectedProductNames.length > 1) && !isCreateProposalFundAllocationComplete)" (clicked)="productInfoStep === 'products' ? continueFromSavedProposalProducts() : productInfoStep === 'info' ? continueFromProductInfo() : productInfoStep === 'benefits' ? continueFromProductBenefits() : productInfoStep === 'riders' ? continueFromProductRiders() : (startedFromSavedProposalList || isMultiProductProposalCompletionFlow || (startedFromProductSelection && selectedProductNames.length > 1)) ? openCreateProposalReview() : continueFromProductFunds()" />
+          </footer>
+        </section>
+
         <section *ngIf="isGeneratingProposals" class="proposal-generation-loading" aria-labelledby="proposal-loading-title" aria-live="polite" aria-busy="true">
           <div class="proposal-generation-loading__content">
             <div class="proposal-generation-loading__heading">
@@ -65,14 +305,13 @@
           <div class="proposal-recommendations__content">
             <div class="proposal-recommendations__intro">
               <button type="button" class="proposal-recommendations__back" (click)="returnToQuestionnaire()">
-                <span class="material-symbols-rounded" aria-hidden="true">chevron_left</span>
-                Back to Questionnaire
+                <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+                Back To Questionnaire
               </button>
 
               <header class="proposal-recommendations__heading">
-                <p>RECOMMENDED PROPOSALS</p>
-                <h1 id="proposal-recommendations-title">We’ve prepared three proposals for you</h1>
-                <span>Based on your goals and priorities, we’ve selected three proposals to explore.</span>
+                <h1 id="proposal-recommendations-title">Here’s What We Recommend for You</h1>
+                <span>Explore proposal options based on the goals and priorities you shared.</span>
               </header>
             </div>
 
@@ -177,19 +416,446 @@
         </section>
 
         <lam-proposal-recommendation-detail
-          *ngIf="showProposalDetails"
-          [proposal]="selectedRecommendation"
+          *ngIf="showProposalDetails || showProposalApplication || hasConvertedApplication"
+          [hidden]="showProposalApplication || !showProposalDetails"
+          [proposal]="proposalDetailRecommendation"
+          [proposalNumber]="proposalNumber"
           [maximumCoveragePeriod]="selectedMaximumCoveragePeriod"
           [paymentPeriod]="selectedPaymentPeriod"
           [riderCount]="selectedRiderCount"
           [fundCount]="selectedFundCount"
-          [insuredInfo]="insuredSummary"
+          [proposedInsured]="proposalDetailInsuredInfo"
+          [proposedOwner]="proposalDetailOwnerInfo"
           [selectedProtections]="selectedProtections"
           [investmentPreference]="selectedInvestmentPreference || 'A Mix of Both'"
-          (backRequested)="returnToRecommendations()"
+          [savedProposal]="proposalDetailReturnTarget === 'saved-list'"
+          [openCompleteInfoModal]="isMultiProductProposalCompletionFlow && proposalDetailReturnTarget === 'multi-product-completion'"
+          (backRequested)="returnFromProposalDetail()"
+          (editRequested)="editProposalFromDetail()"
+          (individualInfoRequested)="openProposalIndividualInfo()"
+          (applicationRequested)="openProposalApplication()"
         />
 
-        <section *ngIf="!isGeneratingProposals && !showRecommendations && !showProposalDetails" class="proposal-questionnaire" aria-labelledby="proposal-question-title">
+        <lam-proposal-application-preview
+          *ngIf="showProposalApplication"
+          [insured]="proposalDetailInsuredInfo"
+          [productName]="selectedRecommendation.name"
+          (sectionRequested)="navigateFromProposalApplication($event)"
+        />
+
+        <header *ngIf="(showProposalIndividualInfo || showProposalBuilderSavedList) && !showProposalDetails && !showProposalApplication && !showProposalBenefitEditor" class="proposal-individual-info__record-header">
+          <nav aria-label="Breadcrumb">
+            <span>Dashboard</span>
+            <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span>
+            <strong>{{ proposalIndividualInfoDisplayName }}</strong>
+          </nav>
+          <h1>{{ proposalIndividualInfoDisplayName }}</h1>
+          <p>Date Created: {{ proposalIndividualInfoCreatedAt | date:'MMM d, y, h:mm a' }}</p>
+        </header>
+
+        <nav *ngIf="(showProposalIndividualInfo || showProposalBuilderSavedList) && !showProposalDetails && !showProposalApplication && !showProposalBenefitEditor" class="proposal-individual-info__tabs" aria-label="Individual information tabs" role="tablist">
+          <button type="button" role="tab" [attr.aria-selected]="!showProposalCsa && !showProposalBuilderInfo && !showProposalBuilderSavedList && !startedFromSavedProposalList" [class.is-active]="!showProposalCsa && !showProposalBuilderInfo && !showProposalBuilderSavedList && !startedFromSavedProposalList" (click)="returnToProposalInfo()">Info</button>
+          <button type="button" role="tab" [attr.aria-selected]="showProposalCsa" [class.is-active]="showProposalCsa" [disabled]="!showProposalIndividualInfoSummary && !showProposalCsa && !showProposalBuilderInfo" (click)="openProposalCsa()">Profile</button>
+          <button type="button" role="tab" [attr.aria-selected]="showProposalBuilderInfo || showProposalBuilderSavedList || startedFromSavedProposalList" [class.is-active]="showProposalBuilderInfo || showProposalBuilderSavedList || startedFromSavedProposalList" (click)="openProposalBuilderInfo()">Proposals</button>
+          <button type="button" role="tab" aria-selected="false" disabled>Applications</button>
+          <button type="button" role="tab" aria-selected="false" disabled>Policies</button>
+        </nav>
+
+        <section *ngIf="showProposalBenefitEditor" class="proposal-benefit-editor" aria-labelledby="proposal-benefit-editor-title">
+          <div class="proposal-questionnaire__progress proposal-benefit-editor__progress" role="progressbar" aria-label="Edit proposal progress" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="proposalEditStep === 'benefits' ? 33 : proposalEditStep === 'riders' ? 66 : 100">
+            <span [style.width.%]="proposalEditStep === 'benefits' ? 33 : proposalEditStep === 'riders' ? 66 : 100"></span>
+          </div>
+          <div class="proposal-benefit-editor__layout">
+            <div class="proposal-benefit-editor__main">
+              <header class="proposal-benefit-editor__heading">
+                <p>EDIT PROPOSAL</p>
+                <div><h1 id="proposal-benefit-editor-title">{{ proposalEditStep === 'benefits' ? 'Benefits' : proposalEditStep === 'riders' ? 'Riders' : 'Funds' }}</h1><span>{{ proposalEditStep === 'benefits' ? 'Set the benefit options for the plan.' : proposalEditStep === 'riders' ? 'Choose any additional protection to include.' : 'Select the preferred funds and customize the investment allocation.' }}</span></div>
+              </header>
+              <ng-container *ngIf="proposalEditStep === 'benefits'; else proposalRidersEditor">
+              <section class="proposal-benefit-editor__card" aria-labelledby="proposal-benefit-details-title">
+                <h2 id="proposal-benefit-details-title">Benefit Details</h2>
+                <label class="proposal-benefit-editor__field">
+                  <span>Payment Period</span>
+                  <app-field-control label="Select payment period" ariaLabel="Payment Period" [value]="proposalEditPaymentPeriod" [options]="paymentPeriodOptions" [fluid]="true" trailingIcon="keyboard_arrow_down" (valueChange)="proposalEditPaymentPeriod = $event" />
+                </label>
+                <label class="proposal-benefit-editor__field">
+                  <span>Annual Premium</span>
+                  <span class="proposal-benefit-editor__currency"><span aria-hidden="true">₱</span><input type="number" min="0" step="0.01" aria-label="Annual Premium" [(ngModel)]="proposalEditAnnualPremium"></span>
+                </label>
+                <label class="proposal-benefit-editor__field">
+                  <span>Benefit Amount</span>
+                  <span class="proposal-benefit-editor__currency"><span aria-hidden="true">₱</span><input type="number" min="0" step="0.01" aria-label="Benefit Amount" [(ngModel)]="proposalEditBenefitAmount"></span>
+                </label>
+              </section>
+              </ng-container>
+              <ng-template #proposalRidersEditor>
+                <ng-container *ngIf="proposalEditStep === 'riders'; else proposalFundsEditor">
+                <div class="proposal-riders-editor">
+                  <section aria-labelledby="proposal-included-riders-title">
+                    <h2 id="proposal-included-riders-title">INCLUDED RIDERS</h2>
+                    <article *ngFor="let rider of proposalEditIncludedRiders" class="proposal-riders-editor__included">
+                      <header><strong>{{ rider.name }}</strong><button *ngIf="rider.addedByUser" type="button" (click)="toggleProposalEditRider(rider)"><span class="material-symbols-rounded" aria-hidden="true">remove</span>Remove Rider</button></header>
+                      <div><span>Benefit Amount</span><b>{{ rider.benefit }}</b><span *ngIf="rider.paymentPeriod">Payment Period</span><b *ngIf="rider.paymentPeriod">{{ rider.paymentPeriod }}</b></div>
+                    </article>
+                  </section>
+                  <section aria-labelledby="proposal-optional-riders-title">
+                    <h2 id="proposal-optional-riders-title">OPTIONAL RIDERS</h2>
+                    <article *ngFor="let rider of proposalEditOptionalRiders" class="proposal-riders-editor__optional">
+                      <header><strong>{{ rider.name }}</strong><button type="button" (click)="toggleProposalEditRider(rider)"><span aria-hidden="true">+</span> Add Rider</button></header>
+                      <p>Provides additional financial support for you and your family when you need it most.</p>
+                    </article>
+                  </section>
+                </div>
+                </ng-container>
+                <ng-template #proposalFundsEditor>
+                  <div class="proposal-funds-editor">
+                    <section class="proposal-funds-editor__allocation" aria-labelledby="proposal-funds-allocation-title">
+                      <div class="proposal-funds-editor__section-heading"><h2 id="proposal-funds-allocation-title">Premium Allocation</h2><p>Allocate the premium across the selected funds. Total allocation must equal 100%.</p></div>
+                      <label *ngFor="let fund of proposalEditFunds" class="proposal-funds-editor__allocation-row">
+                        <span>{{ fund.name }}</span>
+                        <span class="proposal-funds-editor__percent"><input type="number" min="0" max="100" step="1" [attr.aria-label]="fund.name + ' allocation'" [(ngModel)]="fund.allocation"><span>%</span></span>
+                      </label>
+                      <div class="proposal-funds-editor__totals"><span>Remaining: <strong>{{ 100 - proposalEditTotalAllocation }}%</strong></span><span>Total Allocation: <strong>{{ proposalEditTotalAllocation }}%</strong></span></div>
+                    </section>
+                    <section class="proposal-funds-editor__top-up" aria-labelledby="proposal-funds-top-up-title">
+                      <div class="proposal-funds-editor__section-heading"><h2 id="proposal-funds-top-up-title">Adhoc top up in projection (Optional)</h2><p>Add an additional amount to include in the projection.</p></div>
+                      <label class="proposal-funds-editor__top-up-field"><span>Top up Amount</span><span class="proposal-benefit-editor__currency"><span aria-hidden="true">₱</span><input type="number" min="0" step="0.01" aria-label="Top up Amount" [(ngModel)]="proposalEditTopUpAmount"></span></label>
+                    </section>
+                  </div>
+                </ng-template>
+              </ng-template>
+            </div>
+            <aside class="proposal-builder-info__summary" aria-label="Proposal summary">
+              <p>PROPOSAL SUMMARY</p>
+              <h2>{{ selectedRecommendation.name }}</h2>
+              <div class="proposal-builder-info__summary-insured"><span>Insured Info</span><strong>{{ proposalBuilderInsured.gender || gender || '—' }}<ng-container *ngIf="proposalBuilderInsuredAge !== '—'"> • {{ proposalBuilderInsuredAge }} years old</ng-container></strong></div>
+              <hr>
+              <dl>
+                <div><dt>Benefit Amount</dt><dd>{{ formatProposalEditAmount(proposalEditBenefitAmount) }}</dd></div>
+                <div><dt>Annual Premium</dt><dd>{{ formatProposalEditAmount(proposalEditAnnualPremium) }}</dd></div>
+                <div><dt>Payment Period</dt><dd>{{ proposalEditPaymentPeriod }}</dd></div>
+                <div><dt>Riders</dt><dd>{{ proposalEditIncludedRiders.length }} Riders</dd></div>
+                <div><dt>Funds</dt><dd>{{ proposalEditStep === 'funds' ? proposalEditSelectedFundCount + ' Funds' : selectedFundCount }}</dd></div>
+              </dl>
+            </aside>
+          </div>
+          <footer class="proposal-benefit-editor__footer" aria-label="Proposal edit actions">
+            <app-button *ngIf="proposalEditStep === 'benefits'" label="Cancel" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Medium" (clicked)="cancelProposalBenefitEdit()" />
+            <app-button *ngIf="proposalEditStep === 'riders'" label="Back" leftIcon="chevron_left" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Medium" (clicked)="backToProposalEditBenefits()" />
+            <app-button *ngIf="proposalEditStep === 'funds'" label="Back" leftIcon="chevron_left" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Medium" (clicked)="backToProposalEditRiders()" />
+            <app-button *ngIf="proposalEditStep !== 'funds'" label="Next" rightIcon="chevron_right" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" [disabled]="proposalEditStep === 'benefits' && (!proposalEditPaymentPeriod || !proposalEditAnnualPremium || !proposalEditBenefitAmount)" (clicked)="continueProposalBenefitEdit()" />
+            <app-button *ngIf="proposalEditStep === 'funds'" label="Save Changes" rightIcon="chevron_right" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" [disabled]="!proposalEditAllocationIsValid" (clicked)="continueProposalBenefitEdit()" />
+          </footer>
+        </section>
+
+        <section *ngIf="showProposalBuilderInfo" class="proposal-builder-info" aria-labelledby="proposal-builder-info-title">
+          <div class="proposal-builder-info__layout">
+            <div class="proposal-builder-info__main">
+              <header class="proposal-builder-info__heading">
+                <p>COMPLETE PROPOSAL</p>
+                <div>
+                  <h1 id="proposal-builder-info-title">Info</h1>
+                  <span>Provide the key details needed to build the proposal.</span>
+                </div>
+              </header>
+              <section class="proposal-builder-info__accordion">
+                <button type="button" [attr.aria-expanded]="proposalBuilderExpandedSections.has('proposal')" (click)="toggleProposalBuilderSection('proposal')">
+                  <span>Proposal Information</span><span class="material-symbols-rounded" aria-hidden="true">{{ proposalBuilderExpandedSections.has('proposal') ? 'expand_less' : 'expand_more' }}</span>
+                </button>
+                <div *ngIf="proposalBuilderExpandedSections.has('proposal')" class="proposal-builder-info__read-only-grid">
+                  <label class="proposal-individual-info__field"><span>Proposal Date</span><span class="proposal-builder-info__date-control"><input value="01/22/2025" readonly><span class="material-symbols-rounded" aria-hidden="true">calendar_today</span></span></label>
+                  <label class="proposal-individual-info__field"><span>Valid Until</span><input value="" disabled></label>
+                </div>
+              </section>
+              <section class="proposal-builder-info__accordion">
+                <button type="button" [attr.aria-expanded]="proposalBuilderExpandedSections.has('lead')" (click)="toggleProposalBuilderSection('lead')">
+                  <span>Lead Information</span><span class="material-symbols-rounded" aria-hidden="true">{{ proposalBuilderExpandedSections.has('lead') ? 'expand_less' : 'expand_more' }}</span>
+                </button>
+                <div *ngIf="proposalBuilderExpandedSections.has('lead')" class="proposal-builder-info__lead-summary">
+                  <div class="proposal-builder-info__lead-item proposal-builder-info__lead-item--wide"><span>Name</span><strong>{{ proposalIndividualInfoDisplayName }}</strong></div>
+                  <div class="proposal-builder-info__lead-item"><span>Birthdate</span><strong>{{ (proposalIndividualInfo.birthdate || '2004-07-30') | date:'MMMM d, y' }}</strong></div>
+                  <div class="proposal-builder-info__lead-item"><span>Age</span><strong>{{ proposalInsuredAge === '—' ? '22' : proposalInsuredAge }}</strong></div>
+                  <div class="proposal-builder-info__lead-item"><span>Gender</span><strong>{{ proposalIndividualInfo.gender || gender || 'Male' }}</strong></div>
+                  <div class="proposal-builder-info__lead-item"><span>Occupation</span><strong>{{ proposalBuilderInsured.occupation || 'Accounting Personnel' }}</strong></div>
+                  <div class="proposal-builder-info__lead-item proposal-builder-info__lead-item--wide"><span>Source of Lead</span><strong>{{ proposalIndividualInfo.sourceOfLead || 'Referral' }}</strong></div>
+                </div>
+              </section>
+              <section class="proposal-builder-info__accordion">
+                <button type="button" [attr.aria-expanded]="proposalBuilderExpandedSections.has('insured')" (click)="toggleProposalBuilderSection('insured')">
+                  <span>Insured Information</span><span class="material-symbols-rounded" aria-hidden="true">{{ proposalBuilderExpandedSections.has('insured') ? 'expand_less' : 'expand_more' }}</span>
+                </button>
+                <div *ngIf="proposalBuilderExpandedSections.has('insured')" class="proposal-builder-info__insured">
+                  <label class="proposal-builder-info__same-as-lead"><input type="checkbox" [checked]="proposalBuilderSameAsLead" (change)="setProposalBuilderSameAsLead($any($event.target).checked)"><span>Same as Lead Information</span></label>
+                  <div class="proposal-builder-info__fields" [class.is-disabled]="proposalBuilderSameAsLead" [attr.aria-disabled]="proposalBuilderSameAsLead">
+                    <label class="proposal-individual-info__field"><span>Title</span><app-field-control label="Select Title" ariaLabel="Title" [value]="proposalBuilderInsured.title" [options]="individualInfoTitleOptions" [fluid]="true" trailingIcon="keyboard_arrow_down" [disabled]="proposalBuilderSameAsLead" (valueChange)="proposalBuilderInsured.title = $event" /></label>
+                    <label class="proposal-individual-info__field"><span>First Name</span><input [(ngModel)]="proposalBuilderInsured.firstName" placeholder="Please input first name" [disabled]="proposalBuilderSameAsLead"></label>
+                    <label class="proposal-individual-info__field"><span>Middle Name</span><input [(ngModel)]="proposalBuilderInsured.middleName" placeholder="Please input middle name" [disabled]="proposalBuilderSameAsLead"></label>
+                    <label class="proposal-individual-info__field"><span>Last Name</span><input [(ngModel)]="proposalBuilderInsured.lastName" placeholder="Please input last name" [disabled]="proposalBuilderSameAsLead"></label>
+                    <label class="proposal-individual-info__field"><span>Suffix</span><app-field-control label="Please select suffix" ariaLabel="Suffix" [value]="proposalBuilderInsured.suffix" [options]="proposalBuilderSuffixOptions" [fluid]="true" trailingIcon="keyboard_arrow_down" [disabled]="proposalBuilderSameAsLead" (valueChange)="proposalBuilderInsured.suffix = $event" /></label>
+                    <label class="proposal-individual-info__field"><span>Birthdate</span><input type="date" [value]="proposalBuilderInsured.birthdate" disabled></label>
+                    <label class="proposal-individual-info__field"><span>Age</span><input [value]="proposalBuilderInsuredAge" disabled></label>
+                    <label class="proposal-individual-info__field"><span>Gender</span><app-field-control label="Select Gender" ariaLabel="Gender" [value]="proposalBuilderInsured.gender" [options]="genderOptions" [fluid]="true" trailingIcon="keyboard_arrow_down" [disabled]="proposalBuilderSameAsLead" (valueChange)="proposalBuilderInsured.gender = $event" /></label>
+                    <fieldset class="proposal-builder-info__dnfbp" [disabled]="proposalBuilderSameAsLead"><legend>Does your client have a nature of business as “Designated Non-Financial Businesses and Professions (DNFBPs)”</legend><app-radio label="Yes" name="proposalBuilderDnfbp" value="Yes" [checked]="proposalBuilderDnfbp === 'Yes'" [disabled]="proposalBuilderSameAsLead" (changed)="proposalBuilderDnfbp = $event" /><app-radio label="No" name="proposalBuilderDnfbp" value="No" [checked]="proposalBuilderDnfbp === 'No'" [disabled]="proposalBuilderSameAsLead" (changed)="proposalBuilderDnfbp = $event" /></fieldset>
+                    <label class="proposal-individual-info__field proposal-builder-info__occupation"><span>Occupation</span><span class="proposal-builder-info__occupation-control"><input [(ngModel)]="proposalBuilderInsured.occupation" placeholder="Type to search from list" [disabled]="proposalBuilderSameAsLead"><span class="material-symbols-rounded" aria-hidden="true">search</span></span></label>
+                  </div>
+                </div>
+              </section>
+            </div>
+            <aside class="proposal-builder-info__summary" aria-label="Proposal summary">
+              <ng-container *ngIf="isMultiProductProposalCompletionFlow; else singleProposalSummary">
+                <p>PROPOSAL SUMMARY</p>
+                <div class="proposal-builder-info__summary-insured"><span>Insured Info</span><strong>{{ proposalBuilderInsured.gender || proposalIndividualInfo.gender || gender || '—' }}<ng-container *ngIf="proposalInsuredAge !== '—'"> • {{ proposalInsuredAge }} years old</ng-container></strong></div>
+                <hr>
+                <ng-container *ngFor="let productName of selectedProductNames; let last = last">
+                  <section class="proposal-builder-info__summary-product" [attr.aria-label]="productName + ' proposal summary'">
+                    <h2>{{ productName }}</h2>
+                    <dl>
+                      <div *ngFor="let row of getCreateProposalReviewProductRows(productName)"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+                    </dl>
+                  </section>
+                  <hr *ngIf="!last">
+                </ng-container>
+                <app-button label="Save Proposals" rightIcon="chevron_right" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" [disabled]="!isProposalBuilderInsuredComplete" (clicked)="requestProposalBuilderSave()" />
+              </ng-container>
+              <ng-template #singleProposalSummary>
+                <p>PROPOSAL SUMMARY</p>
+                <h2>{{ selectedRecommendation.name }}</h2>
+                <div class="proposal-builder-info__summary-insured"><span>Insured Info</span><strong>{{ proposalBuilderInsured.gender || gender || '—' }}<ng-container *ngIf="proposalBuilderInsuredAge !== '—'"> • {{ proposalBuilderInsuredAge }} years old</ng-container></strong></div>
+                <hr>
+                <dl>
+                  <div><dt>Benefit Amount</dt><dd>{{ selectedBenefitAmount }}</dd></div>
+                  <div><dt>Annual Premium</dt><dd>{{ selectedAnnualPremium }}</dd></div>
+                  <div><dt>Payment Period</dt><dd>{{ selectedPaymentPeriod }}</dd></div>
+                  <div><dt>Riders</dt><dd>{{ selectedRiderCount }}</dd></div>
+                  <div><dt>Funds</dt><dd>{{ selectedFundCount }}</dd></div>
+                </dl>
+                <app-button label="Edit Proposal" [variant]="buttonVariant.Subtle" [size]="buttonSize.Medium" (clicked)="openProposalBenefitEditor()" />
+                <app-button label="Save Proposal" rightIcon="chevron_right" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" [disabled]="!isProposalBuilderInsuredComplete" (clicked)="requestProposalBuilderSave()" />
+              </ng-template>
+            </aside>
+          </div>
+        </section>
+        <div *ngIf="showProposalBuilderSaveConfirmation" class="proposal-info-save-modal__overlay" role="presentation">
+          <section class="proposal-info-save-modal proposal-builder-save-modal" role="alertdialog" aria-modal="true" aria-labelledby="proposal-builder-save-modal-title" aria-describedby="proposal-builder-save-modal-description">
+            <h2 id="proposal-builder-save-modal-title">{{ isMultiProductProposalCompletionFlow ? 'Save Proposals' : 'Save Proposal' }}</h2>
+            <p id="proposal-builder-save-modal-description">{{ isMultiProductProposalCompletionFlow ? 'Kindly ensure that all the provided information is accurate and correct before saving these proposals.' : 'Kindly ensure that all the provided information is accurate and correct before saving Proposal.' }}</p>
+            <footer>
+              <app-button label="Cancel" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Medium" (clicked)="cancelProposalBuilderSave()" />
+              <app-button label="Proceed" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" (clicked)="confirmProposalBuilderSave()" />
+            </footer>
+          </section>
+        </div>
+        <section *ngIf="showProposalBuilderSavedList" class="proposal-builder-saved-list" aria-labelledby="proposal-builder-saved-list-title">
+          <header>
+            <h2 id="proposal-builder-saved-list-title">All Proposals</h2>
+            <app-button label="Create New Proposal" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" (clicked)="startAnotherProposal()" />
+          </header>
+          <article *ngFor="let proposal of createdSavedProposals" class="proposal-builder-saved-card">
+            <div class="proposal-builder-saved-card__open">
+              <div class="proposal-builder-saved-card__heading"><h3>{{ proposal.name }}</h3></div>
+              <dl>
+                <div><dt>Proposal No.</dt><dd>{{ proposal.proposalNumber }}</dd></div>
+                <div><dt>Proposal Date</dt><dd>{{ proposal.proposalDate }}</dd></div>
+                <div><dt>Annual Premium</dt><dd>{{ proposal.annualPremium }}</dd></div>
+                <div><dt>Benefit Amount</dt><dd>{{ proposal.benefitAmount }}</dd></div>
+              </dl>
+            </div>
+            <button type="button" class="proposal-builder-saved-card__more" aria-label="More proposal actions" disabled><span class="material-symbols-rounded" aria-hidden="true">more_vert</span></button>
+          </article>
+          <article class="proposal-builder-saved-card">
+            <a href="#proposal-detail-title" class="proposal-builder-saved-card__open" (click)="$event.preventDefault(); openSavedProposalDetails()">
+              <div class="proposal-builder-saved-card__heading">
+                <h3>{{ selectedRecommendation.name }}</h3>
+              </div>
+              <dl>
+                <div><dt>Proposal No.</dt><dd>{{ proposalNumber }}</dd></div>
+                <div><dt>Proposal Date</dt><dd>01/22/2025</dd></div>
+                <div><dt>Annual Premium</dt><dd>{{ selectedRecommendation.annualPremium }}</dd></div>
+                <div><dt>Benefit Amount</dt><dd>{{ selectedRecommendation.benefitAmount }}</dd></div>
+              </dl>
+            </a>
+            <button type="button" class="proposal-builder-saved-card__more" aria-label="More proposal actions" disabled><span class="material-symbols-rounded" aria-hidden="true">more_vert</span></button>
+          </article>
+        </section>
+        <article *ngIf="showProposalIndividualInfo && !showProposalDetails && !showProposalApplication && showProposalCsa && !showProposalBenefitEditor" class="proposal-individual-info proposal-individual-info__csa-card" aria-labelledby="proposal-csa-title">
+          <header class="proposal-individual-info__title"><div><h2 id="proposal-csa-title">Client Suitability Assessment</h2><p>{{ proposalIndividualInfoCreatedAt | date:'MMMM d, y' }}</p></div></header>
+          <div class="proposal-individual-info__csa-tabs">
+            <app-tab-group [tabs]="proposalCsaTabs" [activeId]="proposalCsaActiveTabId" ariaLabel="Client suitability assessment steps" (activeIdChange)="setProposalCsaStep($event)" />
+          </div>
+          <form *ngIf="proposalCsaStep === 'information'" class="proposal-individual-info__csa-form">
+            <fieldset class="proposal-individual-info__csa-general"><legend>General Information</legend><label>Civil Status<app-field-control label="Choices" ariaLabel="Civil Status" [value]="proposalCsaCivilStatus" [options]="proposalCsaCivilStatusOptions" [fluid]="true" trailingIcon="keyboard_arrow_down" (valueChange)="proposalCsaCivilStatus = $event" /></label></fieldset>
+            <fieldset><legend>Occupation</legend><p>Does your client have a nature of business as “Designated Non-Financial Businesses and Professions (DNFBPs)”</p><div class="proposal-individual-info__csa-radio-row"><app-radio label="Yes" name="proposalCsaBusiness" value="Yes" [checked]="proposalCsaDesignatedBusiness === 'Yes'" (changed)="proposalCsaDesignatedBusiness = $event" /><app-radio label="No" name="proposalCsaBusiness" value="No" [checked]="proposalCsaDesignatedBusiness === 'No'" (changed)="proposalCsaDesignatedBusiness = $event" /></div><label>Occupation<span class="proposal-individual-info__csa-input-icon"><input name="proposalCsaOccupation" value="Business Professional"><span class="material-symbols-rounded" aria-hidden="true">search</span></span></label></fieldset>
+            <fieldset><legend>Existing Life Insurance</legend><label class="proposal-individual-info__csa-checkbox"><input type="checkbox" name="proposalCsaNoInsurance" [(ngModel)]="proposalCsaNoExistingInsurance">No Existing Life Insurance</label><div class="proposal-individual-info__csa-fields"><label>Company Name<input name="proposalCsaCompany" value="Not applicable" disabled></label><label>Aggregated Annual Premium<input name="proposalCsaAnnualPremium" value="₱ 0" disabled><small>If amount is in foreign currency, convert to peso</small></label><label>Aggregated Sum Assured<input name="proposalCsaSumAssured" value="₱ 0" disabled></label></div></fieldset>
+          </form>
+          <section *ngIf="proposalCsaStep === 'life-needs'" class="proposal-individual-info__csa-life-needs">
+            <h3>Life Needs and Priorities</h3>
+            <p>Rank financial needs by dragging up or down, with your highest priority at the top.</p>
+            <ol><li *ngFor="let need of proposalCsaNeeds"><span>{{ need }}</span><span class="material-symbols-rounded" aria-hidden="true">drag_indicator</span></li></ol>
+          </section>
+          <form *ngIf="proposalCsaStep === 'calculation'" class="proposal-individual-info__csa-calculation">
+            <fieldset><legend>Health and Wellness</legend><label>Approximate amount needed to cover critical illness<input name="csaCriticalIllnessNeeded" value="₱ 500,000"></label><label>Provision made for critical illness<input name="csaCriticalIllnessProvision" value="₱ 100,000"></label><label>Critical illness and hospitalization shortfall<input value="₱ 400,000" disabled></label></fieldset>
+            <fieldset><legend>Children’s Education</legend><label>University choice<input name="csaUniversity" value="Ateneo de Manila University"></label><label>Provision made for education<input name="csaEducationProvision" value="₱ 500,000"></label><label>Child’s age<input name="csaChildAge" value="8"></label><label>Education shortfall<input value="₱ 1,000,000" disabled></label><label>Projected fees and related costs<input name="csaProjectedFees" value="₱ 1,500,000"></label></fieldset>
+            <fieldset><legend>Financial Capacity</legend><label>Total monthly earnings<input name="csaMonthlyEarnings" [(ngModel)]="proposalCsaMonthlyEarnings"></label><label>Annual premium capacity<input name="csaPremiumCapacity" [(ngModel)]="proposalCsaAnnualPremiumCapacity"></label><label>Total assets<input name="csaTotalAssets" [(ngModel)]="proposalCsaTotalAssets"></label><label>Approximate net worth<input value="₱ 2,500,000" disabled></label></fieldset>
+          </form>
+          <section *ngIf="proposalCsaStep === 'assessment'" class="proposal-individual-info__csa-assessment">
+            <h3>Risk Profile Assessment</h3>
+            <fieldset><legend>How long will you keep your money invested?</legend><button *ngFor="let option of proposalCsaInvestmentHorizonOptions" type="button" class="proposal-individual-info__csa-answer" [class.is-selected]="proposalCsaInvestmentHorizon === option.value" [attr.aria-pressed]="proposalCsaInvestmentHorizon === option.value" (click)="proposalCsaInvestmentHorizon = option.value">{{ option.label }}<span *ngIf="proposalCsaInvestmentHorizon === option.value" aria-hidden="true">✓</span></button></fieldset>
+            <fieldset><legend>What is your goal in investing?</legend><button *ngFor="let option of proposalCsaInvestmentGoalOptions" type="button" class="proposal-individual-info__csa-answer proposal-individual-info__csa-answer--wide" [class.is-selected]="proposalCsaInvestmentGoal === option.value" [attr.aria-pressed]="proposalCsaInvestmentGoal === option.value" (click)="proposalCsaInvestmentGoal = option.value">{{ option.label }}<span *ngIf="proposalCsaInvestmentGoal === option.value" aria-hidden="true">✓</span></button></fieldset>
+            <div class="proposal-individual-info__csa-assessment-actions"><app-button label="Calculate Risk Profile" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" (clicked)="requestProposalCsaRiskProfile()" /></div>
+          </section>
+          <section *ngIf="proposalCsaStep === 'risk-profile'" class="proposal-individual-info__csa-risk-profile">
+            <h3>Risk Profile</h3>
+            <div class="proposal-individual-info__csa-risk-result"><strong>Your current risk profile:</strong><mark>Conservative</mark><ul><li>Preserve Capital</li><li>Product Option: Traditional Life Insurance</li></ul></div>
+            <footer><app-button label="Create Proposal" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" (clicked)="requestProposalCreationFromCsa()" /></footer>
+          </section>
+        </article>
+
+        <div *ngIf="showProposalCsaCompletionModal" class="proposal-info-save-modal__overlay" role="presentation">
+          <section class="proposal-info-save-modal proposal-csa-completion-modal" role="alertdialog" aria-modal="true" aria-labelledby="proposal-csa-completion-modal-title" aria-describedby="proposal-csa-completion-modal-description">
+            <h2 id="proposal-csa-completion-modal-title">You Have a Proposal in Progress</h2>
+            <p id="proposal-csa-completion-modal-description">You’ve already completed some of the proposal details. Complete the remaining insured information to continue.</p>
+            <footer>
+              <app-button label="Cancel" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Medium" (clicked)="cancelProposalCsaCompletion()" />
+              <app-button label="Complete Proposal" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" (clicked)="completeProposalFromCsa()" />
+            </footer>
+          </section>
+        </div>
+
+        <form *ngIf="showProposalIndividualInfo && !showProposalDetails && !showProposalApplication && !showProposalIndividualInfoSummary && !showProposalCsa && !showProposalBuilderInfo && !showProposalBuilderSavedList && !showProposalBenefitEditor && !showProductInfo" class="proposal-individual-info" aria-labelledby="proposal-individual-info-title" (ngSubmit)="requestSaveProposalIndividualInfo()">
+          <header class="proposal-individual-info__title">
+            <h1 id="proposal-individual-info-title">Individual Information</h1>
+            <button type="button" aria-label="More individual information options"><span class="material-symbols-rounded" aria-hidden="true">more_vert</span></button>
+          </header>
+
+          <section class="proposal-individual-info__section" aria-labelledby="proposal-individual-basic-title">
+            <div class="proposal-individual-info__section-intro">
+              <p><span class="material-symbols-rounded" aria-hidden="true">info</span>Complete all details to proceed with the CSA/Sales process.</p>
+              <h2 id="proposal-individual-basic-title">Basic Information</h2>
+            </div>
+            <ng-container *ngIf="selectedCoverage === 'someone-else'; else samePersonInfoFields">
+              <div class="proposal-individual-info__identity-groups">
+                <div class="proposal-individual-info__identity-group">
+                  <div class="proposal-individual-info__fields">
+                    <label class="proposal-individual-info__field"><span>Title</span><select [(ngModel)]="proposalIndividualInfo.title" name="proposalTitle"><option value="">Select Title</option><option *ngFor="let title of individualInfoTitles" [value]="title">{{ title }}</option></select></label>
+                    <label class="proposal-individual-info__field"><span>First Name</span><input type="text" autocomplete="given-name" [(ngModel)]="proposalIndividualInfo.firstName" name="proposalFirstName"></label>
+                    <label class="proposal-individual-info__field"><span>Middle Name</span><input type="text" autocomplete="additional-name" [(ngModel)]="proposalIndividualInfo.middleName" name="proposalMiddleName"></label>
+                    <label class="proposal-individual-info__field"><span>Last Name</span><input type="text" autocomplete="family-name" [(ngModel)]="proposalIndividualInfo.lastName" name="proposalLastName"></label>
+                  </div>
+                </div>
+                <div class="proposal-individual-info__identity-group">
+                  <div class="proposal-individual-info__fields">
+                    <label class="proposal-individual-info__field"><span>Gender</span><input type="text" [(ngModel)]="proposalIndividualInfo.gender" name="proposalGender" disabled></label>
+                    <label class="proposal-individual-info__field"><span>Birthdate</span><input type="date" [(ngModel)]="proposalIndividualInfo.birthdate" name="proposalBirthdate" disabled></label>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+            <ng-template #samePersonInfoFields>
+              <div class="proposal-individual-info__fields">
+                <label class="proposal-individual-info__field"><span>Title</span><select [(ngModel)]="proposalIndividualInfo.title" name="proposalTitle"><option value="">Select Title</option><option *ngFor="let title of individualInfoTitles" [value]="title">{{ title }}</option></select></label>
+                <label class="proposal-individual-info__field"><span>First Name</span><input type="text" autocomplete="given-name" [(ngModel)]="proposalIndividualInfo.firstName" name="proposalFirstName"></label>
+                <label class="proposal-individual-info__field"><span>Middle Name</span><input type="text" autocomplete="additional-name" [(ngModel)]="proposalIndividualInfo.middleName" name="proposalMiddleName"></label>
+                <label class="proposal-individual-info__field"><span>Last Name</span><input type="text" autocomplete="family-name" [(ngModel)]="proposalIndividualInfo.lastName" name="proposalLastName"></label>
+                <label class="proposal-individual-info__field"><span>Gender</span><input type="text" [(ngModel)]="proposalIndividualInfo.gender" name="proposalGender" disabled></label>
+                <label class="proposal-individual-info__field"><span>Birthdate</span><input type="date" [(ngModel)]="proposalIndividualInfo.birthdate" name="proposalBirthdate" disabled></label>
+              </div>
+            </ng-template>
+          </section>
+
+          <section class="proposal-individual-info__section" aria-labelledby="proposal-individual-contact-title">
+            <h2 id="proposal-individual-contact-title">Contact Information</h2>
+            <div class="proposal-individual-info__fields">
+              <label class="proposal-individual-info__field"><span>Mobile Number</span><span class="proposal-individual-info__phone"><span aria-hidden="true">🇵🇭</span><strong>+63</strong><input type="tel" autocomplete="tel-national" placeholder="10 digit mobile number" [(ngModel)]="proposalIndividualInfo.mobileNumber" name="proposalMobile"></span></label>
+              <label class="proposal-individual-info__field"><span>Email Address</span><input type="email" autocomplete="email" placeholder="youremail@domain.com" [(ngModel)]="proposalIndividualInfo.email" name="proposalEmail"></label>
+            </div>
+          </section>
+
+          <section class="proposal-individual-info__section" aria-labelledby="proposal-individual-source-title">
+            <h2 id="proposal-individual-source-title">Source of Lead</h2>
+            <div class="proposal-individual-info__fields">
+              <label class="proposal-individual-info__field"><span>Source of Lead</span><select [(ngModel)]="proposalIndividualInfo.sourceOfLead" name="proposalLeadSource"><option value="">Select Source of Lead</option><option *ngFor="let source of individualInfoSources" [value]="source">{{ source }}</option></select></label>
+              <label class="proposal-individual-info__field"><span>Product Interested</span><select [(ngModel)]="proposalIndividualInfo.productInterested" name="proposalInterestedProduct"><option value="">Select Product</option><option *ngFor="let product of individualInfoProducts" [value]="product">{{ product }}</option></select></label>
+            </div>
+          </section>
+
+          <section class="proposal-individual-info__section" aria-labelledby="proposal-individual-referrer-title">
+            <h2 id="proposal-individual-referrer-title">Referrer Information</h2>
+            <div class="proposal-individual-info__fields">
+              <label class="proposal-individual-info__field"><span>Referrer Date</span><input type="date" [(ngModel)]="proposalIndividualInfo.referrerDate" name="proposalReferrerDate"></label>
+              <label class="proposal-individual-info__field"><span>Referrer Name</span><input type="text" placeholder="Enter Referrer Name" [(ngModel)]="proposalIndividualInfo.referrerName" name="proposalReferrerName"></label>
+              <label class="proposal-individual-info__field"><span>Referrer ID</span><input type="text" placeholder="Enter Referrer ID" [(ngModel)]="proposalIndividualInfo.referrerId" name="proposalReferrerId"></label>
+            </div>
+          </section>
+
+          <section class="proposal-individual-info__section" aria-labelledby="proposal-individual-store-title">
+            <h2 id="proposal-individual-store-title">Store Information</h2>
+            <div class="proposal-individual-info__fields">
+              <label class="proposal-individual-info__field"><span>Store Name</span><select [(ngModel)]="proposalIndividualInfo.storeName" name="proposalStoreName"><option value="">Select Store Name</option><option *ngFor="let store of individualInfoStores" [value]="store">{{ store }}</option></select></label>
+              <label class="proposal-individual-info__field"><span>Store ID</span><input type="text" placeholder="Enter Store ID" [(ngModel)]="proposalIndividualInfo.storeId" name="proposalStoreId" disabled></label>
+            </div>
+          </section>
+
+          <footer class="proposal-individual-info__actions">
+            <app-button label="Save Changes" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" (clicked)="requestSaveProposalIndividualInfo()" />
+            <app-button label="Cancel" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Medium" (clicked)="returnToProposalDetail()" />
+          </footer>
+        </form>
+
+        <article *ngIf="showProposalIndividualInfo && !showProposalDetails && !showProposalApplication && showProposalIndividualInfoSummary && !showProposalCsa && !showProposalBuilderInfo && !showProposalBuilderSavedList && !showProposalBenefitEditor" class="proposal-individual-info proposal-individual-info--summary" aria-labelledby="proposal-individual-summary-title">
+          <header class="proposal-individual-info__title">
+            <h2 id="proposal-individual-summary-title">Individual Information</h2>
+            <button type="button" aria-label="Edit individual information" (click)="editProposalIndividualInfo()"><span class="material-symbols-rounded" aria-hidden="true">edit</span></button>
+          </header>
+
+          <section class="proposal-individual-info__section" aria-labelledby="proposal-summary-basic-title">
+            <h3 id="proposal-summary-basic-title">Basic Information</h3>
+            <dl class="proposal-individual-info__summary-fields">
+              <div><dt>Full Name</dt><dd>{{ proposalIndividualInfoDisplayName }}</dd></div>
+              <div><dt>Birthdate</dt><dd>{{ proposalIndividualInfo.birthdate ? (proposalIndividualInfo.birthdate | date:'MMMM d, y') : '—' }}</dd></div>
+              <div><dt>Gender</dt><dd>{{ proposalIndividualInfo.gender || '—' }}</dd></div>
+              <div><dt>Age</dt><dd>{{ proposalInsuredAge }}</dd></div>
+            </dl>
+          </section>
+
+          <section class="proposal-individual-info__section" aria-labelledby="proposal-summary-contact-title">
+            <h3 id="proposal-summary-contact-title">Contact Information</h3>
+            <dl class="proposal-individual-info__summary-fields">
+              <div><dt>Mobile Number</dt><dd>{{ proposalIndividualInfo.mobileNumber ? '+63 ' + proposalIndividualInfo.mobileNumber : '—' }}</dd></div>
+              <div><dt>Email Address</dt><dd>{{ proposalIndividualInfo.email || '—' }}</dd></div>
+            </dl>
+          </section>
+
+          <section class="proposal-individual-info__section" aria-label="Lead and product details">
+            <dl class="proposal-individual-info__summary-fields proposal-individual-info__summary-fields--lead-source">
+              <div><dt>Product Interested</dt><dd>{{ proposalIndividualInfo.productInterested || selectedRecommendation.name || '—' }}</dd></div>
+              <div><dt>Source of Lead</dt><dd>{{ proposalIndividualInfo.sourceOfLead || '—' }}</dd></div>
+              <div><dt>Referrer Name</dt><dd>{{ proposalIndividualInfo.referrerName || '—' }}</dd></div>
+            </dl>
+          </section>
+
+          <footer class="proposal-individual-info__summary-actions">
+            <div class="proposal-individual-info__summary-action-row">
+              <app-button label="Continue and Add Profile (CSA)" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" (clicked)="openProposalCsa()" />
+              <app-button label="Generate Draft Sales Illustration" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Medium" />
+            </div>
+            <button type="button" class="proposal-individual-info__quick-quotes-link">Or view all generated Quick Quotes</button>
+          </footer>
+        </article>
+
+        <div *ngIf="showProposalInfoSaveConfirmation" class="proposal-info-save-modal__overlay" role="presentation">
+          <section class="proposal-info-save-modal" role="alertdialog" aria-modal="true" aria-labelledby="proposal-info-save-modal-title" aria-describedby="proposal-info-save-modal-description">
+            <h2 id="proposal-info-save-modal-title">Save Lead Information</h2>
+            <p id="proposal-info-save-modal-description">Kindly ensure that all the provided information is accurate and correct before saving Lead Information.</p>
+            <footer>
+              <app-button label="Cancel" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="cancelSaveProposalIndividualInfo()" />
+              <app-button label="Proceed" [variant]="buttonVariant.Primary" [size]="buttonSize.Small" (clicked)="confirmSaveProposalIndividualInfo()" />
+            </footer>
+          </section>
+        </div>
+
+        <app-section-message *ngIf="proposalBuilderSaveToastMessage" class="activity-toast" appearance="success" icon="check_circle" [description]="proposalBuilderSaveToastMessage" />
+
+        <section *ngIf="!showProductInfo && !showCreateProposalReview && !isGeneratingProposals && !showRecommendations && !showProposalDetails && !showProposalApplication && !showProposalIndividualInfo && !showProposalIndividualInfoSummary && !showProposalCsa && !showProposalBuilderInfo && !showProposalBuilderSavedList && !showProposalBenefitEditor" class="proposal-questionnaire" aria-labelledby="proposal-question-title">
           <div class="proposal-questionnaire__progress" [attr.aria-label]="'Question ' + questionStep + ' of 7'">
             <span [style.width.%]="progressPercent"></span>
           </div>
@@ -205,7 +871,7 @@
                   <ng-container *ngSwitchCase="2">
                     <p class="proposal-questionnaire__eyebrow">QUESTION 2 OF 7</p>
                     <h1 id="proposal-question-title">What would you like the plan to help with?</h1>
-                    <p>Choose the goals and priorities you’d like the plan to support.</p>
+                    <p>Choose the goals and priorities you’d like the plan to support. You can select more than one.</p>
                   </ng-container>
                   <ng-container *ngSwitchCase="3">
                     <p class="proposal-questionnaire__eyebrow">QUESTION 3 OF 7</p>
@@ -255,36 +921,53 @@
                   </button>
                 </div>
 
-                <section *ngIf="selectedCoverage" #proposalDetails class="proposal-details-card">
-                  <div class="proposal-details-card__heading">
-                    <h2 id="proposal-details-title">A few details about the person being covered</h2>
-                    <p>These details help us find suitable proposal options.</p>
+                <section *ngIf="selectedCoverage === 'someone-else'" #proposalDetails class="proposal-details-card__split-layout">
+                  <div class="proposal-details-card__identity-groups proposal-details-card__identity-groups--cards">
+                    <section class="proposal-details-card proposal-details-card--group" aria-labelledby="proposal-owner-details-title">
+                      <div class="proposal-details-card__group-heading">
+                        <h3 id="proposal-owner-details-title">A Few Details About You</h3>
+                        <p>Fill in the fields below to continue.</p>
+                      </div>
+                      <div class="proposal-details-card__fields proposal-details-card__fields--identity">
+                          <label class="proposal-form-field"><span>First Name</span><span class="proposal-form-field__control"><input type="text" aria-label="First Name" autocomplete="given-name" placeholder="Please input first name" [(ngModel)]="proposalIndividualInfo.firstName" name="insuredFirstName"></span></label>
+                          <div class="proposal-middle-name-field">
+                            <label class="proposal-form-field"><span>Middle Name</span><span class="proposal-form-field__control" [class.is-disabled]="noMiddleName"><input type="text" aria-label="Middle Name" autocomplete="additional-name" [placeholder]="noMiddleName ? '' : 'Please input middle name'" [(ngModel)]="proposalIndividualInfo.middleName" [disabled]="noMiddleName" name="insuredMiddleName"></span></label>
+                            <label class="proposal-middle-name-field__checkbox"><input type="checkbox" name="noMiddleName" [ngModel]="noMiddleName" (ngModelChange)="setNoMiddleName($event)"><span>No Middle Name</span></label>
+                          </div>
+                          <label class="proposal-form-field"><span>Last Name</span><span class="proposal-form-field__control"><input type="text" aria-label="Last Name" autocomplete="family-name" placeholder="Please input last name" [(ngModel)]="proposalIndividualInfo.lastName" name="insuredLastName"></span></label>
+                      </div>
+                    </section>
+                    <section class="proposal-details-card proposal-details-card--group" aria-labelledby="proposal-insured-details-title">
+                      <div class="proposal-details-card__group-heading">
+                        <h3 id="proposal-insured-details-title">A Few Details About the Person Covered</h3>
+                        <p>Tell us a little more about the person covered to get started.</p>
+                      </div>
+                      <div class="proposal-details-card__fields proposal-details-card__fields--identity proposal-details-card__fields--insured">
+                          <label class="proposal-form-field"><span>Gender</span><app-field-control [class.is-placeholder]="!gender" label="Select Gender" ariaLabel="Gender" [value]="gender" [options]="genderOptions" [fluid]="true" trailingIcon="keyboard_arrow_down" (valueChange)="gender = $event" /></label>
+                          <label class="proposal-form-field"><span>Birthdate</span><span class="proposal-form-field__control" (click)="openBirthdatePicker(birthdateInput)"><input #birthdateInput type="date" aria-label="Birthdate" [class.is-empty]="!birthdate" [(ngModel)]="birthdate" (click)="openBirthdatePicker(birthdateInput); $event.stopPropagation()"></span></label>
+                      </div>
+                    </section>
                   </div>
-                  <div class="proposal-details-card__fields">
-                    <label class="proposal-form-field">
-                      <span>Birthdate</span>
-                      <span class="proposal-form-field__control" (click)="openBirthdatePicker(birthdateInput)">
-                        <input #birthdateInput type="date" aria-label="Birthdate" [(ngModel)]="birthdate" (click)="openBirthdatePicker(birthdateInput); $event.stopPropagation()">
-                      </span>
-                    </label>
-                    <label class="proposal-form-field">
-                      <span>Gender</span>
-                      <app-field-control
-                        label="Select Gender"
-                        ariaLabel="Gender"
-                        [value]="gender"
-                        [options]="genderOptions"
-                        [fluid]="true"
-                        trailingIcon="keyboard_arrow_down"
-                        (valueChange)="gender = $event"
-                      />
-                    </label>
+                </section>
+                <section *ngIf="selectedCoverage === 'myself'" #proposalDetails class="proposal-details-card">
+                  <div class="proposal-details-card__heading">
+                    <h2 id="proposal-details-title">A Few Details About You</h2>
+                    <p>Tell us a little more about yourself to get started.</p>
+                  </div>
+                  <div class="proposal-details-card__fields proposal-details-card__fields--identity">
+                      <label class="proposal-form-field"><span>First Name</span><span class="proposal-form-field__control"><input type="text" aria-label="First Name" autocomplete="given-name" placeholder="Please input first name" [(ngModel)]="proposalIndividualInfo.firstName" name="insuredFirstName"></span></label>
+                      <div class="proposal-middle-name-field">
+                        <label class="proposal-form-field"><span>Middle Name</span><span class="proposal-form-field__control" [class.is-disabled]="noMiddleName"><input type="text" aria-label="Middle Name" autocomplete="additional-name" [placeholder]="noMiddleName ? '' : 'Please input middle name'" [(ngModel)]="proposalIndividualInfo.middleName" [disabled]="noMiddleName" name="insuredMiddleName"></span></label>
+                        <label class="proposal-middle-name-field__checkbox"><input type="checkbox" name="noMiddleName" [ngModel]="noMiddleName" (ngModelChange)="setNoMiddleName($event)"><span>No Middle Name</span></label>
+                      </div>
+                      <label class="proposal-form-field"><span>Last Name</span><span class="proposal-form-field__control"><input type="text" aria-label="Last Name" autocomplete="family-name" placeholder="Please input last name" [(ngModel)]="proposalIndividualInfo.lastName" name="insuredLastName"></span></label>
+                      <label class="proposal-form-field"><span>Gender</span><app-field-control [class.is-placeholder]="!gender" label="Select Gender" ariaLabel="Gender" [value]="gender" [options]="genderOptions" [fluid]="true" trailingIcon="keyboard_arrow_down" (valueChange)="gender = $event" /></label>
+                      <label class="proposal-form-field"><span>Birthdate</span><span class="proposal-form-field__control" (click)="openBirthdatePicker(birthdateInput)"><input #birthdateInput type="date" aria-label="Birthdate" [class.is-empty]="!birthdate" [(ngModel)]="birthdate" (click)="openBirthdatePicker(birthdateInput); $event.stopPropagation()"></span></label>
                   </div>
                 </section>
               </section>
 
               <section *ngSwitchCase="2" class="proposal-questionnaire__step proposal-questionnaire__step--goals" aria-label="Plan goals">
-                <p class="proposal-goal-selection-note">You can select more than one.</p>
                 <div class="proposal-goal-grid" role="group" aria-label="Plan goals">
                   <button
                     *ngFor="let goal of proposalGoals"
@@ -309,7 +992,8 @@
                   <div class="proposal-budget-card__content">
                     <p class="proposal-budget-card__instruction">Move the slider or enter an amount</p>
                     <div class="proposal-budget-card__value">
-                      <strong>{{ formatBudget(budgetAmount) }}</strong>
+                      <span aria-hidden="true">₱</span>
+                      <input type="number" min="50000" max="500000" step="any" [value]="budgetAmount" (input)="setBudget(+$any($event.target).value)" aria-label="Yearly budget amount">
                       <span>/ year</span>
                     </div>
                     <div class="proposal-budget-card__slider-group">
@@ -434,12 +1118,64 @@
             </ng-container>
           </div>
 
-          <footer class="proposal-questionnaire__footer">
-            <app-button [label]="questionStep === 1 ? 'Cancel' : 'Back'" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Medium" (clicked)="questionStep === 1 ? cancelQuestionnaire() : questionStep === 7 ? questionStep = 6 : questionStep === 6 ? questionStep = 5 : questionStep === 5 ? questionStep = 4 : questionStep === 4 ? questionStep = 3 : questionStep === 3 ? questionStep = 2 : questionStep = 1" />
+          <footer class="proposal-questionnaire__footer proposal-questionnaire__footer--sticky">
+            <app-button [label]="questionStep === 1 ? 'Cancel' : 'Back'" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Medium" (clicked)="questionStep === 1 ? cancelQuestionnaire() : goToPreviousQuestion()" />
             <app-button [label]="questionStep === 7 ? 'Generate Proposals' : 'Next'" rightIcon="arrow_forward" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" [disabled]="questionStep === 1 ? !isQuestionOneComplete : questionStep === 2 ? !isQuestionTwoComplete : questionStep === 3 ? !isQuestionThreeComplete : questionStep === 4 ? !isQuestionFourComplete : questionStep === 5 ? !isQuestionFiveComplete : questionStep === 6 ? !isQuestionSixComplete : !isQuestionSevenComplete" (clicked)="continueQuestionnaire()" />
           </footer>
         </section>
       </ng-template>
+
+      <section *ngIf="showCreateProposalReview" class="proposal-create-review" aria-labelledby="proposal-create-review-title">
+        <div class="proposal-create-review__scroll">
+          <header class="proposal-product-info__heading">
+            <p class="proposal-product-info__eyebrow">CREATE PROPOSAL</p>
+            <div>
+              <h1 id="proposal-create-review-title">Review Proposals</h1>
+              <p>Compare the details entered for each selected product.</p>
+            </div>
+          </header>
+          <p *ngIf="!selectedProductNames.length" class="proposal-product-info__no-funds">Select at least one proposal to continue.</p>
+          <div *ngIf="selectedProductNames.length" class="proposal-comparison-table__scroll proposal-create-review__table-scroll">
+            <table class="proposal-comparison-table proposal-create-review__table">
+              <thead>
+                <tr>
+                  <th scope="col">Proposal Details</th>
+                  <th *ngFor="let productName of selectedProductNames" scope="col">{{ productName }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of createProposalReviewRows">
+                  <th scope="row">{{ row.label }}</th>
+                  <td *ngFor="let value of row.values">{{ value }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th scope="row"></th>
+                  <td *ngFor="let productName of selectedProductNames">
+                    <app-button label="Remove Proposal" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="removeCreateProposalReviewProduct(productName)" />
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <section *ngIf="selectedProductNames.length" class="proposal-comparison-cards proposal-create-review__cards" aria-label="Proposal details by product">
+            <article *ngFor="let productName of selectedProductNames" class="proposal-comparison-card">
+              <header><h3>{{ productName }}</h3></header>
+              <dl>
+                <div *ngFor="let row of getCreateProposalReviewProductRows(productName)"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+              </dl>
+              <app-button label="Remove Proposal" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Small" (clicked)="removeCreateProposalReviewProduct(productName)" />
+            </article>
+          </section>
+        </div>
+        <footer class="proposal-product-info__actions proposal-questionnaire__footer proposal-create-review__actions">
+          <p *ngIf="!isCreateProposalFundAllocationComplete" class="proposal-create-review__validation">Each product’s fund allocation must total 100% before you continue.</p>
+          <app-button label="Back" [variant]="buttonVariant.Primary" [emphasis]="buttonEmphasis.Outline" [size]="buttonSize.Medium" (clicked)="backToCreateProposalFunds()" />
+          <app-button [label]="createProposalReviewContinueLabel" rightIcon="chevron_right" [variant]="buttonVariant.Primary" [size]="buttonSize.Medium" [disabled]="!selectedProductNames.length || !isCreateProposalFundAllocationComplete" (clicked)="continueFromCreateProposalReview()" />
+        </footer>
+      </section>
+
     </section>
   </div>
 </main>

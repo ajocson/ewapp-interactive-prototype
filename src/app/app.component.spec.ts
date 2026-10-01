@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { AppModule } from './app.module';
 import { LeadActivityDrawerComponent } from './components/lead-activity-drawer/lead-activity-drawer.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { ProposalGeneratorComponent } from './proposal-generator/proposal-generator.component';
 
 describe('AppComponent LCAM activity feedback', () => {
   let fixture: ComponentFixture<AppComponent>;
@@ -69,7 +70,28 @@ describe('AppComponent LCAM activity feedback', () => {
     expect(fixture.componentInstance.showProposalGenerator).toBe(true);
     expect(fixture.componentInstance['navigation'].isSidebarOpen()).toBe(false);
     expect(fixture.nativeElement.querySelector('lam-proposal-generator')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('#proposal-generator-title')?.textContent).toContain('Find a plan that fits your needs');
+    expect(Array.from(fixture.nativeElement.querySelectorAll('#proposal-generator-title span') as NodeListOf<HTMLSpanElement>).map(span => span.textContent?.trim()).join(' ')).toContain('Find a plan that fits your needs');
+  });
+
+  it('keeps the sidebar on the proposal landing page and hides it after continuing', async () => {
+    const navigation = fixture.componentInstance['navigation'];
+    navigation.setSidebarOpen(true);
+    fixture.detectChanges();
+
+    const generateProposalButton = fixture.nativeElement.querySelector('.side-navigation__action--subtle:last-child') as HTMLButtonElement;
+    generateProposalButton.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.showProposalGenerator).toBe(true);
+    expect(navigation.isSidebarOpen()).toBe(true);
+    expect(fixture.nativeElement.querySelector('#proposal-generator-title')).not.toBeNull();
+
+    const proposalGenerator = fixture.debugElement.query(By.directive(ProposalGeneratorComponent)).componentInstance as ProposalGeneratorComponent;
+    proposalGenerator.selectedProductNames = ['Dream Builder'];
+    proposalGenerator.openSelectedProductProposal();
+    fixture.detectChanges();
+    expect(navigation.isSidebarOpen()).toBe(false);
   });
 
   it('opens recommended proposals directly from its test route', () => {
@@ -78,7 +100,7 @@ describe('AppComponent LCAM activity feedback', () => {
 
     expect(fixture.componentInstance.showProposalGenerator).toBe(true);
     expect(fixture.componentInstance.proposalGeneratorInitialView).toBe('recommendations');
-    expect(fixture.nativeElement.querySelector('#proposal-recommendations-title')?.textContent).toContain('We’ve prepared three proposals for you');
+    expect(fixture.nativeElement.querySelector('#proposal-recommendations-title')?.textContent).toContain('Here’s What We Recommend for You');
   });
 
   it('uses the appointment-specific success message when a contact is scheduled', () => {

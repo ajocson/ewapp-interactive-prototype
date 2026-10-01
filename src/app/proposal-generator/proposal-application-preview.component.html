@@ -1,0 +1,70 @@
+<section class="proposal-application-preview" aria-labelledby="proposal-application-title">
+  <header class="application-page-header">
+    <nav class="application-breadcrumbs" aria-label="Breadcrumb">
+      <span>Dashboard</span>
+      <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span>
+      <strong>{{ insuredName }}</strong>
+    </nav>
+    <div class="application-page-header__summary">
+      <h1 id="proposal-application-title">{{ insuredName }}</h1>
+      <span>Date Created: {{ createdAt | date:'MMM d, y, h:mm a' }}</span>
+    </div>
+  </header>
+
+  <nav class="proposal-application-preview__tabs" aria-label="Proposal sections" role="tablist">
+    <button type="button" role="tab" aria-selected="false" (click)="sectionRequested.emit('info')">Info</button>
+    <button type="button" role="tab" aria-selected="false" (click)="sectionRequested.emit('profile')">Profile</button>
+    <button type="button" role="tab" aria-selected="false" (click)="sectionRequested.emit('proposals')">Proposals</button>
+    <button type="button" role="tab" aria-selected="true" aria-current="page" class="is-active">Applications</button>
+    <button type="button" role="tab" aria-selected="false" disabled>Policies</button>
+  </nav>
+
+  <section class="application-workspace" [attr.aria-label]="productName + ' application'">
+    <aside class="application-progress" aria-label="Application steps">
+      <div class="application-progress__completion">
+        <strong>Steps Completed</strong><span>1/8</span>
+        <div><span style="width: 12.5%"></span></div>
+      </div>
+      <section>
+        <h2>Consumer Details</h2>
+        <ol>
+          <li class="is-current" aria-current="step">Insured Information</li>
+          <li>Insured Underwriting</li>
+          <li>Owner Information</li>
+          <li>Beneficiary</li>
+        </ol>
+      </section>
+      <section><h2>Plan Details</h2><ol><li>Premium &amp; Coverage</li><li>Payment</li></ol></section>
+      <section><h2>Forms</h2><ol><li>Forms Generation</li><li>For Upload</li></ol></section>
+    </aside>
+
+    <article class="application-form-card">
+      <header><h2>Insured Information</h2></header>
+      <div class="application-form-card__body">
+        <p class="application-required"><span class="material-symbols-rounded" aria-hidden="true">info</span>All fields are required unless stated “Optional”</p>
+        <section class="application-basic">
+          <h3>Basic Information</h3>
+          <dl>
+            <div><dt>Full Name</dt><dd>{{ insuredName }}</dd></div>
+            <div><dt>Birth Date</dt><dd>{{ birthDateLabel }}</dd></div>
+            <div><dt>Gender</dt><dd>{{ insured.gender || '—' }}</dd></div>
+            <div><dt>Age</dt><dd>{{ insuredAge }}</dd></div>
+          </dl>
+        </section>
+        <section class="application-government-ids">
+          <div class="application-id-notice">
+            <span class="material-symbols-rounded" aria-hidden="true">warning</span>
+            <div><strong>Submit and Verify your ID in the Owner Tab</strong><p>Complete ID submission and verification in the Owner Tab. Ensure all required steps are followed for successful verification.</p></div>
+          </div>
+          <h3>Government ID’s</h3>
+          <div class="application-id-fields">
+            <label>Select ID type<select aria-label="Select ID type" disabled><option>Others</option></select></label>
+            <label>ID number<input aria-label="ID number" value="12345678" readonly></label>
+          </div>
+          <button type="button" class="proposal-application-preview__check" disabled>Check for existing record <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span></button>
+        </section>
+      </div>
+    </article>
+  </section>
+
+</section>

@@ -81,6 +81,8 @@
   --font-weight-bold: 700;
   --h4-text-size: 36px;
   --h4-line-height: 48px;
+  --h4-compact-text-size: 32px;
+  --h4-compact-line-height: 40px;
   --h6-text-size: 20px;
   --h6-line-height: 28px;
   --h5-text-size: 28px;
@@ -698,6 +700,7 @@ lam-root {
   width: 100%;
   height: 100%;
 }
+
 
 .app-dashboard-host {
   width: 100%;
