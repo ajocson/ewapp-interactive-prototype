@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - feature/proposal-revamp
+      - develop
   workflow_dispatch:
 
 permissions:
@@ -26,10 +26,10 @@ jobs:
           ref: main
           path: main-source
 
-      - name: Check out proposal preview branch
+      - name: Check out develop for proposal preview
         uses: actions/checkout@v6
         with:
-          ref: feature/proposal-revamp
+          ref: develop
           path: preview-source
 
       - name: Set up Node.js
@@ -55,18 +55,18 @@ jobs:
 
       - name: Build proposal preview application
         working-directory: preview-source
-        run: npm run build -- --configuration production --base-href /ewapp-interactive-prototype/proposal-revamp/
+        run: npm run build -- --configuration production --base-href /ewapp-interactive-prototype/develop/
 
       - name: Assemble GitHub Pages site
         run: |
-          mkdir -p site/proposal-revamp
+          mkdir -p site/develop
           cp -R main-source/dist/ewapp-interactive-prototype/browser/. site/
-          cp -R preview-source/dist/ewapp-interactive-prototype/browser/. site/proposal-revamp/
+          cp -R preview-source/dist/ewapp-interactive-prototype/browser/. site/develop/
           node <<'NODE'
           const fs = require('node:fs');
           const indexFiles = [
             'site/index.html',
-            'site/proposal-revamp/index.html',
+            'site/develop/index.html',
           ];
           const restoreScript = '    <script src="/ewapp-interactive-prototype/pages-route-restore.js"></script>\n';
 
@@ -80,7 +80,7 @@ jobs:
           NODE
           cp preview-source/.github/pages-route-restore.js site/pages-route-restore.js
           cp preview-source/.github/pages-404.html site/404.html
-          cp preview-source/.github/pages-404.html site/proposal-revamp/404.html
+          cp preview-source/.github/pages-404.html site/develop/404.html
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
