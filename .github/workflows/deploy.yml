@@ -94,9 +94,9 @@ jobs:
           for (const file of indexFiles) {
             const html = fs.readFileSync(file, 'utf8');
             if (!html.includes('</head>')) {
-              throw new Error('Could not find </head> in ' + file);
+              throw new Error(`Could not find </head> in ${file}`);
             }
-            fs.writeFileSync(file, html.replace('</head>', restoreScript + '  </head>'));
+            fs.writeFileSync(file, html.replace('</head>', `${restoreScript}  </head>`));
           }
           NODE
           cp preview-source/.github/pages-route-restore.js site/pages-route-restore.js
