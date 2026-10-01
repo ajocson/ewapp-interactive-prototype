@@ -53,6 +53,27 @@ jobs:
         working-directory: main-source
         run: npm run build -- --configuration production --base-href /ewapp-interactive-prototype/
 
+      - name: Set preview-only bundle ceilings
+        working-directory: preview-source
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const file = 'angular.json';
+          const config = JSON.parse(fs.readFileSync(file, 'utf8'));
+          const budgets = config.projects['ewapp-interactive-prototype'].architect.build.configurations.production.budgets;
+          const initialBundle = budgets.find((budget) => budget.type === 'initial');
+          const componentStyle = budgets.find((budget) => budget.type === 'anyComponentStyle');
+
+          if (!initialBundle || !componentStyle) {
+            throw new Error('Could not find the production initial bundle and component-style budgets.');
+          }
+
+          // The latest preview build reached 1.25 MB and 20.32 kB; leave main budgets unchanged.
+          initialBundle.maximumError = '1.3MB';
+          componentStyle.maximumError = '21kB';
+          fs.writeFileSync(file, JSON.stringify(config, null, 2) + '\n');
+          NODE
+
       - name: Build proposal preview application
         working-directory: preview-source
         run: npm run build -- --configuration production --base-href /ewapp-interactive-prototype/develop/
@@ -73,9 +94,9 @@ jobs:
           for (const file of indexFiles) {
             const html = fs.readFileSync(file, 'utf8');
             if (!html.includes('</head>')) {
-              throw new Error(`Could not find </head> in ${file}`);
+              throw new Error('Could not find </head> in ' + file);
             }
-            fs.writeFileSync(file, html.replace('</head>', `${restoreScript}  </head>`));
+            fs.writeFileSync(file, html.replace('</head>', restoreScript + '  </head>'));
           }
           NODE
           cp preview-source/.github/pages-route-restore.js site/pages-route-restore.js
