@@ -23,16 +23,17 @@ import { LeadRecordTab } from './proposal-flow/proposal-flow.component';
 import { LeadJourneyStateService } from './shared/services/lead-journey-state.service';
 import { TdxButtonEmphasis, TdxButtonSize, TdxButtonVariant } from './shared/components/button/button.model';
 import { TdxFieldControlOption } from './shared/components/field-control/field-control.component';
+import { TdxTagEmphasis, TdxTagVariant } from './shared/components/tag/tag.model';
 
 @Component({
   selector: 'lam-root',
   template: `
     <router-outlet />
-    <div *ngIf="loggedIn && !showApplications && !showProposalGenerator" class="app-dashboard-host" [attr.inert]="selectedLead ? '' : null" [attr.aria-hidden]="selectedLead ? true : null">
+    <div *ngIf="loggedIn && !passwordResetLinkOpen && !showApplications && !showProposalGenerator" class="app-dashboard-host" [attr.inert]="selectedLead ? '' : null" [attr.aria-hidden]="selectedLead ? true : null">
       <lam-dashboard [userType]="userType" [apiErrorMode]="apiErrorMode" [searchErrorMode]="searchErrorMode" [suppressBoardLoading]="drawerLoadingErrorMode" (leadOpened)="openLead($event)" (newLeadRequested)="openNewLead()" (draftSiRequested)="openDraftSiQuickQuote()" (generateProposalRequested)="openProposalGenerator()" (retryRequested)="retryApiError()" (loggedOut)="logOut()" />
     </div>
-    <lam-applications *ngIf="loggedIn && showApplications" [userType]="userType" (leadSelected)="openApplicationLead($event)" (loggedOut)="logOut()" />
-    <lam-proposal-generator *ngIf="loggedIn && showProposalGenerator" [userType]="userType" [initialView]="proposalGeneratorInitialView" (newLeadRequested)="openNewLead()" (draftSiRequested)="openDraftSiQuickQuote()" (loggedOut)="logOut()" />
+    <lam-applications *ngIf="loggedIn && !passwordResetLinkOpen && showApplications" [userType]="userType" (leadSelected)="openApplicationLead($event)" (loggedOut)="logOut()" />
+    <lam-proposal-generator *ngIf="loggedIn && !passwordResetLinkOpen && showProposalGenerator" [userType]="userType" [initialView]="proposalGeneratorInitialView" (newLeadRequested)="openNewLead()" (draftSiRequested)="openDraftSiQuickQuote()" (loggedOut)="logOut()" />
     <lam-lead-activity-drawer
       *ngIf="selectedLead && ((!draftSiOpen && !proposalOpen) || contactDrawerOpen)"
       [lead]="selectedLead"
@@ -62,17 +63,113 @@ import { TdxFieldControlOption } from './shared/components/field-control/field-c
       (editLeadRequested)="editLeadInfo()"
       (retryRequested)="retryDrawerLoading()"
     />
-    <main *ngIf="!loggedIn" class="login-screen">
+    <main *ngIf="!loggedIn || passwordResetLinkOpen" class="login-screen">
       <div class="login-screen__bg login-screen__bg--left" aria-hidden="true"></div>
       <div class="login-screen__bg login-screen__bg--right" aria-hidden="true"></div>
-      <div class="login-brand"><img src="assets/ewapp-ageas-logo.svg" alt="EastWest Ageas Life Insurance"><span></span><strong>EWApp</strong></div>
-      <section class="login-card" aria-labelledby="login-title">
+      <div class="login-brand"><img src="assets/eastwest-ageas-logo-updated.svg" alt="EastWest Ageas Life Insurance"><span aria-hidden="true"></span><app-tag label="EWApp" [variant]="tagVariant.Primary" [emphasis]="tagEmphasis.Subtle" /></div>
+      <section *ngIf="!passwordResetLinkOpen && !forgotPasswordOpen" class="login-card" aria-labelledby="login-title">
         <h1 id="login-title">Sign in to your account</h1>
         <label>Agent Code<input [(ngModel)]="agentCode" placeholder="Input your Agent Code"></label>
-        <div class="login-card__password-label"><label>Password</label><a href="#" (click)="$event.preventDefault()">Forgot Password</a></div>
-        <div class="login-card__password"><input [type]="passwordVisible ? 'text' : 'password'" [(ngModel)]="password" placeholder="Input your password"><button type="button" [attr.aria-label]="passwordVisible ? 'Hide password' : 'Show password'" (click)="passwordVisible = !passwordVisible"><span class="material-symbols-rounded" aria-hidden="true">{{ passwordVisible ? 'visibility_off' : 'visibility' }}</span></button></div>
+        <div class="login-card__password-group">
+          <div class="login-card__password-label"><label>Password</label><a href="#" (click)="openForgotPassword($event)">Forgot Password</a></div>
+          <div class="login-card__password"><input [type]="passwordVisible ? 'text' : 'password'" [(ngModel)]="password" autocomplete="new-password" placeholder="Input your password"><button type="button" [attr.aria-label]="passwordVisible ? 'Hide password' : 'Show password'" (click)="passwordVisible = !passwordVisible"><span class="material-symbols-rounded" aria-hidden="true">{{ passwordVisible ? 'visibility_off' : 'visibility' }}</span></button></div>
+        </div>
         <app-button class="login-card__continue" label="Continue" [variant]="buttonVariant.Secondary" [size]="buttonSize.Large" (clicked)="logIn()" />
       </section>
+      <section *ngIf="!passwordResetLinkOpen && forgotPasswordOpen" class="login-card forgot-password-card" aria-labelledby="forgot-password-title">
+        <ng-container *ngIf="!forgotPasswordComplete; else forgotPasswordConfirmation">
+          <header class="forgot-password-card__header">
+            <span class="forgot-password-card__step">STEP {{ forgotPasswordStep }} OF 2</span>
+            <h1 id="forgot-password-title">{{ forgotPasswordStep === 2 ? 'Verify Your Email Address' : 'Forgot Password' }}</h1>
+            <p *ngIf="forgotPasswordStep === 1">Enter the Agent Code provided to you. We’ll verify it before you continue.</p>
+            <p *ngIf="forgotPasswordStep === 2">Enter the email address associated with your Agent Code.</p>
+          </header>
+
+          <div *ngIf="forgotPasswordStep === 1" class="forgot-password-card__field">
+            <label for="reset-agent-code">Agent Code</label>
+            <input id="reset-agent-code" [(ngModel)]="resetAgentCode" autocomplete="off" placeholder="Input your Agent Code" (keydown.enter)="continueForgotPassword()">
+          </div>
+
+          <div *ngIf="forgotPasswordStep === 2" class="forgot-password-card__field">
+            <label for="reset-email">Email Address</label>
+            <input id="reset-email" [(ngModel)]="resetEmail" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" [attr.aria-invalid]="resetEmailError ? 'true' : null" [attr.aria-describedby]="resetEmailError ? 'reset-email-error' : 'reset-email-help'" (keydown.enter)="confirmForgotPassword()">
+            <p *ngIf="resetEmailError" id="reset-email-error" class="forgot-password-card__error" role="alert">{{ resetEmailError }}</p>
+            <p *ngIf="!resetEmailError" id="reset-email-help" class="forgot-password-card__hint">Use the email address linked to your Agent Code.</p>
+          </div>
+
+          <div class="forgot-password-card__actions">
+            <app-button *ngIf="forgotPasswordStep === 1" label="Continue" [variant]="buttonVariant.Secondary" [size]="buttonSize.Large" [disabled]="!resetAgentCode.trim()" (clicked)="continueForgotPassword()" />
+            <ng-container *ngIf="forgotPasswordStep === 2">
+              <app-button label="Confirm" [variant]="buttonVariant.Secondary" [size]="buttonSize.Large" [disabled]="!resetEmail.trim()" (clicked)="confirmForgotPassword()" />
+              <app-button label="Back" [variant]="buttonVariant.Subtle" [size]="buttonSize.Large" (clicked)="backToAgentCode()" />
+            </ng-container>
+          </div>
+          <button *ngIf="forgotPasswordStep === 1" type="button" class="forgot-password-card__back-to-login" (click)="closeForgotPassword()">Back to Login</button>
+        </ng-container>
+
+        <ng-template #forgotPasswordConfirmation>
+          <div class="forgot-password-card__confirmation" aria-live="polite">
+            <img class="forgot-password-card__confirmation-illustration" src="assets/forgot-password-illustration.gif" alt="" aria-hidden="true">
+            <h1 id="forgot-password-title">Temporary Password Sent</h1>
+            <p>If the information matches an account, password reset instructions will be sent to the email address on file. Please check your inbox.</p>
+          </div>
+          <app-button class="forgot-password-card__sign-in" label="Back to Login" [variant]="buttonVariant.Secondary" [size]="buttonSize.Large" (clicked)="closeForgotPassword()" />
+        </ng-template>
+      </section>
+      <section *ngIf="passwordResetLinkOpen" class="login-card forgot-password-card password-reset-link-card" aria-labelledby="password-reset-link-title">
+        <header class="forgot-password-card__header">
+          <h1 id="password-reset-link-title">Secure Your Account</h1>
+          <p>Choose a new password for your EWApp account.</p>
+        </header>
+        <div class="forgot-password-card__field">
+          <label for="new-password">New Password</label>
+          <div class="login-card__password">
+            <input id="new-password" [type]="newPasswordVisible ? 'text' : 'password'" [(ngModel)]="newPassword" autocomplete="new-password" placeholder="Enter a new password" [attr.aria-invalid]="passwordResetError ? 'true' : null" [attr.aria-describedby]="passwordResetError ? 'password-reset-error password-policy-help' : 'password-policy-help'" (ngModelChange)="validatePasswordReset()" (keydown.enter)="submitPasswordReset()">
+            <button type="button" [attr.aria-label]="newPasswordVisible ? 'Hide new password' : 'Show new password'" (click)="newPasswordVisible = !newPasswordVisible"><span class="material-symbols-rounded" aria-hidden="true">{{ newPasswordVisible ? 'visibility_off' : 'visibility' }}</span></button>
+          </div>
+        </div>
+        <div class="forgot-password-card__field">
+          <label for="confirm-new-password">Re-type Password</label>
+          <div class="login-card__password">
+            <input id="confirm-new-password" [type]="confirmPasswordVisible ? 'text' : 'password'" [(ngModel)]="confirmNewPassword" autocomplete="new-password" placeholder="Re-type your new password" [attr.aria-invalid]="passwordResetError ? 'true' : null" [attr.aria-describedby]="passwordResetError ? 'password-reset-error password-policy-help' : 'password-policy-help'" (ngModelChange)="validatePasswordReset()" (keydown.enter)="submitPasswordReset()">
+            <button type="button" [attr.aria-label]="confirmPasswordVisible ? 'Hide confirmation password' : 'Show confirmation password'" (click)="confirmPasswordVisible = !confirmPasswordVisible"><span class="material-symbols-rounded" aria-hidden="true">{{ confirmPasswordVisible ? 'visibility_off' : 'visibility' }}</span></button>
+          </div>
+          <p *ngIf="passwordResetError" id="password-reset-error" class="forgot-password-card__error" role="alert">{{ passwordResetError }}</p>
+          <p id="password-policy-help" class="forgot-password-card__hint">Your password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and one of these special characters: @ . ! -.</p>
+        </div>
+        <div class="forgot-password-card__actions">
+          <app-button label="Update Password" [variant]="buttonVariant.Secondary" [size]="buttonSize.Large" [disabled]="!newPassword || !confirmNewPassword" (clicked)="submitPasswordReset()" />
+        </div>
+      </section>
+      <div *ngIf="passwordResetLoading" class="password-reset-status-backdrop" role="dialog" aria-modal="true" aria-labelledby="password-reset-loading-title" aria-describedby="password-reset-loading-copy">
+        <section class="password-reset-status-card password-reset-status-card--loading">
+          <img class="password-reset-status-card__spinner" src="assets/password-update-spinner.svg" alt="" aria-hidden="true">
+          <div class="password-reset-status-card__content">
+            <h2 id="password-reset-loading-title">Updating Password...</h2>
+            <p id="password-reset-loading-copy">Please wait. Do not close the browser or switch to a different tab for now.</p>
+          </div>
+        </section>
+      </div>
+      <div *ngIf="passwordResetComplete" class="password-reset-status-backdrop" role="dialog" aria-modal="true" aria-labelledby="password-reset-success-title" aria-describedby="password-reset-success-copy">
+        <section class="password-reset-status-card password-reset-status-card--success">
+          <img class="password-reset-status-card__success-illustration" src="assets/password-updated-success.gif" alt="" aria-hidden="true">
+          <div class="password-reset-status-card__content">
+            <h2 id="password-reset-success-title">Password Updated!</h2>
+            <p id="password-reset-success-copy">Your password has been updated. Sign in using your new password to access EWApp.</p>
+          </div>
+          <app-button label="Back to Login" [variant]="buttonVariant.Secondary" [size]="buttonSize.Large" (clicked)="finishPasswordResetLink()" />
+        </section>
+      </div>
+      <div *ngIf="passwordResetOldPassword" class="password-reset-status-backdrop" role="dialog" aria-modal="true" aria-labelledby="password-reset-old-title" aria-describedby="password-reset-old-copy">
+        <section class="password-reset-status-card password-reset-status-card--old-password">
+          <span class="password-reset-status-card__old-icon material-symbols-rounded" aria-hidden="true">lock_reset</span>
+          <div class="password-reset-status-card__content">
+            <h2 id="password-reset-old-title">Password Already Used</h2>
+            <p id="password-reset-old-copy">You can’t reuse your temporary password. Choose a different password to continue.</p>
+          </div>
+          <app-button label="Got it" [variant]="buttonVariant.Secondary" [size]="buttonSize.Large" (clicked)="dismissOldPasswordNotice()" />
+        </section>
+      </div>
       <footer class="login-footer-group">
         <div class="login-support"><p>Having trouble logging in? Please contact</p><div><span>✉ AgencySupport@ewageas.com.ph</span><span>✉ BancaSupport@ewageas.com.ph</span></div></div>
         <div class="login-footer"><span>Copyright © 2026. East West Ageas Life Insurance Corporation.</span><span>Legal&nbsp; · &nbsp;Privacy&nbsp; · &nbsp;Security</span></div>
@@ -216,6 +313,8 @@ export class AppComponent implements AfterViewInit {
   readonly buttonVariant = TdxButtonVariant;
   readonly buttonEmphasis = TdxButtonEmphasis;
   readonly buttonSize = TdxButtonSize;
+  readonly tagVariant = TdxTagVariant;
+  readonly tagEmphasis = TdxTagEmphasis;
   @ViewChild(DashboardComponent) private dashboard?: DashboardComponent;
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
@@ -227,6 +326,27 @@ export class AppComponent implements AfterViewInit {
   loggedIn = this.readLoginState();
   agentCode = '';
   password = '';
+  forgotPasswordOpen = false;
+  passwordResetLinkOpen = false;
+  passwordResetLoading = false;
+  passwordResetComplete = false;
+  passwordResetOldPassword = false;
+  newPassword = '';
+  confirmNewPassword = '';
+  passwordResetError = '';
+  passwordResetSubmitted = false;
+  readonly demoTemporaryPassword = 'opW4Y.Z4';
+  private demoTemporaryPasswordIssued = false;
+  private demoUpdatedPassword = '';
+  private readonly demoPreviousPassword = 'opW4Y.Z4';
+  private passwordResetTimer?: ReturnType<typeof setTimeout>;
+  newPasswordVisible = false;
+  confirmPasswordVisible = false;
+  forgotPasswordStep: 1 | 2 = 1;
+  forgotPasswordComplete = false;
+  resetAgentCode = '';
+  resetEmail = '';
+  resetEmailError = '';
   userType: 'Agency' | 'Banca' = this.readUserType();
   passwordVisible = false;
   newLeadStep: 1 | 2 = 1;
@@ -318,6 +438,7 @@ export class AppComponent implements AfterViewInit {
     this.destroyRef.onDestroy(() => {
       if (this.activityToastTimer) clearTimeout(this.activityToastTimer);
       if (this.activityToastDismissTimer) clearTimeout(this.activityToastDismissTimer);
+      if (this.passwordResetTimer) clearTimeout(this.passwordResetTimer);
     });
   }
 
@@ -325,7 +446,8 @@ export class AppComponent implements AfterViewInit {
     const navigationEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
     const isApiErrorScenario = this.router.url.startsWith('/lcam/') && this.router.url.endsWith('-api-error');
     const isProposalGeneratorRoute = this.router.url === '/proposals' || this.router.url === '/proposals/recommended' || this.router.url === '/lcam/proposal/recommended';
-    if (navigationEntry?.type === 'reload' && !isApiErrorScenario && !isProposalGeneratorRoute) {
+    const isPasswordResetLinkRoute = this.router.url.startsWith('/reset-password');
+    if (navigationEntry?.type === 'reload' && !isApiErrorScenario && !isProposalGeneratorRoute && !isPasswordResetLinkRoute) {
       void this.router.navigate(['/lcam']);
       return;
     }
@@ -427,11 +549,159 @@ export class AppComponent implements AfterViewInit {
     this.newLeadOpen = false;
   }
 
+  openForgotPassword(event: Event): void {
+    event.preventDefault();
+    this.forgotPasswordOpen = true;
+    this.forgotPasswordStep = 1;
+    this.forgotPasswordComplete = false;
+    this.resetAgentCode = '';
+    this.resetEmail = '';
+    this.resetEmailError = '';
+  }
+
+  continueForgotPassword(): void {
+    if (!this.resetAgentCode.trim()) return;
+
+    this.resetAgentCode = this.resetAgentCode.trim();
+    this.resetEmail = '';
+    this.resetEmailError = '';
+    this.forgotPasswordStep = 2;
+  }
+
+  backToAgentCode(): void {
+    this.forgotPasswordStep = 1;
+    this.resetAgentCode = '';
+    this.resetEmail = '';
+    this.resetEmailError = '';
+  }
+
+  validatePasswordReset(): void {
+    if (!this.passwordResetSubmitted) return;
+    if (!this.isPasswordFormatValid(this.newPassword)) {
+      this.passwordResetError = 'Your password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and one of these special characters: @ . ! -.';
+      return;
+    }
+    if (this.confirmNewPassword && this.newPassword !== this.confirmNewPassword) {
+      this.passwordResetError = 'The passwords don’t match. Check both fields and try again.';
+      return;
+    }
+    this.passwordResetError = '';
+  }
+
+  submitPasswordReset(): void {
+    this.passwordResetSubmitted = true;
+    this.validatePasswordReset();
+    if (!this.newPassword || !this.confirmNewPassword) {
+      this.passwordResetError = 'Enter and confirm your new password.';
+      return;
+    }
+    if (this.passwordResetError || this.newPassword !== this.confirmNewPassword) {
+      if (!this.passwordResetError) this.passwordResetError = 'The passwords don’t match. Check both fields and try again.';
+      return;
+    }
+    if (this.newPassword === this.demoPreviousPassword) {
+      this.passwordResetOldPassword = true;
+      return;
+    }
+    this.passwordResetLoading = true;
+    this.passwordResetTimer = setTimeout(() => this.completePasswordResetUpdate(), 1200);
+  }
+
+  completePasswordResetUpdate(): void {
+    if (this.passwordResetTimer) clearTimeout(this.passwordResetTimer);
+    this.passwordResetTimer = undefined;
+    this.passwordResetLoading = false;
+    this.passwordResetComplete = true;
+    this.changeDetectorRef.markForCheck();
+  }
+
+  dismissOldPasswordNotice(): void {
+    this.passwordResetOldPassword = false;
+    this.passwordResetSubmitted = false;
+    this.passwordResetError = '';
+    this.newPassword = '';
+    this.confirmNewPassword = '';
+  }
+
+  finishPasswordResetLink(): void {
+    this.demoUpdatedPassword = this.newPassword;
+    this.passwordResetLinkOpen = false;
+    this.passwordResetLoading = false;
+    this.passwordResetComplete = false;
+    this.passwordResetOldPassword = false;
+    this.passwordResetSubmitted = false;
+    this.newPassword = '';
+    this.confirmNewPassword = '';
+    this.passwordResetError = '';
+    if (this.passwordResetTimer) clearTimeout(this.passwordResetTimer);
+    this.passwordResetTimer = undefined;
+    this.loggedIn = false;
+    this.agentCode = '';
+    this.password = '';
+    this.passwordVisible = false;
+    this.writeLoginState(false);
+    void this.router.navigate(['/lcam']);
+  }
+
+  private isPasswordFormatValid(value: string): boolean {
+    return value.length >= 8
+      && /^[A-Za-z0-9@.!-]+$/.test(value)
+      && /[A-Z]/.test(value)
+      && /[a-z]/.test(value)
+      && /\d/.test(value)
+      && /[@.!-]/.test(value);
+  }
+
+  validateResetEmail(): void {
+    const email = this.resetEmail.trim();
+    const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!email) {
+      this.resetEmailError = '';
+      return;
+    }
+    if (!isValid) {
+      this.resetEmailError = 'Please enter a valid email address (e.g., ewageas@domain.com).';
+      return;
+    }
+    this.resetEmailError = '';
+  }
+
+  get isResetEmailValid(): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.resetEmail.trim());
+  }
+
+  confirmForgotPassword(): void {
+    if (!this.isResetEmailValid) {
+      this.validateResetEmail();
+      return;
+    }
+    this.resetEmailError = '';
+    this.demoTemporaryPasswordIssued = true;
+    this.forgotPasswordComplete = true;
+  }
+
+  closeForgotPassword(): void {
+    this.forgotPasswordOpen = false;
+    this.forgotPasswordStep = 1;
+    this.forgotPasswordComplete = false;
+    this.resetAgentCode = '';
+    this.resetEmail = '';
+    this.resetEmailError = '';
+    this.agentCode = '';
+    this.password = '';
+    this.passwordVisible = false;
+  }
+
   logIn(): void {
-    const credentialsMatch = this.agentCode === this.password && (this.agentCode === 'Banca' || this.agentCode === 'Agency');
+    if (this.demoTemporaryPasswordIssued && this.agentCode.trim().toUpperCase() === 'BANCA123' && this.password === this.demoTemporaryPassword) {
+      void this.router.navigate(['/reset-password'], { queryParams: { token: 'demo' } });
+      return;
+    }
+    const demoPassword = this.demoTemporaryPasswordIssued && this.agentCode.trim().toUpperCase() === 'BANCA123' ? this.demoUpdatedPassword : this.agentCode;
+    const credentialsMatch = this.password === demoPassword && (this.agentCode === 'Banca' || this.agentCode === 'Agency' || (this.demoTemporaryPasswordIssued && this.agentCode.trim().toUpperCase() === 'BANCA123'));
     if (!credentialsMatch) return;
     this.loggedIn = true;
-    this.userType = this.agentCode as 'Agency' | 'Banca';
+    this.userType = this.agentCode.trim().toUpperCase() === 'BANCA123' ? 'Banca' : this.agentCode as 'Agency' | 'Banca';
     sessionStorage.setItem('ewapp-user-type', this.userType);
     this.writeLoginState(true);
     this.changeDetectorRef.markForCheck();
@@ -879,6 +1149,26 @@ export class AppComponent implements AfterViewInit {
 
   private openRoute(url: string): void {
     const path = url.split(/[?#]/, 1)[0];
+    if (path === '/reset-password') {
+      if (this.passwordResetTimer) clearTimeout(this.passwordResetTimer);
+      this.passwordResetTimer = undefined;
+      this.passwordResetLinkOpen = true;
+      this.passwordResetLoading = false;
+      this.passwordResetComplete = false;
+      this.passwordResetOldPassword = false;
+      this.passwordResetSubmitted = false;
+      this.newPassword = '';
+      this.confirmNewPassword = '';
+      this.passwordResetError = '';
+      this.loggedIn = false;
+      this.writeLoginState(false);
+      this.forgotPasswordOpen = false;
+      this.selectedLead = null;
+      this.navigation.activeDestination.set('lcam-board');
+      this.changeDetectorRef.markForCheck();
+      return;
+    }
+    this.passwordResetLinkOpen = false;
     if (path === '/proposals' || path === '/proposals/recommended' || path === '/lcam/proposal/recommended') {
       this.navigation.setSidebarOpen(false);
       this.selectedLead = null;

@@ -51,6 +51,7 @@
   --color-purple-600: #5b27af;
   --color-purple-700: #5b27af;
   --color-purple-900: #3a1971;
+  --color-magenta-100: #f9e6f2;
   --color-magenta-700: #a82675;
   --color-red-100: #fce1e6;
   --color-red-200: #f8c6cf;
@@ -1004,34 +1005,68 @@ select {
 .login-screen__bg--left { top: 0; left: calc(50% - 300px); transform: rotate(-45deg); background: linear-gradient(180deg, rgb(238 212 227 / 52%) 0%, rgb(246 246 246 / 0%) 100%); }
 .login-screen__bg--right { top: 300px; left: calc(50% + 15px); transform: rotate(118.39deg); background: linear-gradient(180deg, rgb(254 236 209) 0%, rgb(246 246 246 / 0%) 100%); }
 .login-brand, .login-card, .login-footer-group { position: relative; z-index: 1; }
-.login-brand { display: flex; align-items: center; justify-content: flex-start; gap: 24px; width: min(542px, 100%); height: 48px; margin-bottom: 28px; }
-.login-brand img { width: 103.6px; height: 44px; object-fit: contain; }
-.login-brand span { width: 1px; height: 31px; background: #dedede; }
-.login-brand strong { padding: 8px 16px; border: 1px solid #eed4e3; border-radius: 999px; background: #eed4e3; color: #54133b; font-size: 12px; font-weight: 800; }
+.login-brand { display: flex; align-items: center; justify-content: flex-start; gap: var(--space-xl); width: min(542px, 100%); height: 48px; margin-bottom: 28px; }
+.login-brand img { width: 112px; height: 48px; object-fit: contain; }
+.login-brand > span { width: 1px; height: 24px; background: var(--border-neutral-default-tertiary); }
+.login-brand app-tag { --tag-height: auto; --tag-padding-x: var(--space-md); --tag-padding-y: var(--space-xs); --tag-primary-bg: var(--color-magenta-100); --tag-primary-border: var(--color-magenta-100); --tag-primary-text: var(--color-magenta-700); --tag-font-weight: var(--font-weight-regular); }
 .login-card { display: flex; width: min(542px, 100%); box-sizing: border-box; flex-direction: column; gap: 32px; padding: 56px 35px 52px; border-radius: 8px; background: #fff; box-shadow: 0 2px 10px #ececec; }
 .login-card h1 { margin: 0; color: #263234; font-family: var(--typography-font-family-paragraph); font-size: 28px; font-weight: 700; letter-spacing: -.56px; }
 .login-card > label, .login-card__password-label { color: #263234; font-size: 16px; font-weight: 400; }
 .login-card input { box-sizing: border-box; width: 100%; height: 48px; margin-top: 8px; padding: 12px 16px; border: 1px solid #9b9b9b; border-radius: 8px; background: #fff; color: #263234; font-family: var(--typography-font-family-paragraph); font-size: 16px; font-weight: 400; }
 .login-card input:focus { border: var(--border-width-xs-2) solid var(--field-border-focus); outline: none; }
 .login-card input::placeholder { color: #263234; opacity: .5; font-size: 16px; font-weight: 400; }
-.login-card__password-label { display: flex; justify-content: space-between; align-items: end; margin-bottom: -24px; }
+.login-card__password-group { display: flex; flex-direction: column; gap: 8px; }
+.login-card__password-label { display: flex; justify-content: space-between; align-items: end; }
 .login-card__password-label label { font-size: inherit; }
 .login-card__password-label a { color: #a82675; text-decoration: none; }
 .login-card__password-label a { font-weight: 700; }
 .login-card__password { position: relative; }
-.login-card__password input { padding-right: 52px; }
+.login-card__password input { margin-top: 0; padding-right: 52px; }
 .login-card__password button { position: absolute; top: 32px; right: 12px; transform: translateY(-50%); border: 0; background: transparent; color: #697386; cursor: pointer; }
 .login-card__password button .material-symbols-rounded { font-size: 20px; }
 .login-card__continue, .login-card__continue .tdx-button { display: block; width: 100%; }
 .login-card__continue { margin-top: -8px; }
 .login-card__continue .tdx-button { width: 100%; box-shadow: 0 2px 5px rgb(0 0 0 / 24%); }
+.forgot-password-card { gap: var(--space-3xl); }
+.forgot-password-card__header { display: flex; flex-direction: column; gap: var(--space-md); }
+.forgot-password-card__step { color: var(--text-neutral-secondary); font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
+.forgot-password-card__header p, .forgot-password-card__confirmation p { margin: 0; color: var(--text-neutral-secondary); font-size: var(--paragraph-md-text-size); line-height: var(--paragraph-md-line-height); }
+.forgot-password-card__field { display: flex; flex-direction: column; gap: var(--space-md); }
+.forgot-password-card__field label { color: var(--text-neutral-primary); font-size: var(--paragraph-md-text-size); line-height: var(--paragraph-md-line-height); }
+.forgot-password-card__field input { margin: 0; border-color: var(--field-border-default); }
+.forgot-password-card__field input:focus { border-color: var(--field-border-focus); box-shadow: var(--field-focus-shadow); }
+.forgot-password-card__field input[aria-invalid='true'] { border: var(--border-width-xs-2) solid var(--color-red-600); }
+.forgot-password-card__error { margin: 0; color: var(--color-red-700); font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
+.forgot-password-card__hint { margin: 0; color: var(--text-neutral-secondary); font-size: var(--paragraph-sm-text-size); line-height: var(--paragraph-sm-line-height); }
+.forgot-password-card__actions { display: flex; flex-direction: column; gap: var(--space-xl); }
+.forgot-password-card__actions app-button { display: flex; width: 100%; }
+.forgot-password-card__actions app-button .tdx-button, .forgot-password-card__sign-in .tdx-button { width: 100%; }
+.forgot-password-card__back-to-login { align-self: center; padding: var(--space-xs); border: var(--border-width-none); background: transparent; color: var(--color-magenta-700); font: inherit; text-decoration: underline; cursor: pointer; }
+.forgot-password-card__back-to-login:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring-color); outline-offset: var(--focus-ring-offset); }
+.forgot-password-card__confirmation { display: flex; align-items: center; flex-direction: column; gap: var(--space-xl); text-align: center; }
+.forgot-password-card__confirmation-illustration { display: block; width: 120px; height: auto; object-fit: contain; }
+.forgot-password-card__sign-in { display: flex; width: 100%; }
+.password-reset-link-card .forgot-password-card__header h1 { color: var(--text-neutral-primary); font-family: var(--typography-font-family-heading); }
+.password-reset-link-card .login-card__password button { top: 24px; }
+.password-reset-status-backdrop { position: fixed; z-index: calc(var(--layer-modal) + 1); inset: 0; display: grid; place-items: center; padding: var(--space-xl); background: var(--modal-overlay-bg); }
+.password-reset-status-card { display: flex; width: min(400px, 100%); box-sizing: border-box; flex-direction: column; align-items: center; gap: var(--space-3xl); padding: var(--space-3xl); border-radius: var(--radius-xl); background: var(--surface-default); box-shadow: var(--shadow-xl); text-align: center; }
+.password-reset-status-card__spinner { display: block; width: 100px; height: 100px; animation: password-reset-spinner-rotate 1.1s linear infinite; }
+.password-reset-status-card__success-illustration { display: block; width: 120px; height: auto; object-fit: contain; }
+.password-reset-status-card__content { display: flex; width: 100%; flex-direction: column; align-items: center; gap: var(--space-md); }
+.password-reset-status-card__content h2, .password-reset-status-card__content p { margin: 0; }
+.password-reset-status-card__content h2 { color: var(--text-neutral-primary); font-family: var(--typography-font-family-heading); font-size: var(--h5-text-size); line-height: var(--h5-line-height); }
+.password-reset-status-card__content p { color: var(--text-neutral-primary); font-size: var(--paragraph-lg-text-size); line-height: var(--paragraph-lg-line-height); }
+.password-reset-status-card app-button, .password-reset-status-card app-button .tdx-button { display: block; width: 100%; }
+.password-reset-status-card__old-icon { display: grid; width: var(--space-7xl); height: var(--space-7xl); place-items: center; border-radius: var(--radius-round); background: var(--section-message-bg-warning); color: var(--section-message-icon-warning); font-size: var(--icon-3xl); }
+@keyframes password-reset-spinner-rotate { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .password-reset-status-card__spinner { animation: none; } }
 .login-footer-group { display: flex; width: 100%; box-sizing: border-box; flex-direction: column; align-items: center; margin-top: auto; padding: 25px 0 20px; }
 .login-support { color: #5c5c5c; font-size: 14px; text-align: center; }
 .login-support p { margin: 0 0 8px; }
 .login-support div { display: flex; justify-content: center; gap: 16px; }
 .login-support span::first-letter { color: #e31c8a; font-size: 24px; }
 .login-footer { display: flex; flex-direction: column; gap: 8px; margin-top: 32px; color: #5c5c5c; font-size: 14px; text-align: center; }
-@media (max-width: 700px) { .login-screen { padding: 32px 16px; } .login-card { padding: 40px 24px; gap: 32px; } .login-card h1 { font-size: 24px; } .login-support div { flex-direction: column; gap: 8px; } }
+@media (max-width: 700px) { .login-screen { padding: 32px 16px; } .login-card { padding: 40px 24px; gap: 32px; } .forgot-password-card { gap: var(--space-3xl); } .login-card h1 { font-size: 24px; } .login-support div { flex-direction: column; gap: 8px; } }
 .drawer-scroll { height: calc(100dvh - var(--proposal-drawer-content-offset)); overflow-y: auto; }
 .drawer-lead-info { display: flex; flex-direction: column; gap: var(--space-2xl); padding: var(--space-3xl) var(--space-2xl) var(--space-2xl); border-bottom: var(--border-width-xs-1) solid var(--border-neutral-subtle); }
 .drawer-lead-info--action-open { border-bottom: var(--border-width-none); }
