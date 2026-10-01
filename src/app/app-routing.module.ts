@@ -5,6 +5,7 @@ import { LcamRouteComponent } from './lcam-route.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'lcam' },
+  { path: 'reset-password', pathMatch: 'full', component: LcamRouteComponent },
   { path: 'lcam/api', pathMatch: 'full', redirectTo: 'lcam/board-loading-api-error' },
   { path: 'lcam/board-loading-api-error', pathMatch: 'full', component: LcamRouteComponent },
   { path: 'lcam/search-error', pathMatch: 'full', redirectTo: 'lcam/page-search-api-error' },
