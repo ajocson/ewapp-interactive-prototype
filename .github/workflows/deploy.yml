@@ -26,7 +26,7 @@ jobs:
           ref: main
           path: main-source
 
-      - name: Check out Proposal Revamp preview
+      - name: Check out develop preview
         uses: actions/checkout@v6
         with:
           ref: develop
@@ -72,20 +72,20 @@ jobs:
           fs.writeFileSync(file, `${JSON.stringify(config, null, 2)}\n`);
           NODE
 
-      - name: Build Proposal Revamp preview
+      - name: Build develop preview
         working-directory: preview-source
-        run: npm run build -- --configuration production --base-href /ewapp-interactive-prototype/proposal-revamp/
+        run: npm run build -- --configuration production --base-href /ewapp-interactive-prototype/develop/
 
       - name: Assemble combined GitHub Pages site
         run: |
-          mkdir -p site/proposal-revamp
+          mkdir -p site/develop
           cp -R main-source/dist/ewapp-interactive-prototype/browser/. site/
-          cp -R preview-source/dist/ewapp-interactive-prototype/browser/. site/proposal-revamp/
+          cp -R preview-source/dist/ewapp-interactive-prototype/browser/. site/develop/
           node <<'NODE'
           const fs = require('node:fs');
           const indexFiles = [
             'site/index.html',
-            'site/proposal-revamp/index.html',
+            'site/develop/index.html',
           ];
           const restoreScript = '    <script src="/ewapp-interactive-prototype/pages-route-restore.js"></script>\n';
 
@@ -98,8 +98,20 @@ jobs:
           }
           NODE
           cp preview-source/.github/pages-route-restore.js site/pages-route-restore.js
-          cp preview-source/.github/pages-404.html site/404.html
-          cp preview-source/.github/pages-404.html site/proposal-revamp/404.html
+          node <<'NODE'
+          const fs = require('node:fs');
+          const sourceFile = 'preview-source/.github/pages-404.html';
+          const previewBase = '/ewapp-interactive-prototype/proposal-revamp/';
+          const pages404 = fs.readFileSync(sourceFile, 'utf8');
+
+          if (!pages404.includes(previewBase)) {
+            throw new Error(`Could not find the expected preview base path in ${sourceFile}.`);
+          }
+
+          const develop404 = pages404.replace(previewBase, '/ewapp-interactive-prototype/develop/');
+          fs.writeFileSync('site/404.html', develop404);
+          fs.writeFileSync('site/develop/404.html', develop404);
+          NODE
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
